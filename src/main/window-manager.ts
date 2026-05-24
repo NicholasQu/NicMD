@@ -81,6 +81,11 @@ export function createMainWindow(openFileCallback: (filePath: string) => void): 
   mainWindow.once('ready-to-show', () => {
     if (is.dev) mainWindow?.webContents.openDevTools()
 
+    if (pendingFile) {
+      openFileCallback(pendingFile)
+      pendingFile = null
+    }
+
     const targetSize = 48
     const targetX = 16
     const targetY = 16
@@ -89,10 +94,10 @@ export function createMainWindow(openFileCallback: (filePath: string) => void): 
     const startY = Math.round((screenH - splashSize) / 2)
 
     const duration = 600
-    const startTime = performance.now()
+    const startTime = Date.now()
 
-    const animate = (now: number) => {
-      const elapsed = now - startTime
+    const animate = () => {
+      const elapsed = Date.now() - startTime
       const t = Math.min(elapsed / duration, 1)
       const ease = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
 
@@ -105,7 +110,7 @@ export function createMainWindow(openFileCallback: (filePath: string) => void): 
       splashWin.setOpacity(1 - t * 0.3)
 
       if (t < 1) {
-        requestAnimationFrame(animate)
+        setTimeout(animate, 16)
       } else {
         splashWin.close()
         mainWindow?.show()
@@ -113,14 +118,7 @@ export function createMainWindow(openFileCallback: (filePath: string) => void): 
       }
     }
 
-    setTimeout(() => requestAnimationFrame(animate), 200)
-  })
-
-  mainWindow.on('ready-to-show', () => {
-    if (pendingFile) {
-      openFileCallback(pendingFile)
-      pendingFile = null
-    }
+    setTimeout(animate, 200)
   })
 
   mainWindow.on('closed', () => {
