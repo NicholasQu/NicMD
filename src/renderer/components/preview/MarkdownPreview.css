@@ -1,7 +1,7 @@
 .markdown-preview {
   padding: 32px 44px;
   max-width: 100%;
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1.82;
   color: var(--text-secondary);
   word-wrap: break-word;
@@ -13,7 +13,7 @@
 }
 
 .markdown-preview h1 {
-  font-size: 2em;
+  font-size: 1.65em;
   font-weight: 760;
   margin: 1.8em 0 0.8em;
   padding-bottom: 0.35em;
@@ -24,7 +24,7 @@
 }
 
 .markdown-preview h2 {
-  font-size: 1.48em;
+  font-size: 1.3em;
   font-weight: 700;
   margin: 1.65em 0 0.65em;
   padding-bottom: 0.28em;
@@ -46,7 +46,7 @@
 }
 
 .markdown-preview h3 {
-  font-size: 1.25em;
+  font-size: 1.12em;
   font-weight: 650;
   margin: 1.4em 0 0.5em;
   color: var(--text-primary);
@@ -54,7 +54,7 @@
 }
 
 .markdown-preview h4 {
-  font-size: 1.1em;
+  font-size: 1em;
   font-weight: 600;
   margin: 1.2em 0 0.4em;
   color: var(--text-primary);
@@ -107,6 +107,58 @@
   font-size: 0.88em;
   font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
   color: var(--accent-color);
+}
+
+.markdown-preview .preview-code-block-wrapper {
+  margin: 1.2em 0;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--code-border);
+  box-shadow: var(--shadow-sm);
+  background: var(--code-bg);
+}
+
+.markdown-preview .preview-code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 14px;
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.markdown-preview .preview-code-lang {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-tertiary);
+}
+
+.markdown-preview .preview-code-copy {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-tertiary);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.markdown-preview .preview-code-copy:hover {
+  background: var(--accent-light);
+  color: var(--accent-color);
+}
+
+.markdown-preview .preview-code-block-wrapper pre {
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .markdown-preview pre {

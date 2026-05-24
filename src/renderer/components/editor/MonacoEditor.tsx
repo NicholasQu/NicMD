@@ -13,6 +13,7 @@ export const editorScrollRef = { current: false }
 
 export function MonacoEditor({ value }: MonacoEditorProps) {
   const editorRef = useRef<MonacoEditorType.IStandaloneCodeEditor | null>(null)
+  const monacoRef = useRef<any>(null)
   const isUpdating = useRef(false)
   const [selectionBubble, setSelectionBubble] = useState<{ top: number; left: number; text: string; startLine: number; endLine: number } | null>(null)
   const setCurrentContent = useFileStore((s) => s.setCurrentContent)
@@ -23,6 +24,7 @@ export function MonacoEditor({ value }: MonacoEditorProps) {
 
   const handleEditorDidMount: OnMount = (editor, monaco) => {
     editorRef.current = editor
+    monacoRef.current = monaco
 
     monaco.editor.defineTheme('nicmd-dark', {
       base: 'vs-dark',
@@ -109,6 +111,12 @@ export function MonacoEditor({ value }: MonacoEditorProps) {
       }
     })
   }
+
+  useEffect(() => {
+    if (monacoRef.current) {
+      monacoRef.current.editor.setTheme(theme === 'dark' ? 'nicmd-dark' : 'nicmd-light')
+    }
+  }, [theme])
 
   useEffect(() => {
     const unsub = useEditorStore.subscribe((state, prev) => {
