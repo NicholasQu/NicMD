@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>NicMD Logo - 花体字混合方案</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter',sans-serif; background:#0f0f0f; color:#e0e0e0; padding:40px; }
+  h1 { text-align:center; font-size:32px; margin-bottom:6px; color:#fff; }
+  .subtitle { text-align:center; font-size:14px; color:#888; margin-bottom:40px; }
+  .section { margin:60px 0; }
+  .section-title { font-size:22px; font-weight:700; color:#f97316; margin-bottom:24px; padding-left:12px; border-left:4px solid #f97316; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:30px; max-width:1600px; margin:0 auto; }
+  .card { background:#1a1a1a; border-radius:18px; padding:30px; text-align:center; border:1px solid #2a2a2a; transition:all .3s; }
+  .card:hover { border-color:#f97316; transform:translateY(-4px); box-shadow:0 12px 40px rgba(249,115,22,0.15); }
+  .card .title { font-size:16px; font-weight:600; color:#fff; margin-bottom:12px; }
+  .card .desc { font-size:13px; color:#888; margin-bottom:20px; }
+  .card .svg-wrap { width:320px; height:320px; margin:0 auto 16px; border-radius:50%; overflow:hidden; box-shadow:0 12px 48px rgba(0,0,0,0.4); }
+  .card .svg-wrap svg { width:100%; height:100%; }
+  .combo { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:12px; }
+  .combo span { font-size:11px; padding:4px 10px; border-radius:10px; }
+  .combo.script { background:#7c3aed; color:#c084fc; }
+  .combo.bold-script { background:#db2777; color:#fda4af; }
+  .combo.double { background:#0891b2; color:#67e8f9; }
+  .combo.sans-bold { background:#10b981; color:#6ee7b7; }
+  .combo.normal { background:#6b7280; color:#e5e7eb; }
+</style>
+</head>
+<body>
+
+<h1>NicMD Logo - 花体字混合方案</h1>
+<p class="subtitle">天空蓝 #0284c7 / 白色 #ffffff + 花体 M & nic</p>
+
+<!-- ======== 天空蓝方案 ======== -->
+<div class="section">
+  <div class="section-title">天空蓝背景</div>
+  <div class="grid">
+
+    <!-- 1: 花体 M + 花体 nic -->
+    <div class="card">
+      <div class="title">全花体</div>
+      <div class="desc">M 和 nic 都用花体</div>
+      <div class="svg-wrap">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <rect width="200" height="200" rx="100" fill="#0284c7"/>
+          <defs>
+            <filter id="blur1"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#ea580c"/>
+            </linearGradient>
+          </defs>
+          <text x="100" y="148" text-anchor="middle" font-family:'Times New Roman',serif" font-size="140" font-style:italic font-weight="600" fill="url(#grad1)" filter="url(#blur1)" opacity="0.95">𝓜</text>
+          <text x="100" y="108" text-anchor="middle" font-family:'Times New Roman',serif" font-size="48" font-style:italic fill="#fff" opacity="0.95">𝒏𝒊𝒄</text>
+        </svg>
+      </div>
+      <div class="combo">
+        <span class="script">M: 花体 𝓜</span>
+        <span class="script">nic: 花体 𝒏𝒊𝒄</span>
+      </div>
+    </div>
+
+    <!-- 2: 花体 M + 粗体花体 nic -->
+    <div class="card">
+      <div class="title">花体 M + 粗体花体 nic</div>
+      <div class="desc">M 花体，nic 粗体花体</div>
+      <div class="svg-wrap">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <rect width="200" height="200" rx="100" fill="#0284c7"/>
+          <defs>
+            <filter id="blur2"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#ea580c"/>
+            </linearGradient>
+          </defs>
+          <text x="100" y="148" text-anchor="middle" font-family:'Times New Roman',serif" font-size="140" font-style:italic font-weight="600" fill="url(#grad2)" filter="url(#blur2)" opacity="0.95">𝓜</text>
+          <text x="100" y="108" text-anchor="middle" font-family:'Times New Roman',serif" font-size="52" font-style:italic font-weight:700 fill="#fff" opacity="0.95">𝐧𝐢𝐜</text>
+        </svg>
+      </div>
+      <div class="combo">
+        <span class="script">M: 花体 𝓜</span>
+        <span class="bold-script">nic: 粗体花体 𝐧𝐢𝐜</span>
+      </div>
+    </div>
+
+    <!-- 3: 双线体 M + 花体 nic -->
+    <div class="card">
+      <div class="title">双线体 M + 花体 nic</div>
+      <div class="desc">M 双线体，nic 花体</div>
+      <div class="svg-wrap">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <rect width="200" height="200" rx="100" fill="#0284c7"/>
+          <defs>
+            <filter id="blur3"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#ea580c"/>
+            </linearGradient>
+          </defs>
+          <text x="100" y="148" text-anchor="middle" font-family:'Times New Roman',serif" font-size="140" font-weight:800 fill="url(#grad3)" filter="url(#blur3)" opacity="0.95">𝕸</text>
+          <text x="100" y="108" text-anchor="middle" font-family:'Times New Roman',serif" font-size="48" font-style:italic fill="#fff" opacity="0.95">𝒏𝒊𝒄</text>
+        </svg>
+      </div>
+      <div class="combo">
+        <span class="double">M: 双线体 𝕸</span>
+        <span class="script">nic: 花体 𝒏𝒊𝒄</span>
+      </div>
+    </div>
+
+    <!-- 4: 无衬线粗体 M + 花体 nic -->
+    <div class="card">
+      <div class="title">无衬线 M + 花体 nic</div>
+      <div class="desc">M 无衬线粗体，nic 花体</div>
+      <div class="svg-wrap">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <rect width="200" height="200" rx="100" fill="#0284c7"/>
+          <defs>
+            <filter id="blur4"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <linearGradient id="grad4" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#ea580c"/>
+            </linearGradient>
+          </defs>
+          <text x="100" y="148" text-anchor="middle" font-family:'Arial',sans-serif" font-size:140 font-weight:800 fill="url(#grad4)" filter="url(#blur4)" opacity="0.95">𝗠</text>
+          <text x="100" y="108" text-anchor="middle" font-family:'Times New Roman',serif" font-size="48" font-style:italic fill="#fff" opacity="0.95">𝒏𝒊𝒄</text>
+        </svg>
+      </div>
+      <div class="combo">
+        <span class="sans-bold">M: 无衬线粗体 𝗠</span>
+        <span class="script">nic: 花体 𝒏𝒊𝒄</span>
+      </div>
+    </div>
+
+    <!-- 5: 普通 M + 花体 nic -->
+    <div class="card">
+      <div class="title">普通 M + 花体 nic</div>
+      <div class="desc">M 普通 Arial，nic 花体</div>
+      <div class="svg-wrap">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <rect width="200" height="200" rx="100" fill="#0284c7"/>
+          <defs>
+            <filter id="blur5"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <linearGradient id="grad5" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#ea580c"/>
+            </linearGradient>
+          </defs>
+          <text x="100" y="148" text-anchor="middle" font-family:'Arial',sans-serif" font-size:140 font-weight:700 fill="url(#grad5)" filter="url(#blur5)" opacity="0.95">M</text>
+          <text x="100" y="108" text-anchor="middle" font-family:'Times New Roman',serif" font-size="48" font-style:italic fill="#fff" opacity="0.95">𝒏𝒊𝒄</text>
+        </svg>
+      </div>
+      <div class="combo">
+        <span class="normal">M: 普通 M</span>
+        <span class="script">nic: 花体 𝒏𝒊𝒄</span>
+      </div>
+    </div>
+
+    <!-- 6: 普通 M + 粗体花体 nic -->
+    <div class="card">
+      <div class="title">普通 M + 粗体花体 nic</div>
+      <div class="desc">M 普通 Arial，nic 粗体花体</div>
+      <div class="svg-wrap">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <rect width="200" height="200" rx="100" fill="#0284c7"/>
+          <defs>
+            <filter id="blur6"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <linearGradient id="grad6" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#ea580c"/>
+            </linearGradient>
+          </defs>
+          <text x="100" y="148" text-anchor="middle" font-family:'Arial',sans-serif" font-size:140 font-weight:700 fill="url(#grad6)" filter="url(#blur6)" opacity="0.95">M</text>
+          <text x="100" y="108" text-anchor="middle" font-family:'Times New Roman',serif" font-size:52" font-style:italic font-weight:700 fill="#fff" opacity="0.95">𝐧𝐢𝐜</text>
+        </svg>
+      </div>
+      <div class="combo">
+        <span class="normal">M: 普通 M</span>
+        <span class="bold-script">nic: 粗体花体 𝐧𝐢𝐜</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ======== 白色背景方案 ======== -->
+<div class="section">
+  <div class="section-title">白色背景</div>
+  <div class="grid">
+
+    <!-- 7: 花体 M + 花体 nic (白底) -->
+    <div class="card">
+      <div class="title">全花体</div>
+      <div class="desc">M 和 nic 都用花体</div>
+      <div class="svg-wrap">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <rect width="200" height="200" rx="100" fill="#ffffff"/>
+          <defs>
+            <filter id="blur7"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <linearGradient id="grad7" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#ea580c"/>
+            </linearGradient>
+          </defs>
+          <text x="100" y="148" text-anchor="middle" font-family:'Times New Roman',serif" font-size="140" font-style:italic font-weight:600" fill="url(#grad7)" filter="url(#blur7)" opacity="0.95">𝓜</text>
+          <text x="100" y="108" text-anchor="middle" font-family:'Times New Roman',serif" font-size="48" font-style:italic fill="#1a1a1a" opacity="0.85">𝒏𝒊𝒄</text>
+        </svg>
+      </div>
+      <div class="combo">
+        <span class="script">M: 花体 𝓜</span>
+        <span class="script">nic: 花体 𝒏𝒊𝒄</span>
+      </div>
+    </div>
+
+    <!-- 8: 花体 M + 粗体花体 nic (白底) -->
+    <div class="card">
+      <div class="title">花体 M + 粗体花体 nic</div>
+      <div class="desc">M 花体，nic 粗体花体</div>
+      <div class="svg-wrap">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <rect width="200" height="200" rx="100" fill="#ffffff"/>
+          <defs>
+            <filter id="blur8"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <linearGradient id="grad8" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#ea580c"/>
+            </linearGradient>
+          </defs>
+          <text x="100" y="148" text-anchor="middle" font-family:'Times New Roman',serif" font-size:140" font-style:italic font-weight:600" fill="url(#grad8)" filter="url(#blur8)" opacity="0.95">𝓜</text>
+          <text x="100" y="108" text-anchor="middle" font-family:'Times New Roman',serif" font-size="52" font-style:italic font-weight:700 fill="#1a1a1a" opacity="0.85">𝐧𝐢𝐜</text>
+        </svg>
+      </div>
+      <div class="combo">
+        <span class="script">M: 花体 𝓜</span>
+        <span class="bold-script">nic: 粗体花体 𝐧𝐢𝐜</span>
+      </div>
+    </div>
+
+    <!-- 9: 双线体 M + 花体 nic (白底) -->
+    <div class="card">
+      <div class="title">双线体 M + 花体 nic</div>
+      <div class="desc">M 双线体，nic 花体</div>
+      <div class="svg-wrap">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <rect width="200" height="200" rx="100" fill="#ffffff"/>
+          <defs>
+            <filter id="blur9"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <linearGradient id="grad9" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#ea580c"/>
+            </linearGradient>
+          </defs>
+          <text x="100" y="148" text-anchor="middle" font-family:'Times New Roman',serif" font-size:140" font-weight:800 fill="url(#grad9)" filter="url(#blur9)" opacity="0.95">𝕸</text>
+          <text x="100" y="108" text-anchor="middle" font-family:'Times New Roman',serif" font-size="48" font-style:italic fill="#1a1a1a" opacity="0.85">𝒏𝒊𝒄</text>
+        </svg>
+      </div>
+      <div class="combo">
+        <span class="double">M: 双线体 𝕸</span>
+        <span class="script">nic: 花体 𝒏𝒊𝒄</span>
+      </div>
+    </div>
+
+    <!-- 10: 无衬线粗体 M + 花体 nic (白底) -->
+    <div class="card">
+      <div class="title">无衬线 M + 花体 nic</div>
+      <div class="desc">M 无衬线粗体，nic 花体</div>
+      <div class="svg-wrap">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <rect width="200" height="200" rx="100" fill="#ffffff"/>
+          <defs>
+            <filter id="blur10"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <linearGradient id="grad10" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#ea580c"/>
+            </linearGradient>
+          </defs>
+          <text x="100" y="148" text-anchor="middle" font-family:'Arial',sans-serif" font-size:140" font-weight:800 fill="url(#grad10)" filter="url(#blur10)" opacity="0.95">𝗠</text>
+          <text x="100" y="108" text-anchor="middle" font-family:'Times New Roman',serif" font-size="48" font-style:italic fill="#1a1a1a" opacity="0.85">𝒏𝒊𝒄</text>
+        </svg>
+      </div>
+      <div class="combo">
+        <span class="sans-bold">M: 无衬线粗体 𝗠</span>
+        <span class="script">nic: 花体 𝒏𝒊𝒄</span>
+      </div>
+    </div>
+
+    <!-- 11: 普通 M + 花体 nic (白底) -->
+    <div class="card">
+      <div class="title">普通 M + 花体 nic</div>
+      <div class="desc">M 普通 Arial，nic 花体</div>
+      <div class="svg-wrap">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <rect width="200" height="200" rx="100" fill="#ffffff"/>
+          <defs>
+            <filter id="blur11"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <linearGradient id="grad11" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#ea580c"/>
+            </linearGradient>
+          </defs>
+          <text x="100" y="148" text-anchor="middle" font-family:'Arial',sans-serif" font-size:140" font-weight:700 fill="url(#grad11)" filter="url(#blur11)" opacity="0.95">M</text>
+          <text x="100" y="108" text-anchor="middle" font-family:'Times New Roman',serif" font-size="48" font-style:italic fill="#1a1a1a" opacity="0.85">𝒏𝒊𝒄</text>
+        </svg>
+      </div>
+      <div class="combo">
+        <span class="normal">M: 普通 M</span>
+        <span class="script">nic: 花体 𝒏𝒊𝒄</span>
+      </div>
+    </div>
+
+    <!-- 12: 普通 M + 粗体花体 nic (白底) -->
+    <div class="card">
+      <div class="title">普通 M + 粗体花体 nic</div>
+      <div class="desc">M 普通 Arial，nic 粗体花体</div>
+      <div class="svg-wrap">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <rect width="200" height="200" rx="100" fill="#ffffff"/>
+          <defs>
+            <filter id="blur12"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <linearGradient id="grad12" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#ea580c"/>
+            </linearGradient>
+          </defs>
+          <text x="100" y="148" text-anchor="middle" font-family:'Arial',sans-serif" font-size:140" font-weight:700 fill="url(#grad12)" filter="url(#blur12)" opacity="0.95">M</text>
+          <text x="100" y="108" text-anchor="middle" font-family:'Times New Roman',serif" font-size:52" font-style:italic font-weight:700 fill="#1a1a1a" opacity="0.85">𝐧𝐢𝐜</text>
+        </svg>
+      </div>
+      <div class="combo">
+        <span class="normal">M: 普通 M</span>
+        <span class="bold-script">nic: 粗体花体 𝐧𝐢𝐜</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div style="text-align:center;margin-top:60px;color:#555;font-size:14px;">
+  NicMD Logo | 花体字混合 | 天空蓝 & 白色 | 12 方案
+</div>
+
+</body>
+</html>

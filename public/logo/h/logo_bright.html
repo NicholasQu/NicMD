@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>NicMD Logo - 鲜亮配色方案</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter',sans-serif; background:#0f0f0f; color:#e0e0e0; padding:40px; }
+  h1 { text-align:center; font-size:32px; margin-bottom:6px; color:#fff; }
+  .subtitle { text-align:center; font-size:14px; color:#888; margin-bottom:40px; }
+  .section { margin:60px 0; }
+  .section-title { font-size:22px; font-weight:700; color:#f97316; margin-bottom:24px; padding-left:12px; border-left:4px solid #f97316; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:30px; max-width:1600px; margin:0 auto; }
+  .card { background:#1a1a1a; border-radius:18px; padding:30px; text-align:center; border:1px solid #2a2a2a; transition:all .3s; }
+  .card:hover { border-color:#f97316; transform:translateY(-4px); box-shadow:0 12px 40px rgba(249,115,22,0.15); }
+  .card .color-name { font-size:18px; font-weight:600; color:#fff; margin-bottom:8px; }
+  .card .color-hex { font-size:13px; color:#888; margin-bottom:16px; font-family:monospace; }
+  .card .svg-wrap { width:280px; height:280px; margin:0 auto 16px; border-radius:50%; overflow:hidden; box-shadow:0 8px 32px rgba(0,0,0,0.3); }
+  .card .svg-wrap svg { width:100%; height:100%; }
+  .card .desc { font-size:14px; color:#666; margin-top:12px; }
+  .mood { display:inline-block; padding:4px 10px; border-radius:12px; font-size:11px; margin-top:8px; }
+  .mood.bright { background:#0a3d2e; color:#6ee7b7; }
+  .mood.cool { background:#1e3a8a; color:#93c5fd; }
+  .mood.warm { background:#7c2d12; color:#fdba74; }
+  .mood.chic { background:#581c87; color:#c084fc; }
+  .mood.fresh { background:#0ea5e9; color:#e0f2fe; }
+</style>
+</head>
+<body>
+
+<h1>NicMD Logo - 橙色搭配轻快靓丽色系</h1>
+<p class="subtitle">桌面图标大幅放大 + 鲜明配色</p>
+
+<!-- ======== 鲜亮配色方案 ======== -->
+<div class="section">
+  <div class="section-title">配色对比</div>
+  <div class="grid">
+
+    <div class="card">
+      <div class="color-name">青色海洋</div>
+      <div class="color-hex">#0891b2</div>
+      <div class="svg-wrap">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <rect width="200" height="200" rx="100" fill="#0891b2"/>
+          <defs>
+            <filter id="blur1"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#ea580c"/>
+            </linearGradient>
+          </defs>
+          <path d="M50,160 L50,48 Q50,32 58,32 L62,32 Q68,32 72,44 L86,104 Q90,116 100,116 Q110,116 114,104 L128,44 Q132,32 138,32 L142,32 Q150,32 150,48 L150,160" fill="none" stroke="url(#grad1)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" filter="url(#blur1)"/>
+          <text x="70" y="100" text-anchor="middle" font-family="Arial,sans-serif" font-size="38" font-weight="700" fill="#fff" opacity="0.95">n</text>
+          <circle cx="100" cy="64" r="4" fill="#fff" opacity="0.95"/>
+          <rect x="97.5" y="74" width="5" height="24" rx="2.5" fill="#fff" opacity="0.95"/>
+          <text x="130" y="100" text-anchor="middle" font-family="Arial,sans-serif" font-size="38" font-weight="700" fill="#fff" opacity="0.95">c</text>
+        </svg>
+      </div>
+      <div class="mood bright">清新明亮</div>
+      <div class="desc">橙色补色，最强烈对比</div>
+    </div>
+
+    <div class="card">
+      <div class="color-name">天空蓝</div>
+      <div class="color-hex">#0284c7</div>
+      <div class="svg-wrap">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <rect width="200" height="200" rx="100" fill="#0284c7"/>
+          <defs>
+            <filter id="blur2"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#ea580c"/>
+            </linearGradient>
+          </defs>
+          <path d="M50,160 L50,48 Q50,32 58,32 L62,32 Q68,32 72,44 L86,104 Q90,116 100,116 Q110,116 114,104 L128,44 Q132,32 138,32 L142,32 Q150,32 150,48 L150,160" fill="none" stroke="url(#grad2)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" filter="url(#blur2)"/>
+          <text x="70" y="100" text-anchor="middle" font-family="Arial,sans-serif" font-size="38" font-weight="700" fill="#fff" opacity="0.95">n</text>
+          <circle cx="100" cy="64" r="4" fill="#fff" opacity="0.95"/>
+          <rect x="97.5" y="74" width="5" height="24" rx="2.5" fill="#fff" opacity="0.95"/>
+          <text x="130" y="100" text-anchor="middle" font-family="Arial,sans-serif" font-size="38" font-weight="700" fill="#fff" opacity="0.95">c</text>
+        </svg>
+      </div>
+      <div class="mood cool">科技感</div>
+      <div class="desc">蓝色系，冷静专业</div>
+    </div>
+
+    <div class="card">
+      <div class="color-name">珊瑚粉</div>
+      <div class="color-hex">#db2777</div>
+      <div class="svg-wrap">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <rect width="200" height="200" rx="100" fill="#db2777"/>
+          <defs>
+            <filter id="blur3"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#ea580c"/>
+            </linearGradient>
+          </defs>
+          <path d="M50,160 L50,48 Q50,32 58,32 L62,32 Q68,32 72,44 L86,104 Q90,116 100,116 Q110,116 114,104 L128,44 Q132,32 138,32 L142,32 Q150,32 150,48 L150,160" fill="none" stroke="url(#grad3)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" filter="url(#blur3)"/>
+          <text x="70" y="100" text-anchor="middle" font-family="Arial,sans-serif" font-size="38" font-weight="700" fill="#fff" opacity="0.95">n</text>
+          <circle cx="100" cy="64" r="4" fill="#fff" opacity="0.95"/>
+          <rect x="97.5" y="74" width="5" height="24" rx="2.5" fill="#fff" opacity="0.95"/>
+          <text x="130" y="100" text-anchor="middle" font-family="Arial,sans-serif" font-size="38" font-weight="700" fill="#fff" opacity="0.95">c</text>
+        </svg>
+      </div>
+      <div class="mood warm">活力温暖</div>
+      <div class="desc">温暖色调，热情活泼</div>
+    </div>
+
+    <div class="card">
+      <div class="color-name">薰衣紫</div>
+      <div class="color-hex">#7c3aed</div>
+      <div class="svg-wrap">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <rect width="200" height="200" rx="100" fill="#7c3aed"/>
+          <defs>
+            <filter id="blur4"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <linearGradient id="grad4" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#ea580c"/>
+            </linearGradient>
+          </defs>
+          <path d="M50,160 L50,48 Q50,32 58,32 L62,32 Q68,32 72,44 L86,104 Q90,116 100,116 Q110,116 114,104 L128,44 Q132,32 138,32 L142,32 Q150,32 150,48 L150,160" fill="none" stroke="url(#grad4)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" filter="url(#blur4)"/>
+          <text x="70" y="100" text-anchor="middle" font-family="Arial,sans-serif" font-size="38" font-weight="700" fill="#fff" opacity="0.95">n</text>
+          <circle cx="100" cy="64" r="4" fill="#fff" opacity="0.95"/>
+          <rect x="97.5" y="74" width="5" height="24" rx="2.5" fill="#fff" opacity="0.95"/>
+          <text x="130" y="100" text-anchor="middle" font-family="Arial,sans-serif" font-size="38" font-weight="700" fill="#fff" opacity="0.95">c</text>
+        </svg>
+      </div>
+      <div class="mood chic">优雅时尚</div>
+      <div class="desc">紫色系，创意优雅</div>
+    </div>
+
+    <div class="card">
+      <div class="color-name">薄荷绿</div>
+      <div class="color-hex">#10b981</div>
+      <div class="svg-wrap">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <rect width="200" height="200" rx="100" fill="#10b981"/>
+          <defs>
+            <filter id="blur5"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <linearGradient id="grad5" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#ea580c"/>
+            </linearGradient>
+          </defs>
+          <path d="M50,160 L50,48 Q50,32 58,32 L62,32 Q68,32 72,44 L86,104 Q90,116 100,116 Q110,116 114,104 L128,44 Q132,32 138,32 L142,32 Q150,32 150,48 L150,160" fill="none" stroke="url(#grad5)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" filter="url(#blur5)"/>
+          <text x="70" y="100" text-anchor="middle" font-family="Arial,sans-serif" font-size="38" font-weight="700" fill="#fff" opacity="0.95">n</text>
+          <circle cx="100" cy="64" r="4" fill="#fff" opacity="0.95"/>
+          <rect x="97.5" y="74" width="5" height="24" rx="2.5" fill="#fff" opacity="0.95"/>
+          <text x="130" y="100" text-anchor="middle" font-family="Arial,sans-serif" font-size="38" font-weight="700" fill="#fff" opacity="0.95">c</text>
+        </svg>
+      </div>
+      <div class="mood bright">清新自然</div>
+      <div class="desc">绿色系，护眼舒适</div>
+    </div>
+
+    <div class="card">
+      <div class="color-name">纯白底</div>
+      <div class="color-hex">#ffffff</div>
+      <div class="svg-wrap">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <rect width="200" height="200" rx="100" fill="#ffffff"/>
+          <defs>
+            <filter id="blur6"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <linearGradient id="grad6" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#ea580c"/>
+            </linearGradient>
+          </defs>
+          <path d="M50,160 L50,48 Q50,32 58,32 L62,32 Q68,32 72,44 L86,104 Q90,116 100,116 Q110,116 114,104 L128,44 Q132,32 138,32 L142,32 Q150,32 150,48 L150,160" fill="none" stroke="url(#grad6)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" filter="url(#blur6)"/>
+          <text x="70" y="100" text-anchor="middle" font-family="Arial,sans-serif" font-size="38" font-weight="700" fill="#1a1a1a" opacity="0.85">n</text>
+          <circle cx="100" cy="64" r="4" fill="#1a1a1a" opacity="0.85"/>
+          <rect x="97.5" y="74" width="5" height="24" rx="2.5" fill="#1a1a1a" opacity="0.85"/>
+          <text x="130" y="100" text-anchor="middle" font-family="Arial,sans-serif" font-size="38" font-weight="700" fill="#1a1a1a" opacity="0.85">c</text>
+        </svg>
+      </div>
+      <div class="mood fresh">极简纯粹</div>
+      <div class="desc">白色底，橙色M，黑nic</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ======== 桌面图标大幅展示 ======== -->
+<div class="section">
+  <div class="section-title">桌面图标大幅预览（480×480）</div>
+  <div style="display:flex; gap:40px; flex-wrap:wrap; justify-content:center;">
+
+    <div style="text-align:center;">
+      <svg width="480" height="480" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="border-radius:50%; box-shadow:0 16px 64px rgba(0,0,0,0.4);">
+        <rect width="200" height="200" rx="100" fill="#0891b2"/>
+        <defs>
+          <filter id="blur-d1"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <linearGradient id="grad-d1" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#ea580c"/>
+          </linearGradient>
+        </defs>
+        <path d="M50,160 L50,48 Q50,32 58,32 L62,32 Q68,32 72,44 L86,104 Q90,116 100,116 Q110,116 114,104 L128,44 Q132,32 138,32 L142,32 Q150,32 150,48 L150,160" fill="none" stroke="url(#grad-d1)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" filter="url(#blur-d1)"/>
+        <text x="70" y="100" text-anchor="middle" font-family="Arial,sans-serif" font-size="38" font-weight="700" fill="#fff" opacity="0.95">n</text>
+        <circle cx="100" cy="64" r="4" fill="#fff" opacity="0.95"/>
+        <rect x="97.5" y="74" width="5" height="24" rx="2.5" fill="#fff" opacity="0.95"/>
+        <text x="130" y="100" text-anchor="middle" font-family="Arial,sans-serif" font-size="38" font-weight="700" fill="#fff" opacity="0.95">c</text>
+      </svg>
+      <div style="font-size:16px;color:#fff;margin-top:16px;font-weight:600;">青色海洋</div>
+      <div style="font-size:13px;color:#888;">480×480</div>
+    </div>
+
+    <div style="text-align:center;">
+      <svg width="480" height="480" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="border-radius:50%; box-shadow:0 16px 64px rgba(0,0,0,0.4);">
+        <rect width="200" height="200" rx="100" fill="#7c3aed"/>
+        <defs>
+          <filter id="blur-d2"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <linearGradient id="grad-d2" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#ea580c"/>
+          </linearGradient>
+        </defs>
+        <path d="M50,160 L50,48 Q50,32 58,32 L62,32 Q68,32 72,44 L86,104 Q90,116 100,116 Q110,116 114,104 L128,44 Q132,32 138,32 L142,32 Q150,32 150,48 L150,160" fill="none" stroke="url(#grad-d2)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" filter="url(#blur-d2)"/>
+        <text x="70" y="100" text-anchor="middle" font-family="Arial,sans-serif" font-size="38" font-weight="700" fill="#fff" opacity="0.95">n</text>
+        <circle cx="100" cy="64" r="4" fill="#fff" opacity="0.95"/>
+        <rect x="97.5" y="74" width="5" height="24" rx="2.5" fill="#fff" opacity="0.95"/>
+        <text x="130" y="100" text-anchor="middle" font-family="Arial,sans-serif" font-size="38" font-weight="700" fill="#fff" opacity="0.95">c</text>
+      </svg>
+      <div style="font-size:16px;color:#fff;margin-top:16px;font-weight:600;">薰衣紫</div>
+      <div style="font-size:13px;color:#888;">480×480</div>
+    </div>
+
+    <div style="text-align:center;">
+      <svg width="480" height="480" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="border-radius:50%; box-shadow:0 16px 64px rgba(0,0,0,0.4);">
+        <rect width="200" height="200" rx="100" fill="#ffffff"/>
+        <defs>
+          <filter id="blur-d3"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <linearGradient id="grad-d3" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#ea580c"/>
+          </linearGradient>
+        </defs>
+        <path d="M50,160 L50,48 Q50,32 58,32 L62,32 Q68,32 72,44 L86,104 Q90,116 100,116 Q110,116 114,104 L128,44 Q132,32 138,32 L142,32 Q150,32 150,48 L150,160" fill="none" stroke="url(#grad-d3)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" filter="url(#blur-d3)"/>
+        <text x="70" y="100" text-anchor="middle" font-family="Arial,sans-serif" font-size="38" font-weight="700" fill="#1a1a1a" opacity="0.85">n</text>
+        <circle cx="100" cy="64" r="4" fill="#1a1a1a" opacity="0.85"/>
+        <rect x="97.5" y="74" width="5" height="24" rx="2.5" fill="#1a1a1a" opacity="0.85"/>
+        <text x="130" y="100" text-anchor="middle" font-family="Arial,sans-serif" font-size="38" font-weight="700" fill="#1a1a1a" opacity="0.85">c</text>
+      </svg>
+      <div style="font-size:16px;color:#fff;margin-top:16px;font-weight:600;">纯白底</div>
+      <div style="font-size:13px;color:#888;">480×480</div>
+    </div>
+
+  </div>
+</div>
+
+<div style="text-align:center;margin-top:60px;color:#555;font-size:14px;">
+  NicMD Logo | 鲜亮配色 | 480×480 大预览
+</div>
+
+</body>
+</html>

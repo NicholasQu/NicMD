@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>NicMD Logo - Path M vs 字体 M 对比</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter',sans-serif; background:#0f0f0f; color:#e0e0e0; padding:40px; }
+  h1 { text-align:center; font-size:32px; margin-bottom:6px; color:#fff; }
+  .subtitle { text-align:center; font-size:14px; color:#888; margin-bottom:50px; }
+  .section { margin:50px 0; }
+  .section-title { font-size:22px; font-weight:700; color:#f97316; margin-bottom:24px; padding-left:12px; border-left:4px solid #f97316; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:30px; max-width:1600px; margin:0 auto; }
+  .card { background:#1a1a1a; border-radius:18px; padding:30px; text-align:center; border:1px solid #2a2a2a; transition:all .3s; }
+  .card:hover { border-color:#f97316; transform:translateY(-4px); box-shadow:0 12px 40px rgba(249,115,22,0.15); }
+  .card .title { font-size:18px; font-weight:600; color:#fff; margin-bottom:8px; }
+  .card .desc { font-size:13px; color:#888; margin-bottom:20px; }
+  .card .svg-wrap { width:320px; height:320px; margin:0 auto 12px; border-radius:36px; overflow:hidden; }
+  .card .svg-wrap svg { width:100%; height:100%; }
+  .comparison-row { display:flex; align-items:center; justify-content:center; gap:40px; margin:40px 0; flex-wrap:wrap; }
+  .arrow { font-size:40px; color:#666; }
+</style>
+</head>
+<body>
+
+<h1>NicMD Logo - Path M vs 字体 M</h1>
+<p class="subtitle">双线体效果对比：Path 路径画 M vs Unicode 字体 𝕸</p>
+
+<!-- ======== 主对比 ======== -->
+<div class="section">
+  <div class="section-title">大预览对比 (320×320)</div>
+  <div class="comparison-row">
+    <div class="card">
+      <div class="title">Path M 路径</div>
+      <div class="desc">用 SVG path 画双线体</div>
+      <div class="svg-wrap">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <filter id="shadow1" x="-50%" y="-50%" width="200%" height="200%">
+              <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#000000" flood-opacity="0.35"/>
+            </filter>
+            <filter id="blur1" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="2" result="blur"/>
+              <feMerge>
+                <feMergeNode in="blur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+            <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#fbbf24"/>
+              <stop offset="100%" stop-color="#ea580c"/>
+            </linearGradient>
+          </defs>
+          <rect width="200" height="200" rx="36" fill="#fef2f2"/>
+          <g filter="url(#shadow1)">
+            <path d="M24,168 L24,40 Q24,24 40,24 L48,24 Q56,24 60,36 L82,108 Q86,120 100,120 Q114,120 118,108 L140,36 Q144,24 152,24 L160,24 Q176,24 176,40 L176,168" fill="none" stroke="url(#grad1)" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" filter="url(#blur1)"/>
+            <path d="M30,162 L30,46 Q30,34 44,34 L50,34 Q56,34 60,42 L78,106 Q82,114 100,114 Q118,114 122,106 L140,42 Q144,34 150,34 L156,34 Q170,34 170,46 L170,162" fill="none" stroke="#fef2f2" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
+          </g>
+          <text x="58" y="102" text-anchor="middle" font-family="'Times New Roman',serif" font-size="36" font-style="italic" fill="#dc2626" opacity="0.85">𝒏</text>
+          <circle cx="100" cy="64" r="3.8" fill="#dc2626" opacity="0.85"/>
+          <rect x="97.6" y="74" width="4.8" height="24" rx="2.4" fill="#dc2626" opacity="0.85"/>
+          <text x="142" y="102" text-anchor="middle" font-family="'Times New Roman',serif" font-size="36" font-style="italic" fill="#dc2626" opacity="0.85">𝒄</text>
+        </svg>
+      </div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="card">
+      <div class="title">Unicode 字体 𝕸</div>
+      <div class="desc">使用双线体字体字符</div>
+      <div class="svg-wrap">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <filter id="shadow2" x="-50%" y="-50%" width="200%" height="200%">
+              <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#000000" flood-opacity="0.35"/>
+            </filter>
+            <filter id="blur2" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="2" result="blur"/>
+              <feMerge>
+                <feMergeNode in="blur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+            <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#fbbf24"/>
+              <stop offset="100%" stop-color="#ea580c"/>
+            </linearGradient>
+          </defs>
+          <rect width="200" height="200" rx="36" fill="#fef2f2"/>
+          <text x="100" y="155" text-anchor="middle" font-family="'Times New Roman',serif" font-size="160" font-weight="800" fill="url(#grad2)" filter="url(#shadow2) blur" opacity="0.95">𝕸</text>
+          <text x="58" y="102" text-anchor="middle" font-family="'Times New Roman',serif" font-size="36" font-style="italic" fill="#dc2626" opacity="0.85">𝒏</text>
+          <circle cx="100" cy="64" r="3.8" fill="#dc2626" opacity="0.85"/>
+          <rect x="97.6" y="74" width="4.8" height="24" rx="2.4" fill="#dc2626" opacity="0.85"/>
+          <text x="142" y="102" text-anchor="middle" font-family="'Times New Roman',serif" font-size="36" font-style="italic" fill="#dc2626" opacity="0.85">𝒄</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======== 多尺寸对比 ======== -->
+<div class="section">
+  <div class="section-title">多尺寸对比</div>
+  <div class="grid">
+    <div class="card">
+      <div class="title">256×256 - Path M</div>
+      <div class="svg-wrap">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <filter id="shadow3"><feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#000000" flood-opacity="0.35"/></filter>
+            <filter id="blur3"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#ea580c"/></linearGradient>
+          </defs>
+          <rect width="200" height="200" rx="36" fill="#fef2f2"/>
+          <g filter="url(#shadow3)">
+            <path d="M24,168 L24,40 Q24,24 40,24 L48,24 Q56,24 60,36 L82,108 Q86,120 100,120 Q114,120 118,108 L140,36 Q144,24 152,24 L160,24 Q176,24 176,40 L176,168" fill="none" stroke="url(#grad3)" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" filter="url(#blur3)"/>
+            <path d="M30,162 L30,46 Q30,34 44,34 L50,34 Q56,34 60,42 L78,106 Q82,114 100,114 Q118,114 122,106 L140,42 Q144,34 150,34 L156,34 Q170,34 170,46 L170,162" fill="none" stroke="#fef2f2" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
+          </g>
+          <text x="58" y="102" text-anchor="middle" font-family="'Times New Roman',serif" font-size="36" font-style="italic" fill="#dc2626" opacity="0.85">𝒏</text>
+          <circle cx="100" cy="64" r="3.8" fill="#dc2626" opacity="0.85"/>
+          <rect x="97.6" y="74" width="4.8" height="24" rx="2.4" fill="#dc2626" opacity="0.85"/>
+          <text x="142" y="102" text-anchor="middle" font-family="'Times New Roman',serif" font-size="36" font-style="italic" fill="#dc2626" opacity="0.85">𝒄</text>
+        </svg>
+      </div>
+    </div>
+    <div class="card">
+      <div class="title">256×256 - 字体 𝕸</div>
+      <div class="svg-wrap">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <filter id="shadow4"><feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#000000" flood-opacity="0.35"/></filter>
+            <filter id="blur4"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <linearGradient id="grad4" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#ea580c"/></linearGradient>
+          </defs>
+          <rect width="200" height="200" rx="36" fill="#fef2f2"/>
+          <text x="100" y="155" text-anchor="middle" font-family="'Times New Roman',serif" font-size="160" font-weight="800" fill="url(#grad4)" filter="url(#shadow4) blur" opacity="0.95">𝕸</text>
+          <text x="58" y="102" text-anchor="middle" font-family="'Times New Roman',serif" font-size="36" font-style="italic" fill="#dc2626" opacity="0.85">𝒏</text>
+          <circle cx="100" cy="64" r="3.8" fill="#dc2626" opacity="0.85"/>
+          <rect x="97.6" y="74" width="4.8" height="24" rx="2.4" fill="#dc2626" opacity="0.85"/>
+          <text x="142" y="102" text-anchor="middle" font-family="'Times New Roman',serif" font-size="36" font-style="italic" fill="#dc2626" opacity="0.85">𝒄</text>
+        </svg>
+      </div>
+    </div>
+    <div class="card">
+      <div class="title">128×128 - Path M</div>
+      <div class="svg-wrap">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <filter id="shadow5"><feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#000000" flood-opacity="0.35"/></filter>
+            <filter id="blur5"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <linearGradient id="grad5" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#ea580c"/></linearGradient>
+          </defs>
+          <rect width="200" height="200" rx="36" fill="#fef2f2"/>
+          <g filter="url(#shadow5)">
+            <path d="M24,168 L24,40 Q24,24 40,24 L48,24 Q56,24 60,36 L82,108 Q86,120 100,120 Q114,120 118,108 L140,36 Q144,24 152,24 L160,24 Q176,24 176,40 L176,168" fill="none" stroke="url(#grad5)" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" filter="url(#blur5)"/>
+            <path d="M30,162 L30,46 Q30,34 44,34 L50,34 Q56,34 60,42 L78,106 Q82,114 100,114 Q118,114 122,106 L140,42 Q144,34 150,34 L156,34 Q170,34 170,46 L170,162" fill="none" stroke="#fef2f2" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
+          </g>
+          <text x="58" y="102" text-anchor="middle" font-family="'Times New Roman',serif" font-size="36" font-style="italic" fill="#dc2626" opacity="0.85">𝒏</text>
+          <circle cx="100" cy="64" r="3.8" fill="#dc2626" opacity="0.85"/>
+          <rect x="97.6" y="74" width="4.8" height="24" rx="2.4" fill="#dc2626" opacity="0.85"/>
+          <text x="142" y="102" text-anchor="middle" font-family="'Times New Roman',serif" font-size="36" font-style="italic" fill="#dc2626" opacity="0.85">𝒄</text>
+        </svg>
+      </div>
+    </div>
+    <div class="card">
+      <div class="title">128×128 - 字体 𝕸</div>
+      <div class="svg-wrap">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <filter id="shadow6"><feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#000000" flood-opacity="0.35"/></filter>
+            <filter id="blur6"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <linearGradient id="grad6" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#ea580c"/></linearGradient>
+          </defs>
+          <rect width="200" height="200" rx="36" fill="#fef2f2"/>
+          <text x="100" y="155" text-anchor="middle" font-family="'Times New Roman',serif" font-size="160" font-weight="800" fill="url(#grad6)" filter="url(#shadow6) blur" opacity="0.95">𝕸</text>
+          <text x="58" y="102" text-anchor="middle" font-family="'Times New Roman',serif" font-size="36" font-style="italic" fill="#dc2626" opacity="0.85">𝒏</text>
+          <circle cx="100" cy="64" r="3.8" fill="#dc2626" opacity="0.85"/>
+          <rect x="97.6" y="74" width="4.8" height="24" rx="2.4" fill="#dc2626" opacity="0.85"/>
+          <text x="142" y="102" text-anchor="middle" font-family="'Times New Roman',serif" font-size="36" font-style="italic" fill="#dc2626" opacity="0.85">𝒄</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======== 64×64 对比 ======== -->
+<div class="section">
+  <div class="section-title">小尺寸对比 (64×64)</div>
+  <div class="comparison-row">
+    <div class="card">
+      <div class="title">64×64 - Path M</div>
+      <div class="svg-wrap">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <filter id="shadow7"><feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#000000" flood-opacity="0.35"/></filter>
+            <filter id="blur7"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <linearGradient id="grad7" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#ea580c"/></linearGradient>
+          </defs>
+          <rect width="200" height="200" rx="36" fill="#fef2f2"/>
+          <g filter="url(#shadow7)">
+            <path d="M24,168 L24,40 Q24,24 40,24 L48,24 Q56,24 60,36 L82,108 Q86,120 100,120 Q114,120 118,108 L140,36 Q144,24 152,24 L160,24 Q176,24 176,40 L176,168" fill="none" stroke="url(#grad7)" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" filter="url(#blur7)"/>
+            <path d="M30,162 L30,46 Q30,34 44,34 L50,34 Q56,34 60,42 L78,106 Q82,114 100,114 Q118,114 122,106 L140,42 Q144,34 150,34 L156,34 Q170,34 170,46 L170,162" fill="none" stroke="#fef2f2" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
+          </g>
+          <text x="58" y="102" text-anchor="middle" font-family="'Times New Roman',serif" font-size="36" font-style="italic" fill="#dc2626" opacity="0.85">𝒏</text>
+          <circle cx="100" cy="64" r="3.8" fill="#dc2626" opacity="0.85"/>
+          <rect x="97.6" y="74" width="4.8" height="24" rx="2.4" fill="#dc2626" opacity="0.85"/>
+          <text x="142" y="102" text-anchor="middle" font-family="'Times New Roman',serif" font-size="36" font-style="italic" fill="#dc2626" opacity="0.85">𝒄</text>
+        </svg>
+      </div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="card">
+      <div class="title">64×64 - 字体 𝕸</div>
+      <div class="svg-wrap">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <filter id="shadow8"><feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#000000" flood-opacity="0.35"/></filter>
+            <filter id="blur8"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <linearGradient id="grad8" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#ea580c"/></linearGradient>
+          </defs>
+          <rect width="200" height="200" rx="36" fill="#fef2f2"/>
+          <text x="100" y="155" text-anchor="middle" font-family="'Times New Roman',serif" font-size="160" font-weight="800" fill="url(#grad8)" filter="url(#shadow8) blur" opacity="0.95">𝕸</text>
+          <text x="58" y="102" text-anchor="middle" font-family="'Times New Roman',serif" font-size="36" font-style="italic" fill="#dc2626" opacity="0.85">𝒏</text>
+          <circle cx="100" cy="64" r="3.8" fill="#dc2626" opacity="0.85"/>
+          <rect x="97.6" y="74" width="4.8" height="24" rx="2.4" fill="#dc2626" opacity="0.85"/>
+          <text x="142" y="102" text-anchor="middle" font-family="'Times New Roman',serif" font-size="36" font-style="italic" fill="#dc2626" opacity="0.85">𝒄</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======== 特点对比 ======== -->
+<div class="section">
+  <div class="section-title">特点对比</div>
+  <div class="grid">
+    <div class="card">
+      <div class="title">Path M 路径</div>
+      <div style="text-align:left;color:#aaa;font-size:14px;line-height:1.8;">
+        <div style="margin-bottom:10px;color:#fff;font-weight:600;">优势：</div>
+        <div>✓ 完全控制 M 形状</div>
+        <div>✓ 麦当劳拱门风格</div>
+        <div>✓ 自定义双线效果</div>
+        <div style="margin:15px 0;color:#fff;font-weight:600;">劣势：</div>
+        <div>✗ 代码复杂</div>
+        <div>✗ 小尺寸可能模糊</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="title">Unicode 字体 𝕸</div>
+      <div style="text-align:left;color:#aaa;font-size:14px;line-height:1.8;">
+        <div style="margin-bottom:10px;color:#fff;font-weight:600;">优势：</div>
+        <div>✓ 代码简洁</div>
+        <div>✓ 双线体原生效果</div>
+        <div>✓ 小尺寸清晰</div>
+        <div style="margin:15px 0;color:#fff;font-weight:600;">劣势：</div>
+        <div>✗ 形状无法自定义</div>
+        <div>✗ 不是麦当劳拱门</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="text-align:center;margin-top:60px;color:#555;font-size:14px;">
+  NicMD Logo | Path M vs 字体 𝕸 | 淡红 #fef2f2 | 深阴影
+</div>
+
+</body>
+</html>

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f97316"/>
+      <stop offset="100%" stop-color="#ea580c"/>
+    </linearGradient>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000000" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  <rect width="200" height="200" rx="36" fill="url(#orangeGrad)" filter="url(#shadow)"/>
+  <text x="75" y="150" text-anchor="middle" font-family="'Times New Roman',serif" font-size="130" font-weight="800" fill="#ffffff">𝕸</text>
+  <text x="140" y="70" text-anchor="middle" font-family="'Times New Roman',serif" font-size="40" font-style="italic" fill="#ffffff" opacity="0.95">𝒏</text>
+  <text x="170" y="80" text-anchor="middle" font-family="'Times New Roman',serif" font-size="28" font-style="italic" fill="#ffffff" opacity="0.95">(𝒊𝒄)</text>
+</svg>

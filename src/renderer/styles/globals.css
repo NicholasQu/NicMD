@@ -1,0 +1,159 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg-primary: #ffffff;
+    --bg-secondary: #fafafa;
+    --bg-tertiary: #f3f4f6;
+    --bg-glass: rgba(255, 255, 255, 0.78);
+    --bg-glass-border: rgba(15, 23, 42, 0.08);
+    --text-primary: #111827;
+    --text-secondary: #374151;
+    --text-tertiary: #6b7280;
+    --border-color: #e5e7eb;
+    --border-subtle: #f1f5f9;
+    --accent-color: #ea580c;
+    --accent-hover: #c2410c;
+    --accent-light: rgba(234, 88, 12, 0.08);
+    --scrollbar-thumb: #d7c4ae;
+    --scrollbar-track: rgba(234, 223, 210, 0.35);
+    --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+    --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.06);
+    --shadow-lg: 0 18px 48px rgba(15, 23, 42, 0.1);
+    --table-bg: #ffffff;
+    --table-header-start: #fff7ed;
+    --table-header-end: #ffedd5;
+    --table-header-text: #9a3412;
+    --table-border: #eadfd2;
+    --table-hover: #fff3e3;
+    --table-striped: #fffaf4;
+    --code-bg: #fff7ed;
+    --code-border: #eadfd2;
+  }
+
+  .dark {
+    --bg-primary: #0f0f0f;
+    --bg-secondary: #171717;
+    --bg-tertiary: #262626;
+    --bg-glass: rgba(23, 23, 23, 0.72);
+    --bg-glass-border: rgba(255, 255, 255, 0.08);
+    --text-primary: #fafafa;
+    --text-secondary: #a3a3a3;
+    --text-tertiary: #525252;
+    --border-color: #262626;
+    --border-subtle: #1f1f1f;
+    --accent-color: #f97316;
+    --accent-hover: #fb923c;
+    --accent-light: rgba(249, 115, 22, 0.12);
+    --scrollbar-thumb: #404040;
+    --scrollbar-track: transparent;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.5);
+    --table-bg: #171717;
+    --table-header-start: #f97316;
+    --table-header-end: #ea580c;
+    --table-header-text: #ffffff;
+    --table-border: #262626;
+    --table-hover: rgba(249, 115, 22, 0.08);
+    --table-striped: rgba(255, 255, 255, 0.02);
+    --code-bg: #1f1f1f;
+    --code-border: #262626;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html, body, #root {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer components {
+  .glass {
+    background: var(--bg-glass);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--bg-glass-border);
+  }
+
+  .glass-strong {
+    background: var(--bg-glass);
+    backdrop-filter: blur(40px) saturate(200%);
+    -webkit-backdrop-filter: blur(40px) saturate(200%);
+    border: 1px solid var(--bg-glass-border);
+  }
+
+  .titlebar-drag {
+    -webkit-app-region: drag;
+  }
+
+  .titlebar-no-drag {
+    -webkit-app-region: no-drag;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: 3px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-color);
+  }
+
+  .brand-wordmark {
+    font-family: Georgia, 'Times New Roman', ui-serif, serif;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+  }
+
+  .brand-formula {
+    font-family: Georgia, 'Times New Roman', Cambria, ui-serif, serif;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.01em;
+    line-height: 1;
+  }
+
+  .fade-in {
+    animation: fadeIn 0.2s ease-out;
+  }
+
+  .slide-in {
+    animation: slideIn 0.3s ease-out;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    background: linear-gradient(135deg, #fbbf24, #ea580c);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}

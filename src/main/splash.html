@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NicMD</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      overflow: hidden;
+      border-radius: 24px;
+      -webkit-app-region: drag;
+    }
+    .container {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #fef2f2 0%, #fff7ed 100%);
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(234, 88, 12, 0.25);
+    }
+    .logo-container {
+      position: relative;
+      width: 160px;
+      height: 160px;
+    }
+    .spinner {
+      position: absolute;
+      bottom: -50px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 28px;
+      height: 28px;
+      border: 2.5px solid rgba(234, 88, 12, 0.2);
+      border-top-color: #ea580c;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: translateX(-50%) rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo-container">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="160" height="160">
+        <defs>
+          <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#fbbf24"/>
+            <stop offset="100%" stop-color="#ea580c"/>
+          </linearGradient>
+        </defs>
+        <text x="75" y="150" text-anchor="middle" font-family="'Times New Roman',serif" font-size="130" font-weight="800" fill="url(#orangeGrad)">𝕸</text>
+        <text x="140" y="70" text-anchor="middle" font-family="'Times New Roman',serif" font-size="40" font-style="italic" fill="#dc2626">𝒏</text>
+        <text x="170" y="80" text-anchor="middle" font-family="'Times New Roman',serif" font-size="28" font-style="italic" fill="#dc2626">(𝒊𝒄)</text>
+      </svg>
+      <div class="spinner"></div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>NicMD Logo v4.1 - M contains nic - Fixed</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter',sans-serif; background:#0f0f0f; color:#e0e0e0; padding:40px; }
+  h1 { text-align:center; font-size:28px; margin-bottom:6px; color:#fff; }
+  .subtitle { text-align:center; font-size:13px; color:#888; margin-bottom:16px; }
+  .explain { text-align:center; font-size:14px; color:#f97316; margin-bottom:48px; max-width:600px; margin-left:auto; margin-right:auto; line-height:1.8; }
+  .section-title { font-size:18px; font-weight:700; color:#f97316; margin:40px 0 16px; padding-left:8px; border-left:4px solid #f97316; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:20px; max-width:1300px; margin:0 auto 60px; }
+  .card { background:#1a1a1a; border-radius:14px; padding:20px; text-align:center; border:1px solid #2a2a2a; transition:all .3s; }
+  .card:hover { border-color:#f97316; transform:translateY(-3px); box-shadow:0 8px 30px rgba(249,115,22,0.12); }
+  .card .num { font-size:11px; color:#f97316; font-weight:700; margin-bottom:10px; letter-spacing:2px; }
+  .card .svg-wrap { width:180px; height:180px; margin:0 auto 12px; display:flex; align-items:center; justify-content:center; }
+  .card .svg-wrap svg { width:100%; height:100%; }
+  .card .name { font-size:13px; font-weight:600; color:#fff; margin-bottom:3px; }
+  .card .desc { font-size:11px; color:#888; line-height:1.4; }
+  .card .tags { margin-top:10px; display:flex; gap:5px; justify-content:center; flex-wrap:wrap; }
+  .card .tag { font-size:9px; padding:2px 6px; border-radius:16px; background:#2a2a2a; color:#aaa; }
+  .card .tag.hot { background:linear-gradient(135deg,#fb923c,#ea580c); color:#fff; }
+</style>
+</head>
+<body>
+
+<h1>NicMD Logo v4.1</h1>
+<p class="subtitle">M 包含 n i c — 精确对齐版</p>
+<p class="explain">
+  M 路径几何分析：<br>
+  左拱门中心 ≈ (58, 96) → 放 <strong>n</strong><br>
+  中间谷底中心 ≈ (100, 96) → 放 <strong>i</strong><br>
+  右拱门中心 ≈ (142, 96) → 放 <strong>c</strong><br>
+  三者等距，水平对齐
+</p>
+
+<div class="section-title">精确对齐方案</div>
+<div class="grid">
+
+<!-- ===== A: 橙色描边 M + 白 nic ===== -->
+<div class="card">
+  <div class="num">A</div>
+  <div class="svg-wrap">
+  <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <rect width="200" height="200" rx="32" fill="#1a1a1a"/>
+    <defs>
+      <linearGradient id="ga" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#ea580c"/>
+      </linearGradient>
+    </defs>
+    <path d="M24,168 L24,40 Q24,24 40,24 L48,24 Q56,24 60,36 L82,108 Q86,120 100,120 Q114,120 118,108 L140,36 Q144,24 152,24 L160,24 Q176,24 176,40 L176,168"
+          fill="none" stroke="url(#ga)" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- n: centered in left arch (center ≈ x:58, y:96) -->
+    <text x="58" y="102" text-anchor="middle" font-family="Arial,sans-serif" font-size="44" font-weight="700" fill="#fff" opacity="0.9">n</text>
+    <!-- i: centered at valley (x:100) -->
+    <circle cx="100" cy="66" r="4.5" fill="#fff" opacity="0.9"/>
+    <rect x="97.5" y="76" width="5" height="30" rx="2.5" fill="#fff" opacity="0.9"/>
+    <!-- c: centered in right arch (center ≈ x:142, y:96) -->
+    <text x="142" y="102" text-anchor="middle" font-family="Arial,sans-serif" font-size="44" font-weight="700" fill="#fff" opacity="0.9">c</text>
+  </svg>
+  </div>
+  <div class="name">橙色描边 + 白 nic</div>
+  <div class="desc">深色底，M 渐变描边，nic 白色精确居中</div>
+  <div class="tags"><span class="tag hot">推荐</span><span class="tag">描边</span><span class="tag">对齐</span></div>
+</div>
+
+<!-- ===== B: 白底填充 M + 深 nic ===== -->
+<div class="card">
+  <div class="num">B</div>
+  <div class="svg-wrap">
+  <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <rect width="200" height="200" rx="32" fill="#fafaf9"/>
+    <defs>
+      <linearGradient id="gb" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#ea580c"/>
+      </linearGradient>
+    </defs>
+    <path d="M24,168 L24,40 Q24,24 40,24 L48,24 Q56,24 60,36 L82,108 Q86,120 100,120 Q114,120 118,108 L140,36 Q144,24 152,24 L160,24 Q176,24 176,40 L176,168 Z"
+          fill="url(#gb)"/>
+    <text x="58" y="102" text-anchor="middle" font-family="Arial,sans-serif" font-size="40" font-weight="700" fill="#1a1a1a" opacity="0.8">n</text>
+    <circle cx="100" cy="66" r="4" fill="#1a1a1a" opacity="0.8"/>
+    <rect x="97.5" y="76" width="5" height="28" rx="2.5" fill="#1a1a1a" opacity="0.8"/>
+    <text x="142" y="102" text-anchor="middle" font-family="Arial,sans-serif" font-size="40" font-weight="700" fill="#1a1a1a" opacity="0.8">c</text>
+  </svg>
+  </div>
+  <div class="name">白底填充 M + 深 nic</div>
+  <div class="desc">白底，M 橙色填充，nic 深色镂空</div>
+  <div class="tags"><span class="tag hot">推荐</span><span class="tag">填充</span><span class="tag">白底</span></div>
+</div>
+
+<!-- ===== C: 橙色圆底 App Icon ===== -->
+<div class="card">
+  <div class="num">C</div>
+  <div class="svg-wrap">
+  <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="gc" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#fb923c"/><stop offset="100%" stop-color="#ea580c"/>
+      </linearGradient>
+    </defs>
+    <circle cx="100" cy="100" r="92" fill="url(#gc)"/>
+    <path d="M32,160 L32,48 Q32,32 48,32 L54,32 Q62,32 66,44 L84,104 Q88,116 100,116 Q112,116 116,104 L134,44 Q138,32 146,32 L152,32 Q168,32 168,48 L168,160"
+          fill="none" stroke="#fff" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="60" y="100" text-anchor="middle" font-family="Arial,sans-serif" font-size="36" font-weight="700" fill="rgba(255,255,255,0.9)">n</text>
+    <circle cx="100" cy="64" r="3.5" fill="rgba(255,255,255,0.9)"/>
+    <rect x="97.5" y="73" width="5" height="24" rx="2.5" fill="rgba(255,255,255,0.9)"/>
+    <text x="140" y="100" text-anchor="middle" font-family="Arial,sans-serif" font-size="36" font-weight="700" fill="rgba(255,255,255,0.9)">c</text>
+  </svg>
+  </div>
+  <div class="name">圆形 App Icon</div>
+  <div class="desc">橙色渐变圆底 + 白色 M + nic</div>
+  <div class="tags"><span class="tag">圆形</span><span class="tag">App Icon</span></div>
+</div>
+
+<!-- ===== D: 霓虹 ===== -->
+<div class="card">
+  <div class="num">D</div>
+  <div class="svg-wrap">
+  <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <rect width="200" height="200" rx="32" fill="#0a0a0a"/>
+    <defs>
+      <filter id="fd">
+        <feGaussianBlur stdDeviation="3" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
+    <path d="M24,168 L24,40 Q24,24 40,24 L48,24 Q56,24 60,36 L82,108 Q86,120 100,120 Q114,120 118,108 L140,36 Q144,24 152,24 L160,24 Q176,24 176,40 L176,168"
+          fill="none" stroke="#f97316" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" filter="url(#fd)"/>
+    <text x="58" y="102" text-anchor="middle" font-family="Arial,sans-serif" font-size="40" font-weight="700" fill="#fff" opacity="0.9">n</text>
+    <circle cx="100" cy="66" r="4" fill="#fff" opacity="0.9"/>
+    <rect x="97.5" y="76" width="5" height="28" rx="2.5" fill="#fff" opacity="0.9"/>
+    <text x="142" y="102" text-anchor="middle" font-family="Arial,sans-serif" font-size="40" font-weight="700" fill="#fff" opacity="0.9">c</text>
+  </svg>
+  </div>
+  <div class="name">暗夜霓虹</div>
+  <div class="desc">纯黑底 + 橙色霓虹发光 M + 白 nic</div>
+  <div class="tags"><span class="tag">霓虹</span><span class="tag">暗黑</span></div>
+</div>
+
+<!-- ===== E: 像素风 ===== -->
+<div class="card">
+  <div class="num">E</div>
+  <div class="svg-wrap">
+  <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <rect width="200" height="200" rx="20" fill="#1e1b2e"/>
+    <defs>
+      <linearGradient id="ge" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#ea580c"/>
+      </linearGradient>
+    </defs>
+    <!-- Pixel M: legs at x=20-34 and x=166-180, arches dip to x=90-110 -->
+    <g fill="url(#ge)">
+      <!-- Left leg -->
+      <rect x="20" y="20" width="16" height="160"/>
+      <!-- Left diagonal -->
+      <rect x="36" y="20" width="16" height="16"/>
+      <rect x="52" y="36" width="16" height="16"/>
+      <rect x="68" y="52" width="16" height="16"/>
+      <!-- Valley bottom -->
+      <rect x="84" y="68" width="16" height="16"/>
+      <rect x="84" y="84" width="16" height="16"/>
+      <!-- Right diagonal -->
+      <rect x="100" y="52" width="16" height="16"/>
+      <rect x="116" y="36" width="16" height="16"/>
+      <rect x="132" y="20" width="16" height="16"/>
+      <!-- Right leg -->
+      <rect x="148" y="20" width="16" height="16"/>
+      <rect x="148" y="36" width="16" height="16"/>
+      <rect x="164" y="20" width="16" height="160"/>
+    </g>
+    <!-- Pixel n: centered in left arch area x=44-76, y=100-160 -->
+    <g fill="#fff" opacity="0.9">
+      <rect x="44" y="108" width="12" height="12"/>
+      <rect x="44" y="120" width="12" height="12"/>
+      <rect x="44" y="132" width="12" height="12"/>
+      <rect x="44" y="144" width="12" height="12"/>
+      <rect x="56" y="108" width="12" height="12"/>
+      <rect x="68" y="120" width="12" height="12"/>
+      <rect x="68" y="132" width="12" height="12"/>
+      <rect x="68" y="144" width="12" height="12"/>
+    </g>
+    <!-- Pixel i: at valley x=88-96 -->
+    <g fill="#fff" opacity="0.9">
+      <rect x="90" y="88" width="8" height="8"/>
+      <rect x="90" y="100" width="8" height="20"/>
+    </g>
+    <!-- Pixel c: centered in right arch area x=124-156, y=100-160 -->
+    <g fill="#fff" opacity="0.9">
+      <rect x="124" y="108" width="12" height="12"/>
+      <rect x="124" y="120" width="12" height="12"/>
+      <rect x="124" y="132" width="12" height="12"/>
+      <rect x="124" y="144" width="12" height="12"/>
+      <rect x="136" y="108" width="12" height="12"/>
+      <rect x="136" y="144" width="12" height="12"/>
+    </g>
+  </svg>
+  </div>
+  <div class="name">像素 M + 像素 nic</div>
+  <div class="desc">深紫底，像素 M 橙色，nic 白色像素精确对齐</div>
+  <div class="tags"><span class="tag hot">推荐</span><span class="tag">像素</span><span class="tag">对齐</span></div>
+</div>
+
+<!-- ===== F: 橙色圆角方块 ===== -->
+<div class="card">
+  <div class="num">F</div>
+  <div class="svg-wrap">
+  <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="gf" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#fb923c"/><stop offset="100%" stop-color="#ea580c"/>
+      </linearGradient>
+    </defs>
+    <rect width="200" height="200" rx="36" fill="url(#gf)"/>
+    <path d="M28,172 L28,44 Q28,28 44,28 L52,28 Q60,28 64,40 L84,108 Q88,120 100,120 Q112,120 116,108 L136,40 Q140,28 148,28 L156,28 Q172,28 172,44 L172,172 Z"
+          fill="rgba(255,255,255,0.95)"/>
+    <text x="58" y="102" text-anchor="middle" font-family="Arial,sans-serif" font-size="40" font-weight="800" fill="#ea580c">n</text>
+    <circle cx="100" cy="66" r="4" fill="#ea580c"/>
+    <rect x="97.5" y="76" width="5" height="28" rx="2.5" fill="#ea580c"/>
+    <text x="142" y="102" text-anchor="middle" font-family="Arial,sans-serif" font-size="40" font-weight="800" fill="#ea580c">c</text>
+  </svg>
+  </div>
+  <div class="name">橙色圆角方块</div>
+  <div class="desc">橙色渐变底 + 白 M + 橙色 nic 精确居中</div>
+  <div class="tags"><span class="tag hot">推荐</span><span class="tag">App Icon</span><span class="tag">圆角</span></div>
+</div>
+
+<!-- ===== G: 极简线条 ===== -->
+<div class="card">
+  <div class="num">G</div>
+  <div class="svg-wrap">
+  <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <rect width="200" height="200" rx="32" fill="#fafaf9"/>
+    <path d="M28,168 L28,36 Q28,28 36,28 L44,28 Q52,28 56,40 L80,116 Q86,132 100,132 Q114,132 120,116 L144,40 Q148,28 156,28 L164,28 Q172,28 172,36 L172,168"
+          fill="none" stroke="#ea580c" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="58" y="102" text-anchor="middle" font-family="Arial,sans-serif" font-size="36" font-weight="600" fill="#444">n</text>
+    <circle cx="100" cy="66" r="3.5" fill="#444"/>
+    <rect x="98" y="75" width="4" height="24" rx="2" fill="#444"/>
+    <text x="142" y="102" text-anchor="middle" font-family="Arial,sans-serif" font-size="36" font-weight="600" fill="#444">c</text>
+  </svg>
+  </div>
+  <div class="name">极简线条</div>
+  <div class="desc">白底 + 橙色细线 M + 灰色 nic 精确居中</div>
+  <div class="tags"><span class="tag">极简</span><span class="tag">线条</span></div>
+</div>
+
+<!-- ===== H: 墨迹毛笔 ===== -->
+<div class="card">
+  <div class="num">H</div>
+  <div class="svg-wrap">
+  <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <rect width="200" height="200" rx="28" fill="#fef3c7"/>
+    <defs>
+      <linearGradient id="gh" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#b91c1c"/>
+      </linearGradient>
+    </defs>
+    <path d="M20,172 Q18,100 20,40 Q20,20 40,20 Q52,20 56,36 L80,116 Q86,136 100,136 Q114,136 120,116 L144,36 Q148,20 160,20 Q180,20 180,40 Q182,100 180,172"
+          fill="none" stroke="url(#gh)" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="58" y="102" text-anchor="middle" font-family="Georgia,serif" font-size="38" font-weight="700" fill="#57534e">n</text>
+    <circle cx="100" cy="64" r="3.5" fill="#57534e"/>
+    <rect x="97.5" y="74" width="5" height="26" rx="2.5" fill="#57534e"/>
+    <text x="142" y="102" text-anchor="middle" font-family="Georgia,serif" font-size="38" font-weight="700" fill="#57534e">c</text>
+  </svg>
+  </div>
+  <div class="name">墨迹毛笔</div>
+  <div class="desc">暖黄宣纸底 + 橙红墨迹 M + 衬线 nic</div>
+  <div class="tags"><span class="tag hot">推荐</span><span class="tag">墨迹</span><span class="tag">毛笔</span></div>
+</div>
+
+</div>
+
+<div style="text-align:center;margin-top:20px;color:#555;font-size:12px;">
+  NicMD Logo v4.1 | M contains nic | Precise alignment
+</div>
+
+</body>
+</html>

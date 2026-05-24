@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>NicMD Logo - 最终版</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter',sans-serif; background:#0f0f0f; color:#e0e0e0; padding:40px; }
+  h1 { text-align:center; font-size:40px; margin-bottom:10px; color:#fff; }
+  .subtitle { text-align:center; font-size:16px; color:#888; margin-bottom:20px; }
+  .formula { text-align:center; font-size:28px; color:#f97316; margin-bottom:50px; font-family:'Times New Roman',serif; font-style:italic; }
+  .section { margin:60px 0; }
+  .section-title { font-size:24px; font-weight:700; color:#f97316; margin-bottom:28px; padding-left:14px; border-left:4px solid #f97316; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:28px; max-width:1400px; margin:0 auto; }
+  .card { background:#1a1a1a; border-radius:20px; padding:30px; text-align:center; border:1px solid #2a2a2a; transition:all .3s; }
+  .card:hover { border-color:#f97316; transform:translateY(-4px) scale(1.02); box-shadow:0 15px 50px rgba(249,115,22,0.2); }
+  .card .title { font-size:18px; font-weight:600; color:#fff; margin-bottom:8px; }
+  .card .desc { font-size:13px; color:#888; margin-bottom:20px; }
+  .card .svg-wrap { width:300px; height:300px; margin:0 auto 14px; border-radius:38px; overflow:hidden; }
+  .card .svg-wrap svg { width:100%; height:100%; }
+  .preview-row { display:flex; align-items:center; justify-content:center; gap:25px; margin:30px 0; flex-wrap:wrap; }
+  .preview-item { text-align:center; }
+  .preview-item .size { font-size:11px; color:#666; margin-top:10px; }
+  .color-row { display:flex; align-items:center; justify-content:center; gap:35px; margin:25px 0; flex-wrap:wrap; }
+  .color-item { display:flex; align-items:center; gap:10px; }
+  .color-swatch { width:40px; height:40px; border-radius:10px; border:1px solid #333; }
+  .color-name { font-size:14px; color:#aaa; }
+  .specs-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:24px; max-width:1100px; margin:0 auto; }
+  .spec-item { background:#1a1a1a; border-radius:14px; padding:24px; border:1px solid #2a2a2a; }
+  .spec-label { font-size:13px; color:#888; margin-bottom:8px; }
+  .spec-value { font-size:20px; font-weight:600; color:#fff; }
+</style>
+</head>
+<body>
+
+<h1>NicMD Logo - 最终版</h1>
+<p class="subtitle">数学公式风格 · 𝕸ⁿ(𝒊𝒄)</p>
+<p class="formula">𝕸ⁿ(𝒊𝒄)</p>
+
+<!-- ======== 大预览 ======== -->
+<div class="section">
+  <div class="section-title">大预览 (300×300)</div>
+  <div class="grid">
+    <div class="card">
+      <div class="title">App Icon</div>
+      <div class="desc">桌面应用图标</div>
+      <div class="svg-wrap">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <filter id="shadow1"><feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#000000" flood-opacity="0.3"/></filter>
+            <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#ea580c"/></linearGradient>
+          </defs>
+          <rect width="200" height="200" rx="36" fill="#fef2f2"/>
+          <text x="75" y="150" text-anchor="middle" font-family="'Times New Roman',serif" font-size="130" font-weight="800" fill="url(#grad1)" filter="url(#shadow1)">𝕸</text>
+          <text x="140" y="70" text-anchor="middle" font-family="'Times New Roman',serif" font-size="40" font-style="italic" fill="#dc2626">𝒏</text>
+          <text x="170" y="80" text-anchor="middle" font-family="'Times New Roman',serif" font-size="28" font-style="italic" fill="#dc2626">(��𝒄)</text>
+        </svg>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="title">用户头像</div>
+      <div class="desc">社交媒体头像</div>
+      <div class="svg-wrap">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <filter id="shadow2"><feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#000000" flood-opacity="0.3"/></filter>
+            <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#ea580c"/></linearGradient>
+          </defs>
+          <rect width="200" height="200" rx="36" fill="#fef2f2"/>
+          <text x="75" y="150" text-anchor="middle" font-family="'Times New Roman',serif" font-size="130" font-weight="800" fill="url(#grad2)" filter="url(#shadow2)">𝕸</text>
+          <text x="140" y="70" text-anchor="middle" font-family="'Times New Roman',serif" font-size="40" font-style="italic" fill="#dc2626">𝒏</text>
+          <text x="170" y="80" text-anchor="middle" font-family="'Times New Roman',serif" font-size="28" font-style="italic" fill="#dc2626">(𝒊𝒄)</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======== 多尺寸预览 ======== -->
+<div class="section">
+  <div class="section-title">多尺寸预览</div>
+  <div class="preview-row">
+    <div class="preview-item">
+      <svg viewBox="0 0 200 200" width="144" height="144" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="shadow3"><feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#000000" flood-opacity="0.3"/></filter>
+          <linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#ea580c"/></linearGradient>
+        </defs>
+        <rect width="200" height="200" rx="36" fill="#fef2f2"/>
+        <text x="75" y="150" text-anchor="middle" font-family="'Times New Roman',serif" font-size="130" font-weight="800" fill="url(#grad3)" filter="url(#shadow3)">𝕸</text>
+        <text x="140" y="70" text-anchor="middle" font-family="'Times New Roman',serif" font-size="40" font-style="italic" fill="#dc2626">𝒏</text>
+        <text x="170" y="80" text-anchor="middle" font-family="'Times New Roman',serif" font-size="28" font-style="italic" fill="#dc2626">(𝒊𝒄)</text>
+      </svg>
+      <div class="size">144×144</div>
+    </div>
+    <div class="preview-item">
+      <svg viewBox="0 0 200 200" width="128" height="128" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="shadow4"><feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#000000" flood-opacity="0.3"/></filter>
+          <linearGradient id="grad4" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#ea580c"/></linearGradient>
+        </defs>
+        <rect width="200" height="200" rx="36" fill="#fef2f2"/>
+        <text x="75" y="150" text-anchor="middle" font-family="'Times New Roman',serif" font-size="130" font-weight="800" fill="url(#grad4)" filter="url(#shadow4)">𝕸</text>
+        <text x="140" y="70" text-anchor="middle" font-family="'Times New Roman',serif" font-size="40" font-style="italic" fill="#dc2626">𝒏</text>
+        <text x="170" y="80" text-anchor="middle" font-family="'Times New Roman',serif" font-size="28" font-style="italic" fill="#dc2626">(��𝒄)</text>
+      </svg>
+      <div class="size">128×128</div>
+    </div>
+    <div class="preview-item">
+      <svg viewBox="0 0 200 200" width="96" height="96" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="shadow5"><feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#000000" flood-opacity="0.3"/></filter>
+          <linearGradient id="grad5" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#ea580c"/></linearGradient>
+        </defs>
+        <rect width="200" height="200" rx="36" fill="#fef2f2"/>
+        <text x="75" y="150" text-anchor="middle" font-family="'Times New Roman',serif" font-size="130" font-weight="800" fill="url(#grad5)" filter="url(#shadow5)">𝕸</text>
+        <text x="140" y="70" text-anchor="middle" font-family="'Times New Roman',serif" font-size="40" font-style="italic" fill="#dc2626">𝒏</text>
+        <text x="170" y="80" text-anchor="middle" font-family="'Times New Roman',serif" font-size="28" font-style="italic" fill="#dc2626">(��𝒄)</text>
+      </svg>
+      <div class="size">96×96</div>
+    </div>
+    <div class="preview-item">
+      <svg viewBox="0 0 200 200" width="64" height="64" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="shadow6"><feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#000000" flood-opacity="0.3"/></filter>
+          <linearGradient id="grad6" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#ea580c"/></linearGradient>
+        </defs>
+        <rect width="200" height="200" rx="36" fill="#fef2f2"/>
+        <text x="75" y="150" text-anchor="middle" font-family="'Times New Roman',serif" font-size="130" font-weight="800" fill="url(#grad6)" filter="url(#shadow6)">𝕸</text>
+        <text x="140" y="70" text-anchor="middle" font-family="'Times New Roman',serif" font-size="40" font-style="italic" fill="#dc2626">𝒏</text>
+        <text x="170" y="80" text-anchor="middle" font-family="'Times New Roman',serif" font-size="28" font-style="italic" fill="#dc2626">(��𝒄)</text>
+      </svg>
+      <div class="size">64×64</div>
+    </div>
+    <div class="preview-item">
+      <svg viewBox="0 0 200 200" width="48" height="48" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="shadow7"><feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#000000" flood-opacity="0.3"/></filter>
+          <linearGradient id="grad7" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#ea580c"/></linearGradient>
+        </defs>
+        <rect width="200" height="200" rx="36" fill="#fef2f2"/>
+        <text x="75" y="150" text-anchor="middle" font-family="'Times New Roman',serif" font-size="130" font-weight="800" fill="url(#grad7)" filter="url(#shadow7)">𝕸</text>
+        <text x="140" y="70" text-anchor="middle" font-family="'Times New Roman',serif" font-size="40" font-style="italic" fill="#dc2626">𝒏</text>
+        <text x="170" y="80" text-anchor="middle" font-family="'Times New Roman',serif" font-size="28" font-style="italic" fill="#dc2626">(𝒊𝒄)</text>
+      </svg>
+      <div class="size">48×48</div>
+    </div>
+    <div class="preview-item">
+      <svg viewBox="0 0 200 200" width="32" height="32" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="grad8" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#ea580c"/></linearGradient>
+        </defs>
+        <rect width="200" height="200" rx="36" fill="#fef2f2"/>
+        <text x="75" y="150" text-anchor="middle" font-family="'Times New Roman',serif" font-size="130" font-weight="800" fill="url(#grad8)">𝕸</text>
+        <text x="140" y="70" text-anchor="middle" font-family="'Times New Roman',serif" font-size="40" font-style="italic" fill="#dc2626">𝒏</text>
+        <text x="170" y="80" text-anchor="middle" font-family="'Times New Roman',serif" font-size="28" font-style="italic" fill="#dc2626">(𝒊𝒄)</text>
+      </svg>
+      <div class="size">32×32</div>
+    </div>
+  </div>
+</div>
+
+<!-- ======== 配色方案 ======== -->
+<div class="section">
+  <div class="section-title">配色方案</div>
+  <div class="color-row">
+    <div class="color-item">
+      <div class="color-swatch" style="background:#fef2f2;"></div>
+      <div class="color-name">#fef2f2 背景淡红</div>
+    </div>
+    <div class="color-item">
+      <div class="color-swatch" style="background:#fbbf24;"></div>
+      <div class="color-name">#fbbf24 M 金黄</div>
+    </div>
+    <div class="color-item">
+      <div class="color-swatch" style="background:#ea580c;"></div>
+      <div class="color-name">#ea580c M 深橙</div>
+    </div>
+    <div class="color-item">
+      <div class="color-swatch" style="background:#dc2626;"></div>
+      <div class="color-name">#dc2626 nic 红色</div>
+    </div>
+  </div>
+</div>
+
+<!-- ======== 设计规格 ======== -->
+<div class="section">
+  <div class="section-title">设计规格</div>
+  <div class="specs-grid">
+    <div class="spec-item">
+      <div class="spec-label">数学公式</div>
+      <div class="spec-value">𝕸ⁿ(𝒊𝒄)</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-label">尺寸</div>
+      <div class="spec-value">200×200 px</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-label">圆角</div>
+      <div class="spec-value">36 px (18%)</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-label">𝕸 字号</div>
+      <div class="spec-value">130 px</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-label">𝒏 字号（次方）</div>
+      <div class="spec-value">40 px</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-label">(𝒊𝒄) 字号</div>
+      <div class="spec-value">28 px</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-label">阴影</div>
+      <div class="spec-value">dy=6 blur=6 opacity=0.3</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-label">字体风格</div>
+      <div class="spec-value">Unicode 花体</div>
+    </div>
+  </div>
+</div>
+
+<!-- ======== 使用场景 ======== -->
+<div class="section">
+  <div class="section-title">使用场景</div>
+  <div class="specs-grid">
+    <div class="spec-item">
+      <div class="spec-label">App Icon</div>
+      <div class="spec-value">512×512</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-label">用户头像</div>
+      <div class="spec-value">256×256 / 144×144</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-label">Favicon</div>
+      <div class="spec-value">32×32 / 16×16</div>
+    </div>
+    <div class="spec-item">
+      <div class="spec-label">文档/文件</div>
+      <div class="spec-value">48×48 / 64×64</div>
+    </div>
+  </div>
+</div>
+
+<div style="text-align:center;margin-top:80px;color:#555;font-size:14px;">
+  NicMD Logo | 淡红 #fef2f2 | 数学公式 𝕸ⁿ(𝒊𝒄) | Unicode 花体 | 最终版 ✅
+</div>
+
+</body>
+</html>

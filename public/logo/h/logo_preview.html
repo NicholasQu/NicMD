@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>NicMD Logo Preview - D & G</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter',sans-serif; background:#0f0f0f; color:#e0e0e0; padding:40px; }
+  h1 { text-align:center; font-size:28px; margin-bottom:6px; color:#fff; }
+  .subtitle { text-align:center; font-size:13px; color:#888; margin-bottom:24px; }
+  .section { margin:60px 0; }
+  .section-title { font-size:20px; font-weight:700; color:#f97316; margin-bottom:24px; padding-left:10px; border-left:4px solid #f97316; display:flex; align-items:center; justify-content:space-between; }
+  .section-title .tag { font-size:11px; background:#2a2a2a; color:#888; padding:4px 10px; border-radius:12px; }
+  .variant-section { margin:40px 0; padding:24px; background:#1a1a1a; border-radius:16px; border:1px solid #2a2a2a; }
+  .variant-title { font-size:16px; font-weight:600; color:#fff; margin-bottom:16px; display:flex; align-items:center; gap:10px; }
+  .variant-title .variant-label { font-size:12px; padding:2px 8px; border-radius:8px; font-weight:700; }
+  .variant-title .d-label { background:linear-gradient(135deg,#f97316,#ea580c); color:#fff; }
+  .variant-title .g-label { background:linear-gradient(135deg,#ea580c,#444); color:#fff; }
+  .variant-desc { font-size:12px; color:#888; }
+  .preview-row { display:flex; gap:24px; flex-wrap:wrap; margin:20px 0; }
+  .preview-item { text-align:center; }
+  .preview-item .label { font-size:11px; color:#666; margin-top:8px; }
+  .preview-item .size { font-size:10px; color:#555; }
+  .browser-tab { background:#2a2a2a; border-radius:8px; padding:8px 16px; display:flex; align-items:center; gap:12px; margin:8px 0; max-width:300px; }
+  .browser-tab .fav { width:16px; height:16px; }
+  .browser-tab .text { font-size:12px; color:#ccc; }
+  .dark-mode { background:#0a0a0a; }
+  .light-mode { background:#f5f5f4; }
+  .avatar-circle { border-radius:50%; overflow:hidden; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:24px; max-width:1400px; }
+  .card { background:#1a1a1a; border-radius:14px; padding:20px; text-align:center; border:1px solid #2a2a2a; }
+  .card .card-title { font-size:14px; font-weight:600; color:#fff; margin-bottom:12px; }
+  .card .card-desc { font-size:11px; color:#888; margin-bottom:16px; }
+  .app-icon-display { width:96px; height:96px; margin:0 auto 12px; border-radius:22px; display:flex; align-items:center; justify-content:center; }
+</style>
+</head>
+<body>
+
+<h1>NicMD Logo 实际使用场景预览</h1>
+<p class="subtitle">D 方案（暗夜霓虹）vs G 方案（极简线条）</p>
+
+<!-- ======== 方案 D: 暗夜霓虹 ======== -->
+<div class="variant-section">
+  <div class="variant-title">
+    <span class="variant-label d-label">D</span>
+    <span>暗夜霓虹 Dark Neon</span>
+    <span class="variant-desc">— 深色主题应用、开发者工具</span>
+  </div>
+
+  <!-- Favicon 场景 -->
+  <div class="section">
+    <div class="section-title">
+      Favicon (浏览器标签)
+      <span class="tag">16x16 · 32x32</span>
+    </div>
+    <div class="preview-row">
+      <div class="preview-item">
+        <div class="browser-tab dark-mode">
+          <svg class="fav" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <rect width="200" height="200" rx="32" fill="#0a0a0a"/>
+            <defs>
+              <filter id="fd-d"><feGaussianBlur stdDeviation="6" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            </defs>
+            <path d="M24,168 L24,40 Q24,24 40,24 L48,24 Q56,24 60,36 L82,108 Q86,120 100,120 Q114,120 118,108 L140,36 Q144,24 152,24 L160,24 Q176,24 176,40 L176,168" fill="none" stroke="#f97316" stroke-width="18" stroke-linecap="round" stroke-linejoin="round" filter="url(#fd-d)"/>
+            <text x="58" y="102" text-anchor="middle" font-family="Arial,sans-serif" font-size="44" font-weight="700" fill="#fff" opacity="0.9">n</text>
+            <circle cx="100" cy="66" r="4.5" fill="#fff" opacity="0.9"/>
+            <rect x="97.5" y="76" width="5" height="30" rx="2.5" fill="#fff" opacity="0.9"/>
+            <text x="142" y="102" text-anchor="middle" font-family="Arial,sans-serif" font-size="44" font-weight="700" fill="#fff" opacity="0.9">c</text>
+          </svg>
+          <span class="text">NicMD 编辑器</span>
+        </div>
+        <div class="label">深色标签</div>
+        <div class="size">16x16 实际尺寸</div>
+      </div>
+      <div class="preview-item">
+        <div class="browser-tab light-mode">
+          <svg class="fav" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <rect width="200" height="200" rx="32" fill="#0a0a0a"/>
+            <defs>
+              <filter id="fd-d2"><feGaussianBlur stdDeviation="6" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            </defs>
+            <path d="M24,168 L24,40 Q24,24 40,24 L48,24 Q56,24 60,36 L82,108 Q86,120 100,120 Q114,120 118,108 L140,36 Q144,24 152,24 L160,24 Q176,24 176,40 L176,168" fill="none" stroke="#f97316" stroke-width="18" stroke-linecap="round" stroke-linejoin="round" filter="url(#fd-d2)"/>
+            <text x="58" y="102" text-anchor="middle" font-family="Arial,sans-serif" font-size="44" font-weight="700" fill="#fff" opacity="0.9">n</text>
+            <circle cx="100" cy="66" r="4.5" fill="#fff" opacity="0.9"/>
+            <rect x="97.5" y="76" width="5" height="30" rx="2.5" fill="#fff" opacity="0.9"/>
+            <text x="142" y="102" text-anchor="middle" font-family="Arial,sans-serif" font-size="44" font-weight="700" fill="#fff" opacity="0.9">c</text>
+          </svg>
+          <span class="text" style="color:#333">NicMD 编辑器</span>
+        </div>
+        <div class="label">浅色标签</div>
+        <div class="size">16x16 实际尺寸</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 头像场景 -->
+  <div class="section">
+    <div class="section-title">
+      头像 Avatar
+      <span class="tag">128x128 · 200x200</span>
+    </div>
+    <div class="preview-row">
+      <div class="preview-item">
+        <div class="avatar-circle" style="width:128px;height:128px;">
+          <svg width="128" height="128" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <rect width="200" height="200" rx="32" fill="#0a0a0a"/>
+            <defs>
+              <filter id="fd-d3"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            </defs>
+            <path d="M24,168 L24,40 Q24,24 40,24 L48,24 Q56,24 60,36 L82,108 Q86,120 100,120 Q114,120 118,108 L140,36 Q144,24 152,24 L160,24 Q176,24 176,40 L176,168" fill="none" stroke="#f97316" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" filter="url(#fd-d3)"/>
+            <text x="58" y="102" text-anchor="middle" font-family="Arial,sans-serif" font-size="40" font-weight="700" fill="#fff" opacity="0.9">n</text>
+            <circle cx="100" cy="66" r="4" fill="#fff" opacity="0.9"/>
+            <rect x="97.5" y="76" width="5" height="28" rx="2.5" fill="#fff" opacity="0.9"/>
+            <text x="142" y="102" text-anchor="middle" font-family="Arial,sans-serif" font-size="40" font-weight="700" fill="#fff" opacity="0.9">c</text>
+          </svg>
+        </div>
+        <div class="label">GitHub/社交头像</div>
+        <div class="size">128x128</div>
+      </div>
+      <div class="preview-item">
+        <div class="avatar-circle" style="width:64px;height:64px;">
+          <svg width="64" height="64" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <rect width="200" height="200" rx="32" fill="#0a0a0a"/>
+            <defs>
+              <filter id="fd-d4"><feGaussianBlur stdDeviation="4" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            </defs>
+            <path d="M24,168 L24,40 Q24,24 40,24 L48,24 Q56,24 60,36 L82,108 Q86,120 100,120 Q114,120 118,108 L140,36 Q144,24 152,24 L160,24 Q176,24 176,40 L176,168" fill="none" stroke="#f97316" stroke-width="18" stroke-linecap="round" stroke-linejoin="round" filter="url(#fd-d4)"/>
+            <text x="58" y="102" text-anchor="middle" font-family="Arial,sans-serif" font-size="44" font-weight="700" fill="#fff" opacity="0.9">n</text>
+            <circle cx="100" cy="66" r="4.5" fill="#fff" opacity="0.9"/>
+            <rect x="97.5" y="76" width="5" height="30" rx="2.5" fill="#fff" opacity="0.9"/>
+            <text x="142" y="102" text-anchor="middle" font-family="Arial,sans-serif" font-size="44" font-weight="700" fill="#fff" opacity="0.9">c</text>
+          </svg>
+        </div>
+        <div class="label">小头像</div>
+        <div class="size">64x64</div>
+      </div>
+      <div class="preview-item">
+        <div class="avatar-circle" style="width:32px;height:32px;">
+          <svg width="32" height="32" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <rect width="200" height="200" rx="32" fill="#0a0a0a"/>
+            <defs>
+              <filter id="fd-d5"><feGaussianBlur stdDeviation="5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            </defs>
+            <path d="M24,168 L24,40 Q24,24 40,24 L48,24 Q56,24 60,36 L82,108 Q86,120 100,120 Q114,120 118,108 L140,36 Q144,24 152,24 L160,24 Q176,24 176,40 L176,168" fill="none" stroke="#f97316" stroke-width="20" stroke-linecap="round" stroke-linejoin="round" filter="url(#fd-d5)"/>
+            <text x="58" y="102" text-anchor="middle" font-family="Arial,sans-serif" font-size="48" font-weight="800" fill="#fff" opacity="0.95">n</text>
+            <circle cx="100" cy="65" r="5" fill="#fff" opacity="0.95"/>
+            <rect x="97" y="76" width="6" height="32" rx="3" fill="#fff" opacity="0.95"/>
+            <text x="142" y="102" text-anchor="middle" font-family="Arial,sans-serif" font-size="48" font-weight="800" fill="#fff" opacity="0.95">c</text>
+          </svg>
+        </div>
+        <div class="label">评论头像</div>
+        <div class="size">32x32</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- App Icon 场景 -->
+  <div class="section">
+    <div class="section-title">
+      App Icon (圆角方块版)
+      <span class="tag">桌面图标 · 任务栏</span>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <div class="card-title">桌面图标 256x256</div>
+        <div class="card-desc">Windows/Mac 桌面</div>
+        <div class="app-icon-display" style="width:160px;height:160px;background:linear-gradient(135deg,#1a1a1a,#2d2d2d);border-radius:32px;">
+          <svg width="120" height="120" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <rect width="200" height="200" rx="32" fill="#0a0a0a"/>
+            <defs>
+              <filter id="fd-d6"><feGaussianBlur stdDeviation="2.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            </defs>
+            <path d="M24,168 L24,40 Q24,24 40,24 L48,24 Q56,24 60,36 L82,108 Q86,120 100,120 Q114,120 118,108 L140,36 Q144,24 152,24 L160,24 Q176,24 176,40 L176,168" fill="none" stroke="#f97316" stroke-width="15" stroke-linecap="round" stroke-linejoin="round" filter="url(#fd-d6)"/>
+            <text x="58" y="102" text-anchor="middle" font-family="Arial,sans-serif" font-size="42" font-weight="700" fill="#fff" opacity="0.9">n</text>
+            <circle cx="100" cy="66" r="4.2" fill="#fff" opacity="0.9"/>
+            <rect x="97.6" y="76" width="4.8" height="29" rx="2.4" fill="#fff" opacity="0.9"/>
+            <text x="142" y="102" text-anchor="middle" font-family="Arial,sans-serif" font-size="42" font-weight="700" fill="#fff" opacity="0.9">c</text>
+          </svg>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">任务栏 64x64</div>
+        <div class="card-desc">Windows 任务栏 / macOS Dock</div>
+        <div class="app-icon-display" style="width:80px;height:80px;background:linear-gradient(135deg,#1a1a1a,#2d2d2d);border-radius:16px;">
+          <svg width="56" height="56" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <rect width="200" height="200" rx="32" fill="#0a0a0a"/>
+            <defs>
+              <filter id="fd-d7"><feGaussianBlur stdDeviation="4" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            </defs>
+            <path d="M24,168 L24,40 Q24,24 40,24 L48,24 Q56,24 60,36 L82,108 Q86,120 100,120 Q114,120 118,108 L140,36 Q144,24 152,24 L160,24 Q176,24 176,40 L176,168" fill="none" stroke="#f97316" stroke-width="18" stroke-linecap="round" stroke-linejoin="round" filter="url(#fd-d7)"/>
+            <text x="58" y="102" text-anchor="middle" font-family="Arial,sans-serif" font-size="44" font-weight="700" fill="#fff" opacity="0.9">n</text>
+            <circle cx="100" cy="66" r="4.5" fill="#fff" opacity="0.9"/>
+            <rect x="97.5" y="76" width="5" height="30" rx="2.5" fill="#fff" opacity="0.9"/>
+            <text x="142" y="102" text-anchor="middle" font-family="Arial,sans-serif" font-size="44" font-weight="700" fill="#fff" opacity="0.9">c</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======== 方案 G: 极简线条 ======== -->
+<div class="variant-section">
+  <div class="variant-title">
+    <span class="variant-label g-label">G</span>
+    <span>极简线条 Minimalist</span>
+    <span class="variant-desc">— 文本编辑器、文档工具、简洁应用</span>
+  </div>
+
+  <!-- Favicon 场景 -->
+  <div class="section">
+    <div class="section-title">
+      Favicon (浏览器标签)
+      <span class="tag">16x16 · 32x32</span>
+    </div>
+    <div class="preview-row">
+      <div class="preview-item">
+        <div class="browser-tab light-mode">
+          <svg class="fav" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <rect width="200" height="200" rx="32" fill="#fafaf9"/>
+            <path d="M28,168 L28,36 Q28,28 36,28 L44,28 Q52,28 56,40 L80,116 Q86,132 100,132 Q114,132 120,116 L144,40 Q148,28 156,28 L164,28 Q172,28 172,36 L172,168" fill="none" stroke="#ea580c" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+            <text x="58" y="102" text-anchor="middle" font-family="Arial,sans-serif" font-size="36" font-weight="600" fill="#444">n</text>
+            <circle cx="100" cy="66" r="3.5" fill="#444"/>
+            <rect x="98" y="75" width="4" height="24" rx="2" fill="#444"/>
+            <text x="142" y="102" text-anchor="middle" font-family="Arial,sans-serif" font-size="36" font-weight="600" fill="#444">c</text>
+          </svg>
+          <span class="text" style="color:#333">NicMD 编辑器</span>
+        </div>
+        <div class="label">浅色标签</div>
+        <div class="size">16x16 实际尺寸</div>
+      </div>
+      <div class="preview-item">
+        <div class="browser-tab dark-mode">
+          <svg class="fav" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <rect width="200" height="200" rx="32" fill="#fafaf9"/>
+            <path d="M28,168 L28,36 Q28,28 36,28 L44,28 Q52,28 56,40 L80,116 Q86,132 100,132 Q114,132 120,116 L144,40 Q148,28 156,28 L164,28 Q172,28 172,36 L172,168" fill="none" stroke="#ea580c" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+            <text x="58" y="102" text-anchor="middle" font-family="Arial,sans-serif" font-size="36" font-weight="600" fill="#444">n</text>
+            <circle cx="100" cy="66" r="3.5" fill="#444"/>
+            <rect x="98" y="75" width="4" height="24" rx="2" fill="#444"/>
+            <text x="142" y="102" text-anchor="middle" font-family="Arial,sans-serif" font-size="36" font-weight="600" fill="#444">c</text>
+          </svg>
+          <span class="text">NicMD 编辑器</span>
+        </div>
+        <div class="label">深色标签</div>
+        <div class="size">16x16 实际尺寸</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 头像场景 -->
+  <div class="section">
+    <div class="section-title">
+      头像 Avatar
+      <span class="tag">128x128 · 200x200</span>
+    </div>
+    <div class="preview-row">
+      <div class="preview-item">
+        <div class="avatar-circle" style="width:128px;height:128px;">
+          <svg width="128" height="128" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <rect width="200" height="200" rx="32" fill="#fafaf9"/>
+            <path d="M28,168 L28,36 Q28,28 36,28 L44,28 Q52,28 56,40 L80,116 Q86,132 100,132 Q114,132 120,116 L144,40 Q148,28 156,28 L164,28 Q172,28 172,36 L172,168" fill="none" stroke="#ea580c" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+            <text x="58" y="102" text-anchor="middle" font-family="Arial,sans-serif" font-size="36" font-weight="600" fill="#444">n</text>
+            <circle cx="100" cy="66" r="3.5" fill="#444"/>
+            <rect x="98" y="75" width="4" height="24" rx="2" fill="#444"/>
+            <text x="142" y="102" text-anchor="middle" font-family="Arial,sans-serif" font-size="36" font-weight="600" fill="#444">c</text>
+          </svg>
+        </div>
+        <div class="label">GitHub/社交头像</div>
+        <div class="size">128x128</div>
+      </div>
+      <div class="preview-item">
+        <div class="avatar-circle" style="width:64px;height:64px;">
+          <svg width="64" height="64" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <rect width="200" height="200" rx="32" fill="#fafaf9"/>
+            <path d="M28,168 L28,36 Q28,28 36,28 L44,28 Q52,28 56,40 L80,116 Q86,132 100,132 Q114,132 120,116 L144,40 Q148,28 156,28 L164,28 Q172,28 172,36 L172,168" fill="none" stroke="#ea580c" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+            <text x="58" y="102" text-anchor="middle" font-family="Arial,sans-serif" font-size="38" font-weight="700" fill="#444">n</text>
+            <circle cx="100" cy="66" r="3.8" fill="#444"/>
+            <rect x="98" y="75" width="4" height="25" rx="2" fill="#444"/>
+            <text x="142" y="102" text-anchor="middle" font-family="Arial,sans-serif" font-size="38" font-weight="700" fill="#444">c</text>
+          </svg>
+        </div>
+        <div class="label">小头像</div>
+        <div class="size">64x64</div>
+      </div>
+      <div class="preview-item">
+        <div class="avatar-circle" style="width:32px;height:32px;">
+          <svg width="32" height="32" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <rect width="200" height="200" rx="32" fill="#fafaf9"/>
+            <path d="M28,168 L28,36 Q28,28 36,28 L44,28 Q52,28 56,40 L80,116 Q86,132 100,132 Q114,132 120,116 L144,40 Q148,28 156,28 L164,28 Q172,28 172,36 L172,168" fill="none" stroke="#ea580c" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+            <text x="58" y="102" text-anchor="middle" font-family="Arial,sans-serif" font-size="42" font-weight="800" fill="#444">n</text>
+            <circle cx="100" cy="66" r="4.2" fill="#444"/>
+            <rect x="97.8" y="76" width="4.4" height="28" rx="2.2" fill="#444"/>
+            <text x="142" y="102" text-anchor="middle" font-family="Arial,sans-serif" font-size="42" font-weight="800" fill="#444">c</text>
+          </svg>
+        </div>
+        <div class="label">评论头像</div>
+        <div class="size">32x32</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- App Icon 场景 -->
+  <div class="section">
+    <div class="section-title">
+      App Icon (圆角方块版)
+      <span class="tag">桌面图标 · 任务栏</span>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <div class="card-title">桌面图标 256x256</div>
+        <div class="card-desc">Windows/Mac 桌面</div>
+        <div class="app-icon-display" style="width:160px;height:160px;background:#fafaf9;border-radius:32px;">
+          <svg width="120" height="120" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <rect width="200" height="200" rx="32" fill="#fafaf9"/>
+            <path d="M28,168 L28,36 Q28,28 36,28 L44,28 Q52,28 56,40 L80,116 Q86,132 100,132 Q114,132 120,116 L144,40 Q148,28 156,28 L164,28 Q172,28 172,36 L172,168" fill="none" stroke="#ea580c" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <text x="58" y="102" text-anchor="middle" font-family="Arial,sans-serif" font-size="36.5" font-weight="600" fill="#444">n</text>
+            <circle cx="100" cy="66" r="3.6" fill="#444"/>
+            <rect x="98" y="75" width="4" height="24.5" rx="2" fill="#444"/>
+            <text x="142" y="102" text-anchor="middle" font-family="Arial,sans-serif" font-size="36.5" font-weight="600" fill="#444">c</text>
+          </svg>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">任务栏 64x64</div>
+        <div class="card-desc">Windows 任务栏 / macOS Dock</div>
+        <div class="app-icon-display" style="width:80px;height:80px;background:#fafaf9;border-radius:16px;">
+          <svg width="56" height="56" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <rect width="200" height="200" rx="32" fill="#fafaf9"/>
+            <path d="M28,168 L28,36 Q28,28 36,28 L44,28 Q52,28 56,40 L80,116 Q86,132 100,132 Q114,132 120,116 L144,40 Q148,28 156,28 L164,28 Q172,28 172,36 L172,168" fill="none" stroke="#ea580c" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <text x="58" y="102" text-anchor="middle" font-family="Arial,sans-serif" font-size="38" font-weight="700" fill="#444">n</text>
+            <circle cx="100" cy="66" r="3.8" fill="#444"/>
+            <rect x="98" y="75" width="4" height="25" rx="2" fill="#444"/>
+            <text x="142" y="102" text-anchor="middle" font-family="Arial,sans-serif" font-size="38" font-weight="700" fill="#444">c</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="text-align:center;margin-top:40px;color:#555;font-size:12px;">
+  NicMD Logo Preview | D vs G | Real usage scenarios
+</div>
+
+</body>
+</html>
