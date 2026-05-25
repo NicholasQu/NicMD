@@ -1,23 +1,30 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 
 const STORAGE_KEYS = {
-  apiKey: 'nicmd-llm-apikey',
-  apiBase: 'nicmd-llm-apibase',
-  model: 'nicmd-llm-model',
-  soul: 'nicmd-llm-soul',
-  skill: 'nicmd-llm-skill'
+  profiles: 'nicmd-llm-profiles',
+  activeProfile: 'nicmd-llm-active-profile'
 } as const
 
-const defaultSoul = `你是一个专业的公众号内容创作者，笔名"NicMD小助手"。
+export interface LlmProfile {
+  id: string
+  name: string
+  apiKey: string
+  apiBase: string
+  model: string
+  soul: string
+  skill: string
+}
+
+const defaultSoul = `你是一个专业的写作助手。
+
 风格特点：
 - 温暖亲切但不失专业
-- 善用emoji增加可读性
-- 段落短小精悍，适合手机阅读
+- 段落短小精悍
 - 善用加粗、列表突出重点
-- 开头有吸引力，结尾有总结和互动引导`
+- 开头有吸引力，结尾有总结`
 
 const defaultSkill = `你能做的：
-1. 根据话题撰写公众号推文
+1. 根据话题撰写文章
 2. 优化已有的Markdown内容
 3. 润色和改写文章
 4. 生成文章大纲
@@ -25,34 +32,116 @@ const defaultSkill = `你能做的：
 6. 总结长文章
 7. 解释技术概念`
 
-function loadSetting(key: string, fallback: string): string {
-  try {
-    return localStorage.getItem(key) || fallback
-  } catch {
-    return fallback
+function generateId(): string {
+  return Date.now().toString(36) + Math.random().toString(36).substring(2, 7)
+}
+
+function createDefaultProfile(): LlmProfile {
+  return {
+    id: generateId(),
+    name: '默认配置',
+    apiKey: '',
+    apiBase: 'https://api.openai.com/v1',
+    model: 'gpt-4o',
+    soul: defaultSoul,
+    skill: defaultSkill
   }
 }
 
-export function useLlmSettings() {
-  const [apiKey, setApiKey] = useState(() => loadSetting(STORAGE_KEYS.apiKey, ''))
-  const [apiBase, setApiBase] = useState(() => loadSetting(STORAGE_KEYS.apiBase, 'https://api.openai.com/v1'))
-  const [model, setModel] = useState(() => loadSetting(STORAGE_KEYS.model, 'gpt-4o'))
-  const [soul, setSoul] = useState(() => loadSetting(STORAGE_KEYS.soul, defaultSoul))
-  const [skill, setSkill] = useState(() => loadSetting(STORAGE_KEYS.skill, defaultSkill))
+function loadProfiles(): LlmProfile[] {
+  try {
+    const data = localStorage.getItem(STORAGE_KEYS.profiles)
+    if (data) {
+      const parsed = JSON.parse(data)
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed
+    }
+  } catch {}
+  return [createDefaultProfile()]
+}
 
-  const persistSetting = (key: string, value: string) => {
-    try { localStorage.setItem(key, value) } catch {}
+function saveProfiles(profiles: LlmProfile[]): void {
+  try { localStorage.setItem(STORAGE_KEYS.profiles, JSON.stringify(profiles)) } catch {}
+}
+
+function loadActiveProfileId(): string | null {
+  try {
+    return localStorage.getItem(STORAGE_KEYS.activeProfile)
+  } catch {
+    return null
   }
+}
 
-  const updateApiKey = (v: string) => { setApiKey(v); persistSetting(STORAGE_KEYS.apiKey, v) }
-  const updateApiBase = (v: string) => { setApiBase(v); persistSetting(STORAGE_KEYS.apiBase, v) }
-  const updateModel = (v: string) => { setModel(v); persistSetting(STORAGE_KEYS.model, v) }
-  const updateSoul = (v: string) => { setSoul(v); persistSetting(STORAGE_KEYS.soul, v) }
-  const updateSkill = (v: string) => { setSkill(v); persistSetting(STORAGE_KEYS.skill, v) }
+function saveActiveProfileId(id: string): void {
+  try { localStorage.setItem(STORAGE_KEYS.activeProfileId, id) } catch {}
+}
+
+export function useLlmSettings() {
+  const [profiles, setProfiles] = useState<LlmProfile[]>(() => loadProfiles())
+  const [activeProfileId, setActiveProfileId] = useState<string>(() => {
+    const saved = loadActiveProfileId()
+    const loaded = loadProfiles()
+    if (saved && loaded.find(p => p.id === saved)) return saved
+    return loaded[0]?.id || ''
+  })
+
+  const activeProfile = profiles.find(p => p.id === activeProfileId) || profiles[0]
+
+  const updateActiveProfile = useCallback((updates: Partial<LlmProfile>) => {
+    setProfiles(prev => {
+      const next = prev.map(p => p.id === activeProfileId ? { ...p, ...updates } : p)
+      saveProfiles(next)
+      return next
+    })
+  }, [activeProfileId])
+
+  const switchProfile = useCallback((id: string) => {
+    setActiveProfileId(id)
+    saveActiveProfileId(id)
+  }, [])
+
+  const addProfile = useCallback(() => {
+    const newProfile: LlmProfile = {
+      id: generateId(),
+      name: `配置 ${profiles.length + 1}`,
+      apiKey: '',
+      apiBase: 'https://api.openai.com/v1',
+      model: 'gpt-4o',
+      soul: defaultSoul,
+      skill: defaultSkill
+    }
+    setProfiles(prev => {
+      const next = [...prev, newProfile]
+      saveProfiles(next)
+      return next
+    })
+    setActiveProfileId(newProfile.id)
+    saveActiveProfileId(newProfile.id)
+  }, [profiles.length])
+
+  const removeProfile = useCallback((id: string) => {
+    setProfiles(prev => {
+      if (prev.length <= 1) return prev
+      const next = prev.filter(p => p.id !== id)
+      saveProfiles(next)
+      return next
+    })
+    if (activeProfileId === id) {
+      const remaining = profiles.filter(p => p.id !== id)
+      if (remaining.length > 0) {
+        setActiveProfileId(remaining[0].id)
+        saveActiveProfileId(remaining[0].id)
+      }
+    }
+  }, [activeProfileId, profiles])
 
   return {
-    apiKey, apiBase, model, soul, skill,
-    updateApiKey, updateApiBase, updateModel, updateSoul, updateSkill
+    profiles,
+    activeProfile,
+    activeProfileId,
+    updateActiveProfile,
+    switchProfile,
+    addProfile,
+    removeProfile
   }
 }
 
