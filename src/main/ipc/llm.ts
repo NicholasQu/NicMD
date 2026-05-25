@@ -1,6 +1,11 @@
 import { ipcMain, BrowserWindow } from 'electron'
 import OpenAI from 'openai'
 
+interface ChatMessage {
+  role: 'system' | 'user' | 'assistant'
+  content: string
+}
+
 export function registerLlmIPC(getMainWindow: () => BrowserWindow | null): void {
   ipcMain.handle('llm:generate', async (_event, params: {
     prompt: string
@@ -9,24 +14,34 @@ export function registerLlmIPC(getMainWindow: () => BrowserWindow | null): void 
     model: string
     soul?: string
     skill?: string
+    history?: ChatMessage[]
   }) => {
     try {
       const openai = new OpenAI({
         apiKey: params.apiKey,
         baseURL: params.apiBase || 'https://api.openai.com/v1'
       })
-      const systemPrompt = [
-        params.soul ? `## 你的角色\n${params.soul}` : '',
-        params.skill ? `## 你的能力\n${params.skill}` : '',
-        '请用Markdown格式输出，保持专业但亲切的语调。'
-      ].filter(Boolean).join('\n\n')
+
+      const systemParts: string[] = []
+      if (params.soul) systemParts.push(`## 你的角色\n${params.soul}`)
+      if (params.skill) systemParts.push(`## 你的能力\n${params.skill}`)
+      systemParts.push('请用Markdown格式输出。')
+      const systemPrompt = systemParts.join('\n\n')
+
+      const messages: ChatMessage[] = [
+        { role: 'system', content: systemPrompt }
+      ]
+
+      if (params.history && params.history.length > 0) {
+        const trimmed = trimHistory(params.history, 4000)
+        messages.push(...trimmed)
+      }
+
+      messages.push({ role: 'user', content: params.prompt })
 
       const stream = await openai.chat.completions.create({
         model: params.model || 'gpt-4o',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: params.prompt }
-        ],
+        messages,
         stream: true
       })
 
@@ -48,4 +63,16 @@ export function registerLlmIPC(getMainWindow: () => BrowserWindow | null): void 
       return { success: false, error: e.message }
     }
   })
+}
+
+function trimHistory(history: ChatMessage[], maxChars: number): ChatMessage[] {
+  let totalChars = 0
+  const result: ChatMessage[] = []
+  for (let i = history.length - 1; i >= 0; i--) {
+    const msg = history[i]
+    totalChars += msg.content.length
+    if (totalChars > maxChars) break
+    result.unshift(msg)
+  }
+  return result
 }

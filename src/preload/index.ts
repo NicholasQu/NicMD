@@ -45,6 +45,7 @@ const api = {
     model: string
     soul?: string
     skill?: string
+    history?: { role: 'system' | 'user' | 'assistant'; content: string }[]
   }): Promise<{ success: boolean; content?: string; error?: string }> =>
     ipcRenderer.invoke('llm:generate', params),
   onLlmStream: (callback: (data: { delta: string; done: boolean; full?: string }) => void) => {
