@@ -2,7 +2,7 @@
 
 # 𝕸ⁿ(𝒊𝒄)
 
-**NicMD — A quiet Markdown editor for focused writing**
+**NicMD — 沉静写作，专注表达**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-orange.svg)](https://opensource.org/licenses/MIT)
 [![Platform: Windows](https://img.shields.io/badge/Platform-Windows-blue.svg)]()
@@ -12,82 +12,82 @@
 
 ---
 
-NicMD is a Typora-inspired Markdown editor built with Electron + React + TypeScript. It's designed for writers who want a clean, distraction-free environment — while keeping the developer-friendly features like file tree, CLI, export, and AI assistance.
+NicMD 是一款受 Typora 启发的 Markdown 编辑器，基于 Electron + React + TypeScript 构建。为写作者打造干净、无干扰的写作环境，同时保留文件树、命令行、导出、AI 辅助等开发者友好的功能。
 
-## Features
+## 功能特性
 
-### ✍️ Markdown Editing
-- **Monaco Editor** — Local-loaded code editor (no CDN), syntax highlighting, bracket matching, font ligatures
-- **Real-time Preview** — GitHub Flavored Markdown rendering with tables, task lists, and code blocks
-- **Scroll Sync** — Editor and preview stay in sync as you scroll
-- **Rich Text AI Input** — contentEditable rich input with file reference chips (drag files into AI conversations)
-- **Chinese Typography** — Smart bold rendering for Chinese quotes `**"三位一体"**` via rehype-raw
+### ✍️ Markdown 编辑
+- **Monaco 编辑器** — 本地加载（无需 CDN），语法高亮、括号匹配、字体连字
+- **实时预览** — GitHub 风格 Markdown 渲染，支持表格、任务列表、代码块
+- **滚动同步** — 编辑器和预览区域联动滚动
+- **富文本 AI 输入** — contentEditable 富文本输入框，支持文件引用标签（拖拽文件到 AI 对话）
+- **中文排版优化** — 智能识别中文引号加粗 `**"三位一体"**`（rehype-raw）
 
-### 📁 Workspace
-- **File Tree** — Browse and manage files in any folder with hover actions (open in folder, copy path, AI reference)
-- **Recent Files** — Quick access to recently opened documents with promote-to-top behavior
-- **Outline** — Jump to any heading in your document
-- **Auto Save** — Changes are saved automatically
-- **Open in Folder** — Right-click any file to reveal it in Explorer
+### 📁 工作区
+- **文件树** — 浏览管理任意文件夹，悬停显示操作按钮（打开所在目录、复制路径、引用到 AI）
+- **最近文件** — 快速访问最近打开的文档，新打开的文件自动置顶
+- **大纲导航** — 跳转到文档中的任意标题
+- **自动保存** — 修改自动保存，无需手动操作
+- **打开所在目录** — 右键任意文件，在资源管理器中显示
 
-### 🎨 Preview Enhancements
-- **Mermaid Diagrams** — Lazy-loaded rendering with custom orange theme, zoom & drag support
-- **Tree Structure Rendering** — Auto-detect `├──` `└──` tree characters and render with folder/file icons
-- **Code Blocks** — Unified warm orange theme for all code blocks with language labels
-- **WeChat Preview** — Preview and copy HTML formatted for WeChat Official Accounts (with Mermaid SVG support)
+### 🎨 预览增强
+- **Mermaid 图表** — 懒加载渲染，自定义橙色主题，支持缩放和拖拽
+- **树形结构渲染** — 自动检测 `├──` `└──` 等树形字符，渲染为带文件夹/文件图标的 HTML
+- **代码块** — 统一暖橙色主题，支持语言标签显示
+- **微信预览** — 预览并复制适配微信公众号的 HTML 格式（支持 Mermaid SVG）
 
-### 📤 Export & Publish
-- **PDF Export** — Convert Markdown to beautifully formatted PDF with consistent orange theme
-  - Save dialog for choosing output location
-  - Toast notification with clickable file path
-  - Auto-add to Recent files list
-- **PDF Preview** — Clean full-content view without sidebar thumbnails
-- **DOCX Import** — Convert Word documents to Markdown
+### 📤 导出与发布
+- **PDF 导出** — 将 Markdown 转换为统一橙色主题的精美 PDF
+  - 弹窗选择保存位置
+  - Toast 气泡通知，点击可打开 PDF
+  - 自动添加到最近文件列表
+- **PDF 预览** — 纯净内容视图，无侧边栏缩略图干扰
+- **DOCX 导入** — 将 Word 文档转换为 Markdown
 
-### 🤖 AI Assistant
-- **OpenAI Compatible** — Works with any OpenAI-compatible API (OpenAI, DeepSeek, Qwen, etc.)
-- **Multi-Gateway** — Configure multiple API gateways and switch between them
-- **Custom Agent Personas** — Define Soul (personality) and Skill (capabilities) for different writing scenarios
-- **File References** — Drag files from sidebar into AI input as context chips
-- **Selection Context** — Select text in editor and add it as context to AI conversations
-- **Web Search** 🆕 — AI can search the internet in real-time
-  - **Baidu Search** — General web search, zero cost
-  - **WeChat Articles** — Search WeChat Official Account articles via Sogou
-  - **Function Calling** — LLM automatically decides when to search based on your question
-  - **Search Status** — Real-time display of search progress ("正在搜索: ...")
-  - **Toggle Control** — Enable/disable web search with one click (Globe button)
+### 🤖 AI 助手
+- **OpenAI 兼容** — 支持所有 OpenAI 兼容 API（OpenAI、DeepSeek、通义千问等）
+- **多网关配置** — 配置多个 API 网关，一键切换
+- **自定义 Agent 人格** — 定义 Soul（角色设定）和 Skill（能力设定），适配不同写作场景
+- **文件引用** — 从侧边栏拖拽文件到 AI 输入框，自动作为上下文
+- **选区上下文** — 在编辑器中选中文本，一键添加到 AI 对话
+- **联网搜索** 🆕 — AI 可以实时搜索互联网
+  - **百度搜索** — 通用网页搜索，零成本
+  - **微信文章** — 通过搜狗搜索微信公众号文章
+  - **Function Calling** — LLM 根据你的问题自动决定是否搜索
+  - **搜索状态** — 实时显示搜索进度（"正在搜索: ..."）
+  - **一键开关** — Globe 按钮随时启用/禁用联网搜索
 
-### 🎨 Design
-- **Light & Dark Themes** — Warm, carefully crafted color schemes with CSS variables
-- **Brand Identity** — Mathematical formula-inspired visual language `𝕸ⁿ(𝒊𝒄)`
-- **Splash Animation** — Smooth startup experience
-- **Unified Color System** — Orange accent color throughout (editor, preview, PDF, WeChat)
+### 🎨 设计
+- **明暗主题** — 精心设计的暖色调配色方案
+- **品牌标识** — 数学公式启发的视觉语言 `𝕸ⁿ(𝒊𝒄)`
+- **启动动画** — 流畅的开屏体验
+- **统一色彩体系** — 橙色强调色贯穿始终（编辑器、预览、PDF、微信）
 
-### 💻 CLI Support
+### 💻 命令行支持
 ```bash
-NicMD.exe document.md                    # Open file directly
-NicMD.exe --export-pdf input.md          # Export to PDF
-NicMD.exe --export-pdf input.md out.pdf  # Export with custom path
-NicMD.exe --convert-docx input.docx      # Convert DOCX to Markdown
+NicMD.exe document.md                    # 直接打开文件
+NicMD.exe --export-pdf input.md          # 导出 PDF
+NicMD.exe --export-pdf input.md out.pdf  # 指定路径导出
+NicMD.exe --convert-docx input.docx      # DOCX 转 Markdown
 ```
 
-## Screenshots
+## 下载
 
-> Add your screenshots to `docs/screenshots/` and update the paths.
+前往 [Releases](https://github.com/NicholasQu/NicMD/releases) 下载最新版本。
 
-## Download
+提供两种安装包：
+- **安装版** (`NicMD-x.x.x-x64.exe`) — NSIS 安装程序，支持覆盖安装
+- **便携版** (`NicMD-Portable-x.x.x-x64.exe`) — 绿色免安装，双击即用
 
-See [Releases](https://github.com/NicholasQu/NicMD/releases) for the latest Windows installer.
+## 开发
 
-## Development
-
-### Prerequisites
+### 环境要求
 
 - [Node.js](https://nodejs.org/) >= 18
 - npm >= 9
 - Windows
 
-### Setup
+### 启动开发
 
 ```bash
 git clone https://github.com/NicholasQu/NicMD.git
@@ -96,90 +96,97 @@ npm install
 npm run dev
 ```
 
-### Build
+### 构建
 
 ```bash
 npm run build
 ```
 
-### Package
+### 打包
 
 ```bash
-npm run dist:dated
+npm run dist:win        # 生成安装版 + 便携版
+npm run dist:dated      # 生成带时间戳的构建目录
 ```
 
-This generates a timestamped build directory (`dist-MMDD-NN`) to avoid file lock issues on Windows.
-
-## Project Structure
+## 项目结构
 
 ```
 app/
 ├── src/
-│   ├── main/                  Electron main process
-│   │   ├── index.ts           App entry point
-│   │   ├── window-manager.ts  Window lifecycle & splash
-│   │   ├── pdf-builder.ts     PDF HTML generation (orange theme)
-│   │   ├── cli.ts             Command-line interface
-│   │   ├── error-logger.ts    Error logging & issue reporting
-│   │   └── ipc/               IPC handlers
-│   │       ├── file.ts        File operations & shell.showItemInFolder
-│   │       ├── export.ts      PDF export & DOCX conversion
-│   │       ├── llm.ts         AI assistant with Function Calling
-│   │       ├── web-search.ts  Baidu & Sogou WeChat search
-│   │       ├── settings.ts    Persistent settings
-│   │       └── window.ts      Window controls & theme
-│   ├── preload/               Secure bridge API
-│   ├── renderer/              React frontend
+│   ├── main/                  Electron 主进程
+│   │   ├── index.ts           应用入口
+│   │   ├── window-manager.ts  窗口生命周期 & 启动动画
+│   │   ├── pdf-builder.ts     PDF HTML 生成（橙色主题）
+│   │   ├── cli.ts             命令行接口
+│   │   ├── error-logger.ts    错误日志 & Issue 报告
+│   │   └── ipc/               IPC 处理器
+│   │       ├── file.ts        文件操作 & shell.showItemInFolder
+│   │       ├── export.ts      PDF 导出 & DOCX 转换
+│   │       ├── llm.ts         AI 助手（支持 Function Calling）
+│   │       ├── web-search.ts  百度 & 搜狗微信搜索
+│   │       ├── settings.ts    持久化设置
+│   │       └── window.ts      窗口控制 & 主题
+│   ├── preload/               安全桥接 API
+│   ├── renderer/              React 前端
 │   │   ├── components/
 │   │   │   ├── layout/        Toolbar, Sidebar, AiPanel, RichInput
-│   │   │   ├── editor/        Monaco Editor (local load)
+│   │   │   ├── editor/        Monaco Editor（本地加载）
 │   │   │   ├── preview/       MarkdownPreview, MermaidBlock, TreeView
-│   │   │   ├── file-tree/     FileNode with hover actions
-│   │   │   └── wechat/        WeChat preview with Mermaid SVG
+│   │   │   ├── file-tree/     FileNode（悬停操作按钮）
+│   │   │   └── wechat/        微信预览（含 Mermaid SVG）
 │   │   ├── hooks/             useLlmSettings, useFileOpener
-│   │   ├── stores/            Zustand state (file-store, ui-store, editor-store)
-│   │   └── styles/            CSS & theming
-│   └── shared/                Shared types, utils, constants
-├── public/                    Static assets & icons
-├── scripts/                   Build & packaging scripts
-└── electron.vite.config.ts    Build configuration
+│   │   ├── stores/            Zustand 状态管理
+│   │   └── styles/            CSS & 主题
+│   └── shared/                共享类型、工具、常量
+├── public/                    静态资源 & 图标
+├── scripts/                   构建 & 打包脚本
+└── electron.vite.config.ts    构建配置
 ```
 
-## Tech Stack
+## 技术栈
 
-| Layer | Technology |
-|-------|-----------|
-| Desktop | Electron 28 |
-| Build | Electron Vite + Electron Builder (NSIS) |
-| Frontend | React 18 + TypeScript |
-| Styling | Tailwind CSS + CSS Variables (darkMode: class) |
-| State | Zustand |
-| Editor | Monaco Editor (local, offline-ready) |
-| Preview | react-markdown + remark-gfm + rehype-raw |
-| Diagrams | Mermaid (lazy-loaded, custom theme) |
-| PDF | marked + Electron printToPDF |
-| DOCX | mammoth |
-| AI | OpenAI SDK (Function Calling + Tool Use) |
-| Search | Electron net.request (Baidu + Sogou) |
-| Icons | Lucide React |
+| 层级 | 技术 |
+|------|------|
+| 桌面框架 | Electron 28 |
+| 构建工具 | Electron Vite + Electron Builder (NSIS) |
+| 前端框架 | React 18 + TypeScript |
+| 样式方案 | Tailwind CSS + CSS Variables (darkMode: class) |
+| 状态管理 | Zustand |
+| 编辑器 | Monaco Editor（本地加载，离线可用） |
+| 预览渲染 | react-markdown + remark-gfm + rehype-raw |
+| 图表支持 | Mermaid（懒加载，自定义主题） |
+| PDF 生成 | marked + Electron printToPDF |
+| 文档转换 | mammoth |
+| AI 能力 | OpenAI SDK（Function Calling + Tool Use） |
+| 搜索引擎 | Electron net.request（百度 + 搜狗） |
+| 图标库 | Lucide React |
 
-## Error Reporting
+## 错误报告
 
-NicMD automatically logs errors to:
+NicMD 自动记录错误日志到：
 
 ```
 %APPDATA%/nicmd/logs/
 ```
 
-To report a bug:
-1. Open [GitHub Issues](https://github.com/NicholasQu/NicMD/issues/new?template=bug_report.yml)
-2. Include the log contents from the directory above
-3. Or press `Ctrl+Shift+I` in NicMD to open DevTools and check the Console
+报告 Bug：
+1. 前往 [GitHub Issues](https://github.com/NicholasQu/NicMD/issues/new?template=bug_report.yml)
+2. 附上上述目录中的日志内容
+3. 或在 NicMD 中按 `Ctrl+Shift+I` 打开开发者工具查看控制台
 
-## Contributing
+## 参与贡献
 
-Contributions are welcome! Please read [CONTRIBUTING.md](./CONTRIBUTING.md) for details.
+欢迎贡献代码！请阅读 [CONTRIBUTING.md](./CONTRIBUTING.md) 了解详情。
 
-## License
+## 开源许可
 
 [MIT](./LICENSE) © NicholasQu
+
+---
+
+<div align="center">
+
+*NicMD — 沉静写作，专注表达*
+
+</div>

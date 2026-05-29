@@ -62,7 +62,7 @@
     "appId": "com.nicmd.editor",
     "productName": "NicMD",
     "directories": {
-      "output": "dist",
+      "output": "dist-build",
       "buildResources": "public"
     },
     "files": [
@@ -80,8 +80,17 @@
           "arch": [
             "x64"
           ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
         }
       ]
+    },
+    "portable": {
+      "artifactName": "NicMD-Portable-${version}-${arch}.${ext}"
     },
     "nsis": {
       "oneClick": false,
