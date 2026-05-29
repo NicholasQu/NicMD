@@ -9,7 +9,7 @@ export function useFileOpener() {
   const activeTab = useUIStore((s) => s.activeTab)
   const setActiveTab = useUIStore((s) => s.setActiveTab)
 
-  const openFile = async (path: string) => {
+  const openFile = async (path: string, promote = false) => {
     const store = useFileStore.getState()
     const ext = path.split('.').pop()?.toLowerCase() || ''
 
@@ -17,7 +17,7 @@ export function useFileOpener() {
       store.setCurrentFile(path)
       store.setCurrentContent('')
       store.setIsModified(false)
-      store.addRecentFile(path)
+      store.addRecentFile(path, promote)
       return
     }
 
@@ -26,7 +26,7 @@ export function useFileOpener() {
       store.setCurrentFile(path)
       store.setCurrentContent(content)
       store.setIsModified(false)
-      store.addRecentFile(path)
+      store.addRecentFile(path, promote)
     } catch (e) {
       console.error('[useFileOpener] Failed to open file:', e)
     }
@@ -37,8 +37,7 @@ export function useFileOpener() {
     setCurrentFile(data.path)
     setCurrentContent(data.content)
     setIsModified(false)
-    store.addRecentFile(data.path)
-    if (activeTab === 'preview') setActiveTab('split')
+    store.addRecentFile(data.path, true)
   }
 
   return { openFile, openFileFromEvent }

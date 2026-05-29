@@ -8,14 +8,6 @@ import { buildPdfHtml } from '../pdf-builder'
 export function registerExportIPC(getMainWindow: () => BrowserWindow | null): void {
   ipcMain.handle('export:pdf', async (_event, data: { path: string; content: string }) => {
     const { path: pdfPath, content } = data
-    let finalPath = pdfPath
-    let counter = 1
-    while (existsSync(finalPath)) {
-      const dir = dirname(pdfPath)
-      const name = basename(pdfPath, '.pdf')
-      finalPath = join(dir, `${name}-${counter}.pdf`)
-      counter++
-    }
     try {
       const html = buildPdfHtml(content)
       const os = require('os')
@@ -41,14 +33,14 @@ export function registerExportIPC(getMainWindow: () => BrowserWindow | null): vo
       const pdfData = await pdfWin.webContents.printToPDF({
         pageSize: 'A4',
         printBackground: true,
-        margins: { top: 48, bottom: 48, left: 48, right: 48 },
+        margins: { top: 0.5, bottom: 0.5, left: 0.5, right: 0.5 },
         scaleFactor: 100
       })
 
       pdfWin.close()
-      await writeFile(finalPath, pdfData)
+      await writeFile(pdfPath, pdfData)
       try { await unlink(tempPath) } catch {}
-      return { success: true, path: finalPath }
+      return { success: true, path: pdfPath }
     } catch (e: any) {
       console.error('[export:pdf] Failed:', e.message)
       return { success: false, error: e.message }

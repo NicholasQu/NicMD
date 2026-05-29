@@ -10,18 +10,24 @@ export function PreviewPanel() {
   const currentFile = useFileStore((s) => s.currentFile)
   const fileType = useFileStore((s) => s.fileType)
   const containerRef = useRef<HTMLDivElement>(null)
-  const [pdfDataUrl, setPdfDataUrl] = useState<string | null>(null)
+  const [pdfBlobUrl, setPdfBlobUrl] = useState<string | null>(null)
 
   useEffect(() => {
     if (fileType !== 'pdf' || !currentFile) {
-      setPdfDataUrl(null)
+      setPdfBlobUrl(null)
       return
     }
     window.api.file.readBuffer(currentFile).then((base64) => {
       if (base64) {
-        setPdfDataUrl(`data:application/pdf;base64,${base64}`)
+        const binary = atob(base64)
+        const bytes = new Uint8Array(binary.length)
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i)
+        const blob = new Blob([bytes], { type: 'application/pdf' })
+        const url = URL.createObjectURL(blob)
+        setPdfBlobUrl(url)
+        return () => URL.revokeObjectURL(url)
       } else {
-        setPdfDataUrl(null)
+        setPdfBlobUrl(null)
       }
     })
   }, [fileType, currentFile])
@@ -66,9 +72,9 @@ export function PreviewPanel() {
         className="h-full"
         style={{ background: 'var(--bg-primary)' }}
       >
-        {pdfDataUrl ? (
+        {pdfBlobUrl ? (
           <embed
-            src={pdfDataUrl}
+            src={`${pdfBlobUrl}#toolbar=0&navpanes=0&scrollbar=1`}
             type="application/pdf"
             width="100%"
             height="100%"

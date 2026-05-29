@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 @layer base {
   :root {
     --bg-primary: #ffffff;
@@ -146,6 +151,117 @@
 
   .slide-in {
     animation: slideIn 0.3s ease-out;
+  }
+
+  .ai-chat-markdown p {
+    margin: 0.4em 0;
+  }
+
+  .ai-chat-markdown p:first-child {
+    margin-top: 0;
+  }
+
+  .ai-chat-markdown p:last-child {
+    margin-bottom: 0;
+  }
+
+  .ai-chat-markdown h1, .ai-chat-markdown h2, .ai-chat-markdown h3 {
+    font-weight: 600;
+    margin: 0.8em 0 0.3em;
+    color: var(--text-primary);
+  }
+
+  .ai-chat-markdown h1 { font-size: 1.2em; }
+  .ai-chat-markdown h2 { font-size: 1.1em; }
+  .ai-chat-markdown h3 { font-size: 1em; }
+
+  .ai-chat-markdown ul, .ai-chat-markdown ol {
+    padding-left: 1.5em;
+    margin: 0.4em 0;
+  }
+
+  .ai-chat-markdown li {
+    margin: 0.15em 0;
+  }
+
+  .ai-chat-markdown code {
+    background: var(--code-bg);
+    border: 1px solid var(--code-border);
+    border-radius: 3px;
+    padding: 1px 4px;
+    font-size: 0.88em;
+    font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+  }
+
+  .ai-chat-markdown pre {
+    margin: 0.6em 0;
+    border-radius: 6px;
+    overflow-x: auto;
+    background: var(--code-bg);
+    border: 1px solid var(--code-border);
+    padding: 10px 12px;
+  }
+
+  .ai-chat-markdown pre code {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 0.85em;
+  }
+
+  .ai-chat-markdown blockquote {
+    margin: 0.5em 0;
+    padding: 4px 12px;
+    border-left: 3px solid var(--accent-color);
+    color: var(--text-secondary);
+  }
+
+  .ai-chat-markdown strong {
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .ai-chat-markdown a {
+    color: var(--accent-color);
+    text-decoration: underline;
+  }
+
+  .ai-chat-markdown table {
+    border-collapse: collapse;
+    margin: 0.5em 0;
+    font-size: 0.9em;
+  }
+
+  .ai-chat-markdown th, .ai-chat-markdown td {
+    border: 1px solid var(--border-color);
+    padding: 4px 8px;
+  }
+
+  .ai-chat-markdown th {
+    background: var(--bg-tertiary);
+    font-weight: 600;
+  }
+
+  .ai-ref-chip {
+    display: inline-block;
+    padding: 1px 8px;
+    margin: 0 2px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.5;
+    vertical-align: baseline;
+    background: var(--accent-light);
+    color: var(--accent-color);
+    border: 1px solid var(--accent-color);
+    user-select: none;
+    cursor: default;
+  }
+
+  [data-placeholder]:empty::before {
+    content: attr(data-placeholder);
+    color: var(--text-tertiary);
+    pointer-events: none;
   }
 }
 

@@ -99,6 +99,17 @@
   opacity: 0.5;
 }
 
+.markdown-preview .mermaid-container {
+  display: flex;
+  justify-content: center;
+  overflow-x: auto;
+}
+
+.markdown-preview .mermaid-container svg {
+  max-width: 100%;
+  height: auto;
+}
+
 .markdown-preview code {
   background: var(--code-bg);
   border: 1px solid var(--code-border);

@@ -38,7 +38,8 @@ export default defineConfig({
         input: {
           index: resolve(__dirname, 'src/renderer/index.html')
         }
-      }
+      },
+      target: 'esnext'
     },
     plugins: [react()]
   }

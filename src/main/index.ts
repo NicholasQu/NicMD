@@ -9,6 +9,8 @@ import { registerFileIPC } from './ipc/file'
 import { registerExportIPC } from './ipc/export'
 import { registerLlmIPC } from './ipc/llm'
 import { registerWindowIPC } from './ipc/window'
+import { registerSettingsIPC } from './ipc/settings'
+import { registerWebSearchIPC } from './ipc/web-search'
 import { handleCli } from './cli'
 import { setupErrorHandling, collectLogsForReport, generateIssueUrl, createReport, writeErrorLog } from './error-logger'
 
@@ -96,6 +98,8 @@ if (!gotTheLock) {
     registerExportIPC(getMainWindow)
     registerLlmIPC(getMainWindow)
     registerWindowIPC(getMainWindow)
+    registerSettingsIPC()
+    registerWebSearchIPC(getMainWindow)
     registerAppIPC()
 
     createMainWindow(openFile)

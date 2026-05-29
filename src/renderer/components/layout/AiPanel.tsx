@@ -1,7 +1,11 @@
-import { useState, useEffect, useRef } from 'react'
-import { Sparkles, Send, Loader, X, Settings, Plus, Trash2, Check, Zap, Bot, Server, RotateCcw } from 'lucide-react'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { Sparkles, Send, Loader, X, Settings, Plus, Trash2, Check, Zap, Bot, Server, RotateCcw, Search, Globe } from 'lucide-react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import { useLlmSettings } from '../../hooks/useLlmSettings'
 import type { LlmGateway, AgentPersona } from '../../hooks/useLlmSettings'
+import { RichInput } from './RichInput'
+import type { RichInputHandle, RefTag } from './RichInput'
 
 interface AiContextTag {
   id: string
@@ -29,17 +33,19 @@ export function AiPanel({ visible, onClose }: AiPanelProps) {
     updateAgent, switchAgent, addAgent, removeAgent
   } = useLlmSettings()
 
-  const [prompt, setPrompt] = useState('')
-  const [contexts, setContexts] = useState<AiContextTag[]>([])
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([])
   const [output, setOutput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [webSearchEnabled, setWebSearchEnabled] = useState(true)
+  const [searchStatus, setSearchStatus] = useState<string | null>(null)
   const [showSettings, setShowSettings] = useState(false)
   const [settingsTab, setSettingsTab] = useState<SettingsTab>('gateway')
   const [savedAt, setSavedAt] = useState<string | null>(null)
   const [testing, setTesting] = useState(false)
   const [testResult, setTestResult] = useState<string | null>(null)
+  const [hasContent, setHasContent] = useState(false)
   const outputRef = useRef<HTMLDivElement>(null)
+  const richInputRef = useRef<RichInputHandle>(null)
 
   useEffect(() => {
     if (outputRef.current) {
@@ -49,24 +55,40 @@ export function AiPanel({ visible, onClose }: AiPanelProps) {
 
   useEffect(() => {
     const handleAddContext = (event: Event) => {
-      const detail = (event as CustomEvent<AiContextTag>).detail
+      const detail = (event as CustomEvent<RefTag>).detail
       if (!detail?.content) return
-      setContexts((prev) => [detail, ...prev.filter((item) => item.id !== detail.id)].slice(0, 6))
+      richInputRef.current?.insertRef(detail)
+      setHasContent(true)
     }
     window.addEventListener('nicmd:add-ai-context', handleAddContext)
     return () => window.removeEventListener('nicmd:add-ai-context', handleAddContext)
   }, [])
 
   useEffect(() => {
-    const cleanup = window.api.onLlmStream((data) => {
+    const cleanup = window.api.onLlmStream((data: any) => {
       if (data.done) {
         setLoading(false)
+        setSearchStatus(null)
         if (data.full) {
           setOutput(data.full)
           setChatHistory(prev => [...prev, { role: 'assistant', content: data.full! }])
         }
       } else {
-        setOutput((prev) => prev + data.delta)
+        if (data.toolStatus) {
+          if (data.toolStatus.status === 'searching') {
+            try {
+              const args = JSON.parse(data.toolStatus.args || '{}')
+              setSearchStatus(`正在搜索: ${args.query || ''} (${args.engine === 'wechat' ? '微信公众号' : '百度'})`)
+            } catch {
+              setSearchStatus('正在搜索...')
+            }
+          } else {
+            setSearchStatus('搜索完成，整理中...')
+          }
+        }
+        if (data.delta) {
+          setOutput((prev) => prev + data.delta)
+        }
       }
     })
     return cleanup
@@ -88,18 +110,30 @@ export function AiPanel({ visible, onClose }: AiPanelProps) {
     notifySaved()
   }
 
-  const handleGenerate = async () => {
-    if (!prompt.trim() || !activeGateway.apiKey.trim()) return
+  const expandRefs = useCallback((html: string, refs: Map<string, RefTag>): string => {
+    return html.replace(/<span[^>]*data-ref-id="([^"]*)"[^>]*>([^<]*)<\/span>/g, (_match, id) => {
+      const ref = refs.get(id)
+      if (!ref) return ''
+      return `\n<ref label="${ref.label}">\n${ref.content}\n</ref>\n`
+    }).replace(/&nbsp;/g, ' ').replace(/<br\s*\/?>/g, '\n').replace(/<[^>]+>/g, '')
+  }, [])
+
+  const handleSubmit = useCallback(() => {
+    const input = richInputRef.current
+    if (!input) return
+    const plainText = input.getPlainText().trim()
+    if (!plainText || !activeGateway.apiKey.trim()) return
+
     setLoading(true)
     setOutput('')
 
-    const userMsg = prompt.trim()
-    setChatHistory(prev => [...prev, { role: 'user', content: userMsg }])
-    setPrompt('')
+    const refs = input.getRefs()
+    const html = input.getText()
+    const expandedMsg = expandRefs(html, refs)
 
-    const contextText = contexts.length > 0
-      ? `\n\n相关选区上下文：\n${contexts.map((item) => `【${item.label}】\n${item.content}`).join('\n\n')}`
-      : ''
+    setChatHistory(prev => [...prev, { role: 'user', content: plainText }])
+    input.clear()
+    setHasContent(false)
 
     const historyForApi = chatHistory.slice(-10).map(m => ({
       role: m.role as 'user' | 'assistant',
@@ -107,20 +141,21 @@ export function AiPanel({ visible, onClose }: AiPanelProps) {
     }))
 
     try {
-      await window.api.llmGenerate({
-        prompt: `${userMsg}${contextText}`,
+      window.api.llmGenerate({
+        prompt: expandedMsg,
         apiKey: activeGateway.apiKey,
         apiBase: activeGateway.apiBase,
         model: activeGateway.model,
         soul: activeAgent.soul || undefined,
         skill: activeAgent.skill || undefined,
-        history: historyForApi
+        history: historyForApi,
+        enableTools: webSearchEnabled
       })
     } catch {
       setLoading(false)
       setOutput('> 生成失败，请检查API Key和网络连接')
     }
-  }
+  }, [activeGateway, activeAgent, chatHistory, expandRefs])
 
   const handleTest = async () => {
     if (!activeGateway.apiKey.trim()) {
@@ -154,18 +189,6 @@ export function AiPanel({ visible, onClose }: AiPanelProps) {
   const handleClearChat = () => {
     setChatHistory([])
     setOutput('')
-    setContexts([])
-  }
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      handleGenerate()
-    }
-  }
-
-  const removeContext = (id: string) => {
-    setContexts((prev) => prev.filter((item) => item.id !== id))
   }
 
   const inputStyle = {
@@ -388,7 +411,7 @@ export function AiPanel({ visible, onClose }: AiPanelProps) {
           ) : (
             <div className="space-y-3">
               {chatHistory.map((msg, i) => (
-                <div key={i} className={`text-sm leading-relaxed whitespace-pre-wrap ${msg.role === 'user' ? 'pl-3 border-l-2' : ''}`}
+                <div key={i} className={`${msg.role === 'user' ? 'pl-3 border-l-2' : ''}`}
                   style={{
                     color: msg.role === 'user' ? 'var(--text-secondary)' : 'var(--text-primary)',
                     borderColor: msg.role === 'user' ? 'var(--accent-color)' : 'transparent',
@@ -396,12 +419,24 @@ export function AiPanel({ visible, onClose }: AiPanelProps) {
                     padding: msg.role === 'assistant' ? '10px 12px' : '4px 0 4px 12px',
                     borderRadius: msg.role === 'assistant' ? '8px' : '0'
                   }}>
-                  {msg.content}
+                  {msg.role === 'assistant' ? (
+                    <div className="ai-chat-markdown text-sm leading-relaxed">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
+                    </div>
+                  ) : (
+                    <span className="text-sm leading-relaxed">{msg.content}</span>
+                  )}
                 </div>
               ))}
               {loading && output && !chatHistory.some((_, idx) => idx === chatHistory.length - 1 && chatHistory[idx].role === 'assistant' && chatHistory[idx].content === output) && (
-                <div className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--text-primary)', background: 'var(--bg-tertiary)', padding: '10px 12px', borderRadius: '8px' }}>
-                  {output}
+                <div className="ai-chat-markdown text-sm leading-relaxed" style={{ color: 'var(--text-primary)', background: 'var(--bg-tertiary)', padding: '10px 12px', borderRadius: '8px' }}>
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{output}</ReactMarkdown>
+                </div>
+              )}
+              {loading && searchStatus && (
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium" style={{ background: 'var(--accent-light)', color: 'var(--accent-color)' }}>
+                  <Search size={13} className="animate-pulse" />
+                  <span>{searchStatus}</span>
                 </div>
               )}
             </div>
@@ -410,30 +445,31 @@ export function AiPanel({ visible, onClose }: AiPanelProps) {
       )}
 
       <div className="p-3 border-t" style={{ borderColor: 'var(--border-color)' }}>
-        {contexts.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mb-2">
-            {contexts.map((item) => (
-              <button key={item.id} onClick={() => removeContext(item.id)}
-                className="inline-flex items-center gap-1 max-w-full rounded-full px-2 py-0.5 text-[11px] transition-colors hover:bg-[var(--accent-light)]"
-                style={{ color: 'var(--accent-color)', background: 'var(--bg-primary)', border: '1px solid var(--border-color)' }}>
-                <span className="truncate max-w-[180px]">{item.label}</span>
-                <X size={10} />
-              </button>
-            ))}
-          </div>
-        )}
         <div className="flex gap-2">
-          <textarea value={prompt} onChange={(e) => setPrompt(e.target.value)} onKeyDown={handleKeyDown}
+          <RichInput
+            ref={richInputRef}
             placeholder="输入话题或指令，Enter发送..."
-            rows={2}
-            className="flex-1 px-3 py-2 rounded-lg text-sm border outline-none resize-none"
-            style={{ borderColor: 'var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }} />
-          <button onClick={handleGenerate}
-            disabled={loading || !prompt.trim() || !activeGateway.apiKey.trim()}
+            onSubmit={handleSubmit}
+            className="flex-1 px-3 py-2 rounded-lg text-sm border"
+            style={{ borderColor: 'var(--border-color)', background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }}
+          />
+          <button
+            onClick={() => setWebSearchEnabled(!webSearchEnabled)}
+            className="p-2 rounded-lg transition-all flex-shrink-0"
+            title={webSearchEnabled ? '联网搜索已开启（点击关闭）' : '联网搜索已关闭（点击开启）'}
+            style={{
+              background: webSearchEnabled ? 'var(--accent-light)' : 'var(--bg-tertiary)',
+              color: webSearchEnabled ? '#ea580c' : 'var(--text-tertiary)'
+            }}
+          >
+            <Globe size={16} />
+          </button>
+          <button onClick={handleSubmit}
+            disabled={loading || !hasContent || !activeGateway.apiKey.trim()}
             className="p-2 rounded-lg transition-all flex-shrink-0"
             style={{
               background: loading ? 'var(--bg-tertiary)' : '#ea580c',
-              opacity: loading || !prompt.trim() || !activeGateway.apiKey.trim() ? 0.5 : 1,
+              opacity: loading || !hasContent || !activeGateway.apiKey.trim() ? 0.5 : 1,
               cursor: loading ? 'wait' : 'pointer'
             }}>
             {loading ? <Loader size={16} className="animate-spin" style={{ color: '#fff' }} /> : <Send size={16} style={{ color: '#fff' }} />}

@@ -10,7 +10,7 @@ export function StartPage() {
     try {
       const path = await window.api.file.openDialog()
       if (!path) return
-      await openFile(path)
+      await openFile(path, true)
     } catch (e) {
       console.error('Failed to open file:', e)
     }

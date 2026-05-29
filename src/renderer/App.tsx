@@ -133,17 +133,17 @@ export default function App() {
             <StartPage />
           ) : (
             <>
-              {(activeTab === 'editor' || activeTab === 'split' || aiPanelVisible) && (
+              {(activeTab === 'editor' || activeTab === 'split') && (
                 <div
                   className="overflow-hidden"
                   style={{
-                    width: activeTab === 'split' || aiPanelVisible ? `${editorRatio * 100}%` : '100%'
+                    width: (activeTab === 'split') ? `${editorRatio * 100}%` : '100%'
                   }}
                 >
                   <EditorPanel />
                 </div>
               )}
-              {(activeTab === 'split' || aiPanelVisible) && (
+              {activeTab === 'split' && (
                 <div
                   className="flex-shrink-0 cursor-col-resize group relative"
                   style={{ width: 5, background: 'var(--border-color)' }}
@@ -153,14 +153,7 @@ export default function App() {
                   <div className="absolute inset-y-0 left-1/2 -translate-x-px w-[2px] group-hover:w-[3px] group-hover:bg-[var(--accent-color)] transition-all" />
                 </div>
               )}
-              {aiPanelVisible ? (
-                <div
-                  className="overflow-hidden"
-                  style={{ width: `${(1 - editorRatio) * 100}%` }}
-                >
-                  <AiPanel visible={aiPanelVisible} onClose={() => setAiPanelVisible(false)} />
-                </div>
-              ) : (activeTab === 'preview' || activeTab === 'split') && (
+              {(activeTab === 'preview' || activeTab === 'split') && !aiPanelVisible && (
                 <div
                   className="overflow-hidden"
                   style={{
@@ -169,6 +162,26 @@ export default function App() {
                 >
                   <PreviewPanel />
                 </div>
+              )}
+              {aiPanelVisible && (
+                <>
+                  {activeTab === 'editor' && (
+                    <div
+                      className="flex-shrink-0 cursor-col-resize group relative"
+                      style={{ width: 5, background: 'var(--border-color)' }}
+                      onMouseDown={handleMouseDown}
+                    >
+                      <div className="absolute inset-y-0 -left-1 -right-1" />
+                      <div className="absolute inset-y-0 left-1/2 -translate-x-px w-[2px] group-hover:w-[3px] group-hover:bg-[var(--accent-color)] transition-all" />
+                    </div>
+                  )}
+                  <div
+                    className="overflow-hidden"
+                    style={{ width: activeTab === 'editor' ? '360px' : `${(1 - editorRatio) * 100}%` }}
+                  >
+                    <AiPanel visible={aiPanelVisible} onClose={() => setAiPanelVisible(false)} />
+                  </div>
+                </>
               )}
             </>
           )}

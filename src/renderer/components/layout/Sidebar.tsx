@@ -9,7 +9,11 @@ import {
   FolderPlus,
   Search,
   Clock,
-  X
+  X,
+  BookmarkPlus,
+  Copy,
+  Check,
+  Folder
 } from 'lucide-react'
 import { useFileStore } from '../../stores/file-store'
 import { useEditorStore } from '../../stores/editor-store'
@@ -30,6 +34,29 @@ export function Sidebar() {
   const { openFile } = useFileOpener()
   const recentFiles = useFileStore((s) => s.recentFiles)
   const headings = useMemo(() => parseHeadings(currentContent), [currentContent])
+  const [hoveredRecent, setHoveredRecent] = useState<string | null>(null)
+  const [copiedPath, setCopiedPath] = useState<string | null>(null)
+
+  const handleCopyPath = (path: string) => {
+    navigator.clipboard.writeText(path)
+    setCopiedPath(path)
+    setTimeout(() => setCopiedPath(null), 1500)
+  }
+
+  const handleAddToAi = async (filePath: string) => {
+    const result = await window.api.file.read(filePath)
+    if (!result) return
+    const fileName = filePath.split(/[\\/]/).pop() || 'file'
+    const id = `f-${Date.now().toString(36)}`
+    window.dispatchEvent(new CustomEvent('nicmd:open-ai'))
+    setTimeout(() => window.dispatchEvent(new CustomEvent('nicmd:add-ai-context', {
+      detail: {
+        id,
+        label: fileName,
+        content: result
+      }
+    })), 150)
+  }
 
   const handleOpenFolder = async () => {
     const path = await window.api.file.openFolderDialog()
@@ -140,16 +167,50 @@ export function Sidebar() {
           {recentOpen && (
             <div className="px-1 pb-2 max-h-[220px] overflow-y-auto custom-scrollbar">
               {recentFiles.length > 0 ? recentFiles.slice(0, 10).map((path) => (
-                <button
+                <div
                   key={path}
-                  className="w-full text-left rounded-lg px-2 py-1.5 transition-colors hover:bg-[var(--accent-light)] block"
-                  style={{ color: 'var(--text-secondary)' }}
-                  onClick={() => openFile(path)}
-                  title={path}
+                  className="flex items-center rounded-md px-2 py-[5px] transition-colors hover:bg-[var(--accent-light)]"
+                  onMouseEnter={() => setHoveredRecent(path)}
+                  onMouseLeave={() => setHoveredRecent(null)}
                 >
-                  <span className="block truncate text-[13px]">{path.split(/[\\/]/).pop()}</span>
-                  <span className="block truncate text-[10px] opacity-60">{path}</span>
-                </button>
+                  <button
+                    className="flex-1 text-left min-w-0 text-[13px] truncate"
+                    style={{ color: 'var(--text-secondary)' }}
+                    onClick={() => openFile(path)}
+                    title={path}
+                  >
+                    {path.split(/[\\/]/).pop()}
+                  </button>
+                  {hoveredRecent === path && (
+                    <div className="flex items-center gap-0.5 ml-1 flex-shrink-0">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleCopyPath(path) }}
+                        className="p-0.5 rounded hover:bg-[var(--bg-tertiary)] transition-colors"
+                        title="复制路径"
+                      >
+                        {copiedPath === path ? (
+                          <Check size={12} style={{ color: '#22c55e' }} />
+                        ) : (
+                          <Copy size={12} style={{ color: 'var(--text-tertiary)' }} />
+                        )}
+                      </button>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); window.api.file.showInFolder(path) }}
+                        className="p-0.5 rounded hover:bg-[var(--bg-tertiary)] transition-colors"
+                        title="打开所在目录"
+                      >
+                        <Folder size={12} style={{ color: 'var(--text-tertiary)' }} />
+                      </button>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleAddToAi(path) }}
+                        className="p-0.5 rounded hover:bg-[var(--bg-tertiary)] transition-colors"
+                        title="引用到 AI 对话"
+                      >
+                        <BookmarkPlus size={13} style={{ color: 'var(--accent-color)' }} />
+                      </button>
+                    </div>
+                  )}
+                </div>
               )) : (
                 <div className="px-2 py-2 text-xs leading-relaxed" style={{ color: 'var(--text-tertiary)' }}>
                   Recent documents will appear here.

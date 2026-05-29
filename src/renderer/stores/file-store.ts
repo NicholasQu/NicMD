@@ -27,7 +27,7 @@ interface FileState {
   setIsModified: (modified: boolean) => void
   toggleFolder: (path: string) => void
   updateFileTree: () => Promise<void>
-  addRecentFile: (path: string) => void
+  addRecentFile: (path: string, promote?: boolean) => void
 }
 
 function toggleInTree(nodes: FileNode[], targetPath: string): FileNode[] {
@@ -90,8 +90,9 @@ export const useFileStore = create<FileState>((set, get) => ({
     }
   },
 
-  addRecentFile: (path) => {
+  addRecentFile: (path, promote = false) => {
     const { recentFiles } = get()
+    if (recentFiles.includes(path) && !promote) return
     const filtered = recentFiles.filter(f => f !== path)
     const updated = [path, ...filtered].slice(0, MAX_RECENT)
     set({ recentFiles: updated })

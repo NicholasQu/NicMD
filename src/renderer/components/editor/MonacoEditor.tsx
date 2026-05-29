@@ -1,9 +1,23 @@
 import { useRef, useEffect, useState } from 'react'
-import Editor, { OnMount } from '@monaco-editor/react'
+import Editor, { OnMount, loader } from '@monaco-editor/react'
 import type { editor as MonacoEditorType } from 'monaco-editor'
 import { useFileStore } from '../../stores/file-store'
 import { useEditorStore } from '../../stores/editor-store'
 import { useUIStore } from '../../stores/ui-store'
+
+import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker'
+import jsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker'
+import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker'
+
+self.MonacoEnvironment = {
+  getWorker(_: unknown, label: string) {
+    if (label === 'json') return new jsonWorker()
+    if (label === 'typescript' || label === 'javascript') return new tsWorker()
+    return new editorWorker()
+  }
+}
+
+loader.config({ monaco: import('monaco-editor') })
 
 interface MonacoEditorProps {
   value: string
@@ -176,11 +190,11 @@ export function MonacoEditor({ value }: MonacoEditorProps) {
     window.dispatchEvent(new CustomEvent('nicmd:open-ai'))
     setTimeout(() => window.dispatchEvent(new CustomEvent('nicmd:add-ai-context', {
       detail: {
-        id: `${currentFile}:${selectionBubble.startLine}:${selectionBubble.endLine}:${selectionBubble.text.length}`,
+        id: `s-${Date.now().toString(36)}`,
         label: `${shortName} ${lineLabel}`,
         content: selectionBubble.text
       }
-    })), 0)
+    })), 150)
     setSelectionBubble(null)
   }
 

@@ -12,6 +12,7 @@ const api = {
     openFolderDialog: (): Promise<string | null> => ipcRenderer.invoke('file:open-folder-dialog'),
     saveDialog: (defaultName: string): Promise<string | null> => ipcRenderer.invoke('file:save-dialog', defaultName),
     readBuffer: (path: string): Promise<string | null> => ipcRenderer.invoke('file:read-buffer', path),
+    showInFolder: (path: string): Promise<void> => ipcRenderer.invoke('file:show-in-folder', path),
     onOpened: (callback: (data: { path: string; content: string }) => void) => {
       const handler = (_event: any, data: { path: string; content: string }) => callback(data)
       ipcRenderer.on('file:opened', handler)
@@ -46,12 +47,23 @@ const api = {
     soul?: string
     skill?: string
     history?: { role: 'system' | 'user' | 'assistant'; content: string }[]
+    enableTools?: boolean
   }): Promise<{ success: boolean; content?: string; error?: string }> =>
     ipcRenderer.invoke('llm:generate', params),
-  onLlmStream: (callback: (data: { delta: string; done: boolean; full?: string }) => void) => {
+  onLlmStream: (callback: (data: { delta: string; done: boolean; full?: string; toolStatus?: { name: string; args?: string; status: string } }) => void) => {
     const handler = (_event: any, data: { delta: string; done: boolean; full?: string }) => callback(data)
     ipcRenderer.on('llm:stream', handler)
     return () => ipcRenderer.removeListener('llm:stream', handler)
+  },
+  settings: {
+    load: (): Promise<Record<string, unknown>> => ipcRenderer.invoke('settings:load'),
+    save: (data: Record<string, unknown>): Promise<{ success: boolean; error?: string }> => ipcRenderer.invoke('settings:save', data)
+  },
+  webSearch: {
+    baidu: (query: string): Promise<{ success: boolean; results?: any[]; error?: string; engine: string }> =>
+      ipcRenderer.invoke('web-search:baidu', query),
+    wechat: (query: string): Promise<{ success: boolean; results?: any[]; error?: string; engine: string }> =>
+      ipcRenderer.invoke('web-search:wechat', query)
   }
 }
 

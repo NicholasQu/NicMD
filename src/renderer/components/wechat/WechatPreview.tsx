@@ -1,8 +1,59 @@
-import { useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState, useEffect } from 'react'
 import { Check, Clipboard, Copy, X } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import './WechatPreview.css'
+
+function MermaidSvg({ chart }: { chart: string }) {
+  const [svg, setSvg] = useState('')
+
+  useEffect(() => {
+    let cancelled = false
+    const render = async () => {
+      try {
+        const mermaid = await import('mermaid')
+        const m = mermaid.default
+        m.initialize({
+          startOnLoad: false,
+          theme: 'default',
+          securityLevel: 'loose',
+          fontFamily: 'Inter, system-ui, sans-serif',
+          themeVariables: {
+            primaryColor: '#fff7ed',
+            primaryTextColor: '#111827',
+            primaryBorderColor: '#ea580c',
+            lineColor: '#d1d5db',
+            secondaryColor: '#f3f4f6',
+            tertiaryColor: '#fafafa',
+            fontSize: '12px'
+          }
+        })
+        const id = `wc-mermaid-${Math.random().toString(36).substring(2, 9)}`
+        const { svg: rendered } = await m.render(id, chart)
+        if (!cancelled) setSvg(rendered)
+      } catch {}
+    }
+    render()
+    return () => { cancelled = true }
+  }, [chart])
+
+  if (!svg) {
+    return (
+      <div style={{ margin: '18px 0', padding: '14px 16px', borderRadius: '10px', background: '#faf5f0', border: '1px solid #f1e6df', textAlign: 'center', fontSize: 13, color: '#9a3412' }}>
+        Loading diagram...
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ margin: '18px 0', borderRadius: '10px', border: '1px solid #f1e6df', overflow: 'hidden' }}>
+      <div style={{ display: 'flex', alignItems: 'center', padding: '6px 14px', background: '#fff7ed', borderBottom: '1px solid #f1e6df' }}>
+        <span style={{ fontSize: '11px', fontWeight: 600, color: '#ea580c', textTransform: 'uppercase', letterSpacing: '0.05em' }}>mermaid</span>
+      </div>
+      <div style={{ padding: '16px', background: '#faf5f0', display: 'flex', justifyContent: 'center' }} dangerouslySetInnerHTML={{ __html: svg }} />
+    </div>
+  )
+}
 
 interface WechatPreviewProps {
   content: string
@@ -94,10 +145,26 @@ export function WechatPreview({ content, fileName, onClose }: WechatPreviewProps
                   ol: ({ children }) => <ol style={wechatStyles.ol}>{children}</ol>,
                   li: ({ children }) => <li style={wechatStyles.li}>{children}</li>,
                   a: ({ href, children }) => <a href={href} style={wechatStyles.a}>{children}</a>,
-                  code: ({ className, children }) => {
-                    const isBlock = /language-/.test(className || '')
+                  code({ className, children, node }) {
+                    const match = /language-(\w+)/.exec(className || '')
+                    const isBlock = !!match || (node?.position?.start.line !== node?.position?.end.line)
                     if (!isBlock) return <code style={wechatStyles.inlineCode}>{children}</code>
-                    return <pre style={wechatStyles.pre}><code style={wechatStyles.code}>{children}</code></pre>
+                    const lang = match ? match[1] : ''
+                    const codeString = String(children).replace(/\n$/, '')
+                    const isMermaid = lang === 'mermaid'
+                    if (isMermaid) {
+                      return <MermaidSvg chart={codeString} />
+                    }
+                    return (
+                      <div style={{ margin: '18px 0', borderRadius: '10px', border: '1px solid #f1e6df', overflow: 'hidden' }}>
+                        {lang && (
+                          <div style={{ display: 'flex', alignItems: 'center', padding: '6px 14px', background: '#fff7ed', borderBottom: '1px solid #f1e6df' }}>
+                            <span style={{ fontSize: '11px', fontWeight: 600, color: '#ea580c', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{lang}</span>
+                          </div>
+                        )}
+                        <pre style={{ ...wechatStyles.pre, margin: 0, border: 'none', borderRadius: 0 }}><code style={wechatStyles.code}>{children}</code></pre>
+                      </div>
+                    )
                   },
                   table: ({ children }) => <table style={wechatStyles.table}>{children}</table>,
                   th: ({ children }) => <th style={wechatStyles.th}>{children}</th>,
@@ -246,14 +313,12 @@ const wechatStyles = {
     fontFamily: "'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace"
   },
   pre: {
-    margin: '18px 0',
     padding: '14px 16px',
-    borderRadius: '12px',
-    background: '#1f2937',
+    background: '#faf5f0',
     overflowX: 'auto'
   },
   code: {
-    color: '#f9fafb',
+    color: '#9a3412',
     fontSize: '13px',
     lineHeight: 1.75,
     fontFamily: "'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace"

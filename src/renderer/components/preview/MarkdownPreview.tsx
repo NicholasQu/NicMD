@@ -1,7 +1,10 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { Copy, Check } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import rehypeRaw from 'rehype-raw'
+import { MermaidBlock } from './MermaidBlock'
+import { TreeView, isTreeBlock } from './TreeView'
 import './MarkdownPreview.css'
 
 interface MarkdownPreviewProps {
@@ -10,6 +13,10 @@ interface MarkdownPreviewProps {
 
 export function MarkdownPreview({ content }: MarkdownPreviewProps) {
   const [copiedBlock, setCopiedBlock] = useState<string | null>(null)
+
+  const processedContent = useMemo(() => {
+    return content.replace(/\*\*\s*([\u201c\u201d\u2018\u2019].*?[\u201c\u201d\u2018\u2019])\s*\*\*/g, '<strong>$1</strong>')
+  }, [content])
 
   const handleCopy = useCallback((code: string, id: string) => {
     navigator.clipboard.writeText(code)
@@ -21,6 +28,7 @@ export function MarkdownPreview({ content }: MarkdownPreviewProps) {
     <div className="markdown-preview">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
+        rehypePlugins={[rehypeRaw]}
         components={{
           code({ className, children, ...props }) {
             const match = /language-(\w+)/.exec(className || '')
@@ -33,6 +41,36 @@ export function MarkdownPreview({ content }: MarkdownPreviewProps) {
             const lang = match ? match[1] : ''
             const codeString = String(children).replace(/\n$/, '')
             const blockId = `code-${codeString.length}-${codeString.slice(0, 10).replace(/\s/g, '')}`
+
+            if (lang === 'mermaid') {
+              return (
+                <div className="preview-code-block-wrapper">
+                  <div className="preview-code-header">
+                    <span className="preview-code-lang">mermaid</span>
+                  </div>
+                  <div style={{ padding: '16px 20px', background: 'var(--bg-primary)' }}>
+                    <MermaidBlock chart={codeString} />
+                  </div>
+                </div>
+              )
+            }
+
+            if (isTreeBlock(codeString)) {
+              return (
+                <div className="preview-code-block-wrapper">
+                  <div className="preview-code-header">
+                    <span className="preview-code-lang">tree</span>
+                    <button className="preview-code-copy" onClick={() => handleCopy(codeString, blockId)}>
+                      {copiedBlock === blockId ? <Check size={13} /> : <Copy size={13} />}
+                      {copiedBlock === blockId ? 'Copied!' : 'Copy'}
+                    </button>
+                  </div>
+                  <div style={{ background: 'var(--bg-primary)' }}>
+                    <TreeView code={codeString} />
+                  </div>
+                </div>
+              )
+            }
 
             return (
               <div className="preview-code-block-wrapper">
@@ -85,7 +123,7 @@ export function MarkdownPreview({ content }: MarkdownPreviewProps) {
           }
         }}
       >
-        {content}
+        {processedContent}
       </ReactMarkdown>
     </div>
   )

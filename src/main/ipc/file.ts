@@ -1,4 +1,4 @@
-import { ipcMain, dialog, BrowserWindow } from 'electron'
+import { ipcMain, dialog, BrowserWindow, shell } from 'electron'
 import { readdir, readFile, writeFile, mkdir, rename, unlink } from 'fs/promises'
 import { existsSync } from 'fs'
 import { join, dirname, basename, extname } from 'path'
@@ -131,5 +131,9 @@ export function registerFileIPC(getMainWindow: () => BrowserWindow | null): void
       console.error('[file:read-buffer] Failed:', e.message)
       return null
     }
+  })
+
+  ipcMain.handle('file:show-in-folder', async (_event, filePath: string) => {
+    shell.showItemInFolder(filePath)
   })
 }

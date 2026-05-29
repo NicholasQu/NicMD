@@ -39,6 +39,7 @@ export function Toolbar({ onToggleAi }: { onToggleAi: () => void }) {
         store.setCurrentFile(path)
         store.setCurrentContent(content)
         store.setIsModified(false)
+        store.addRecentFile(path, true)
       }
     } catch (e) {
       console.error('Failed to open file:', e)
@@ -59,19 +60,47 @@ export function Toolbar({ onToggleAi }: { onToggleAi: () => void }) {
   }
 
   const [exporting, setExporting] = useState(false)
+  const [toast, setToast] = useState<{ msg: string; path?: string } | null>(null)
+
+  const showToast = (msg: string, path?: string) => {
+    setToast({ msg, path })
+    setTimeout(() => setToast(null), 4000)
+  }
+
+  const openFilePath = async (filePath: string) => {
+    try {
+      await window.api.file.read(filePath)
+      const store = useFileStore.getState()
+      store.setCurrentFile(filePath)
+      store.setCurrentContent('')
+      store.setIsModified(false)
+      setToast(null)
+    } catch {
+      window.open(`file:///${filePath.replace(/\\/g, '/')}`)
+    }
+  }
 
   const handleExportPdf = async () => {
     const store = useFileStore.getState()
     if (!store.currentFile || !store.currentContent) return
     setExporting(true)
     try {
-      const pdfPath = store.currentFile.replace(/\.(md|markdown|mdx|txt)$/i, '.pdf')
-      const result = await window.api.exportPdf({ path: pdfPath, content: store.currentContent })
+      const defaultName = (store.currentFile.split(/[\\/]/).pop() || 'document').replace(/\.(md|markdown|mdx|txt)$/i, '.pdf')
+      const savePath = await window.api.file.saveDialog(defaultName)
+      if (!savePath) { setExporting(false); return }
+      const result = await window.api.exportPdf({ path: savePath, content: store.currentContent })
       if (result.success) {
         store.updateFileTree()
+        if (result.path) {
+          store.addRecentFile(result.path, true)
+        }
+        showToast('PDF exported', result.path)
+      } else {
+        showToast('PDF export failed: ' + (result.error || 'unknown error'))
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error('PDF export failed:', e)
+      showToast('PDF export failed: ' + (e.message || 'unknown'))
     } finally {
       setExporting(false)
     }
@@ -209,6 +238,44 @@ export function Toolbar({ onToggleAi }: { onToggleAi: () => void }) {
         </button>
       </div>
     </div>
+    {toast && (
+      <div style={{
+        position: 'fixed',
+        top: 38,
+        left: 16,
+        zIndex: 9999,
+        padding: '10px 16px',
+        borderRadius: 8,
+        background: '#ea580c',
+        color: '#fff',
+        fontSize: 13,
+        fontWeight: 600,
+        boxShadow: '0 4px 12px rgba(234,88,12,0.3)',
+        maxWidth: 400,
+        animation: 'toastIn 0.3s ease'
+      }}>
+        <div>{toast.msg}</div>
+        {toast.path && (
+          <div
+            onClick={() => openFilePath(toast.path!)}
+            style={{
+              marginTop: 6,
+              padding: '4px 10px',
+              background: 'rgba(255,255,255,0.2)',
+              borderRadius: 4,
+              fontSize: 12,
+              fontFamily: 'monospace',
+              cursor: 'pointer',
+              wordBreak: 'break-all',
+              textDecoration: 'underline',
+              textDecorationStyle: 'dotted'
+            }}
+          >
+            {toast.path.split(/[\\/]/).pop()} — click to open
+          </div>
+        )}
+      </div>
+    )}
     {wechatPreviewOpen && currentFile && (
       <WechatPreview
         content={currentContent}
