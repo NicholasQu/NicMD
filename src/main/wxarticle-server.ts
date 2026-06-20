@@ -9,10 +9,9 @@ import {
   WECHAT_FONT_FAMILY,
   escapeHtml,
   extractWechatMeta,
-  normalizeMarkdownTypography,
+  prepareWechatMarkdown,
   renderNicmdBrandFooter,
   renderWechatImagePlaceholder,
-  stripFirstH1,
   wrapWechatHtml
 } from '../shared/wechat-render'
 import { WECHAT_THEME } from '../shared/wechat-theme'
@@ -167,8 +166,7 @@ async function renderArticleHtml(inputPath: string, rootDir: string): Promise<st
   }
 
   const markedInstance = new Marked({ gfm: true, breaks: false, renderer })
-  const withoutFirstH1 = stripFirstH1(content)
-  const normalized = normalizeMarkdownTypography(withoutFirstH1)
+  const normalized = prepareWechatMarkdown(content)
   const prepared = await preprocessNicmdHtmlBlocks(normalized, rootDir)
   const html = await markedInstance.parse(prepared)
   return `<section style="font-family:${WECHAT_FONT_FAMILY};">${wrapWechatHtml(String(html))}${renderNicmdBrandFooter()}</section>`

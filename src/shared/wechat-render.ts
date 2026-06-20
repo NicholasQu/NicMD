@@ -61,6 +61,17 @@ export function stripFirstH1(content: string): string {
   return content.replace(/^#\s+.+\n?/, '')
 }
 
+export function prepareWechatMarkdown(content: string): string {
+  return normalizeMarkdownTypography(renderOpeningSubtitle(stripFirstH1(content)))
+}
+
+function renderOpeningSubtitle(content: string): string {
+  return content.replace(/^##\s+(.+)\n+/, (_, subtitle) => {
+    const t = WECHAT_THEME
+    return `<p data-nicmd-subtitle="true" style="margin:2px 0 26px;color:${t.muted};font-size:16px;line-height:1.7;font-weight:520;letter-spacing:.01em;word-break:normal;overflow-wrap:break-word;">${escapeHtml(subtitle)}</p>\n\n`
+  })
+}
+
 export function normalizeMarkdownTypography(content: string): string {
   return content
     .split(CODE_FENCE_SPLIT)
@@ -75,9 +86,9 @@ function applyReplaceRules(content: string, rules: ReplaceRule[]): string {
 export function wrapWechatHtml(html: string): string {
   const t = WECHAT_THEME
   return html
-    .replace(/<h1\b/g, `<h1 style="margin:0 0 26px;padding:0 0 16px;border-bottom:1px solid ${t.border};color:${t.text};font-size:28px;font-weight:850;line-height:1.28;letter-spacing:-.035em;text-wrap:balance;word-break:normal;overflow-wrap:anywhere;"`)
-    .replace(/<h2\b/g, `<h2 style="position:relative;margin:34px 0 15px;padding:12px 15px 11px;border-radius:17px;background:linear-gradient(135deg,${t.surfaceSoft},${t.surface});border:1px solid ${t.border};box-shadow:${t.softShadow};color:${t.text};font-size:21px;font-weight:850;line-height:1.42;letter-spacing:-.02em;text-wrap:balance;word-break:normal;overflow-wrap:anywhere;"`)
-    .replace(/<h3\b/g, `<h3 style="margin:28px 0 12px;color:${t.textSoft};font-size:16px;font-weight:800;line-height:1.5;letter-spacing:-.01em;text-wrap:balance;word-break:normal;overflow-wrap:anywhere;"`)
+    .replace(/<h1\b/g, `<h1 style="margin:0 0 26px;padding:0 0 16px;border-bottom:1px solid ${t.border};color:${t.text};font-size:28px;font-weight:850;line-height:1.28;letter-spacing:-.035em;word-break:normal;overflow-wrap:break-word;"`)
+    .replace(/<h2\b/g, `<h2 style="position:relative;margin:34px 0 15px;padding:12px 15px 11px;border-radius:17px;background:linear-gradient(135deg,${t.surfaceSoft},${t.surface});border:1px solid ${t.border};box-shadow:${t.softShadow};color:${t.text};font-size:21px;font-weight:850;line-height:1.42;letter-spacing:-.02em;word-break:normal;overflow-wrap:break-word;"`)
+    .replace(/<h3\b/g, `<h3 style="margin:28px 0 12px;color:${t.textSoft};font-size:16px;font-weight:800;line-height:1.5;letter-spacing:-.01em;word-break:normal;overflow-wrap:break-word;"`)
     .replace(/<h4\b/g, `<h4 style="margin:22px 0 10px;color:${t.textSoft};font-size:15px;font-weight:760;line-height:1.5;word-break:normal;overflow-wrap:anywhere;"`)
     .replace(/<p\b/g, `<p style="margin:14px 0;color:${t.textSoft};font-size:15px;line-height:1.95;letter-spacing:.01em;word-break:normal;overflow-wrap:anywhere;"`)
     .replace(/<strong\b/g, `<strong style="color:${t.text};font-weight:850;"`)

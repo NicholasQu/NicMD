@@ -1,9 +1,10 @@
 import { useMemo, useRef, useState, useEffect } from 'react'
 import { Check, Clipboard, Copy, X } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
+import rehypeRaw from 'rehype-raw'
 import remarkGfm from 'remark-gfm'
 import './WechatPreview.css'
-import { WECHAT_FONT_FAMILY, NICMD_BRAND_FONT_FAMILY, NICMD_BRAND, extractWechatMeta, normalizeMarkdownTypography, stripFirstH1 } from '../../../shared/wechat-render'
+import { WECHAT_FONT_FAMILY, NICMD_BRAND_FONT_FAMILY, NICMD_BRAND, extractWechatMeta, prepareWechatMarkdown } from '../../../shared/wechat-render'
 import { WECHAT_THEME } from '../../../shared/wechat-theme'
 
 function MermaidSvg({ chart }: { chart: string }) {
@@ -68,7 +69,7 @@ export function WechatPreview({ content, fileName, onClose }: WechatPreviewProps
   const [copied, setCopied] = useState(false)
   const [copiedMeta, setCopiedMeta] = useState<'title' | 'summary' | null>(null)
   const meta = useMemo(() => extractWechatMeta(content, fileName), [content, fileName])
-  const previewContent = useMemo(() => normalizeMarkdownTypography(stripFirstH1(content)).replace(/::: *nicmd-html\s+([\s\S]*?):::/g, (_, body) => renderNicmdHtmlPlaceholder(body)), [content])
+  const previewContent = useMemo(() => prepareWechatMarkdown(content).replace(/::: *nicmd-html\s+([\s\S]*?):::/g, (_, body) => renderNicmdHtmlPlaceholder(body)), [content])
 
   const copyMetaText = async (type: 'title' | 'summary', text: string) => {
     if (!text) return
@@ -133,6 +134,7 @@ export function WechatPreview({ content, fileName, onClose }: WechatPreviewProps
             <div ref={articleRef} className="wechat-body" style={{ fontFamily: WECHAT_FONT_FAMILY }}>
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
+                rehypePlugins={[rehypeRaw]}
                 components={{
                   h1: ({ children }) => <h1 style={wechatStyles.h1}>{children}</h1>,
                   h2: ({ children }) => <h2 style={wechatStyles.h2}><span style={wechatStyles.h2Mark} />{children}</h2>,
@@ -225,22 +227,29 @@ const wechatStyles = {
     letterSpacing: '-0.035em'
   },
   h2: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
+    position: 'relative' as const,
     margin: '34px 0 16px',
+    padding: '12px 15px 11px 24px',
+    borderRadius: '17px',
+    border: `1px solid ${WECHAT_THEME.border}`,
+    background: `linear-gradient(135deg, ${WECHAT_THEME.surfaceSoft}, ${WECHAT_THEME.surface})`,
+    boxShadow: WECHAT_THEME.softShadow,
     color: WECHAT_THEME.text,
     fontSize: '21px',
     fontWeight: 850,
-    lineHeight: 1.42
+    lineHeight: 1.42,
+    wordBreak: 'normal' as const,
+    overflowWrap: 'break-word' as const
   },
   h2Mark: {
+    position: 'absolute' as const,
+    left: '12px',
+    top: '13px',
     display: 'inline-block',
     width: '5px',
     height: '20px',
     borderRadius: '99px',
-    background: `linear-gradient(180deg, ${WECHAT_THEME.accent2}, ${WECHAT_THEME.accent})`,
-    flexShrink: 0
+    background: `linear-gradient(180deg, ${WECHAT_THEME.accent2}, ${WECHAT_THEME.accent})`
   },
   h3: {
     margin: '28px 0 12px',
