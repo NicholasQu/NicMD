@@ -11,7 +11,7 @@ import { registerLlmIPC } from './ipc/llm'
 import { registerWindowIPC } from './ipc/window'
 import { registerSettingsIPC } from './ipc/settings'
 import { registerWebSearchIPC } from './ipc/web-search'
-import { handleCli } from './cli'
+import { handleCli, isCliOnlyCommand } from './cli'
 import { setupErrorHandling, collectLogsForReport, generateIssueUrl, createReport, writeErrorLog } from './error-logger'
 
 setupErrorHandling()
@@ -63,6 +63,7 @@ function findFileArg(argv: string[]): string | null {
   return null
 }
 
+const keepAliveForCliServer = process.argv.includes('weixin') || process.argv.includes('wxarticle')
 const gotTheLock = is.dev ? true : app.requestSingleInstanceLock()
 
 if (!gotTheLock) {
@@ -102,6 +103,11 @@ if (!gotTheLock) {
     registerWebSearchIPC(getMainWindow)
     registerAppIPC()
 
+    if (isCliOnlyCommand(process.argv)) {
+      handleCli(process.argv).then(() => app.quit())
+      return
+    }
+
     createMainWindow(openFile)
 
     const fileArg = findFileArg(process.argv)
@@ -117,6 +123,7 @@ if (!gotTheLock) {
   })
 
   app.on('window-all-closed', () => {
+    if (keepAliveForCliServer) return
     if (process.platform !== 'darwin') {
       app.quit()
     }

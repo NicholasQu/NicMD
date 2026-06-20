@@ -234,16 +234,69 @@
 .markdown-preview ul,
 .markdown-preview ol {
   margin: 0.9em 0;
-  padding-left: 2em;
+  padding-left: 1.65em;
+}
+
+.markdown-preview ol {
+  list-style-position: outside;
+  counter-reset: none;
+}
+
+.markdown-preview ul {
+  list-style-position: outside;
 }
 
 .markdown-preview li {
-  margin: 0.35em 0;
-  line-height: 1.8;
+  margin: 0.38em 0;
+  padding-left: 0.25em;
+  line-height: 1.82;
 }
 
 .markdown-preview li::marker {
   color: var(--accent-color);
+  font-weight: 700;
+}
+
+.markdown-preview li > p {
+  margin: 0.25em 0;
+}
+
+.markdown-preview li > p:first-child {
+  margin-top: 0;
+}
+
+.markdown-preview li > p:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-preview li > ul,
+.markdown-preview li > ol {
+  margin: 0.35em 0 0.45em;
+}
+
+.markdown-preview ul ul {
+  list-style-type: circle;
+}
+
+.markdown-preview ul ul ul {
+  list-style-type: square;
+}
+
+.markdown-preview ol ol {
+  list-style-type: lower-alpha;
+}
+
+.markdown-preview ol ol ol {
+  list-style-type: lower-roman;
+}
+
+.markdown-preview .contains-task-list {
+  padding-left: 1.25em;
+  list-style: none;
+}
+
+.markdown-preview .task-list-item {
+  margin-left: -1.25em;
 }
 
 .markdown-preview hr {

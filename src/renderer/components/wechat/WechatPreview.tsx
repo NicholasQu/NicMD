@@ -3,6 +3,8 @@ import { Check, Clipboard, Copy, X } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import './WechatPreview.css'
+import { WECHAT_FONT_FAMILY, NICMD_BRAND_FONT_FAMILY, NICMD_BRAND, extractWechatMeta, normalizeMarkdownTypography, stripFirstH1 } from '../../../shared/wechat-render'
+import { WECHAT_THEME } from '../../../shared/wechat-theme'
 
 function MermaidSvg({ chart }: { chart: string }) {
   const [svg, setSvg] = useState('')
@@ -19,12 +21,12 @@ function MermaidSvg({ chart }: { chart: string }) {
           securityLevel: 'loose',
           fontFamily: 'Inter, system-ui, sans-serif',
           themeVariables: {
-            primaryColor: '#fff7ed',
-            primaryTextColor: '#111827',
-            primaryBorderColor: '#ea580c',
-            lineColor: '#d1d5db',
-            secondaryColor: '#f3f4f6',
-            tertiaryColor: '#fafafa',
+            primaryColor: WECHAT_THEME.surfaceSoft,
+            primaryTextColor: WECHAT_THEME.text,
+            primaryBorderColor: WECHAT_THEME.accent,
+            lineColor: WECHAT_THEME.borderSoft,
+            secondaryColor: WECHAT_THEME.surfaceSoft,
+            tertiaryColor: WECHAT_THEME.surface,
             fontSize: '12px'
           }
         })
@@ -39,18 +41,18 @@ function MermaidSvg({ chart }: { chart: string }) {
 
   if (!svg) {
     return (
-      <div style={{ margin: '18px 0', padding: '14px 16px', borderRadius: '10px', background: '#faf5f0', border: '1px solid #f1e6df', textAlign: 'center', fontSize: 13, color: '#9a3412' }}>
+      <div style={{ margin: '18px 0', padding: '14px 16px', borderRadius: '14px', background: WECHAT_THEME.codeBg, border: `1px solid ${WECHAT_THEME.codeBorder}`, textAlign: 'center', fontSize: 13, color: WECHAT_THEME.codeText }}>
         Loading diagram...
       </div>
     )
   }
 
   return (
-    <div style={{ margin: '18px 0', borderRadius: '10px', border: '1px solid #f1e6df', overflow: 'hidden' }}>
-      <div style={{ display: 'flex', alignItems: 'center', padding: '6px 14px', background: '#fff7ed', borderBottom: '1px solid #f1e6df' }}>
-        <span style={{ fontSize: '11px', fontWeight: 600, color: '#ea580c', textTransform: 'uppercase', letterSpacing: '0.05em' }}>mermaid</span>
+    <div style={{ margin: '18px 0', borderRadius: '14px', border: `1px solid ${WECHAT_THEME.codeBorder}`, overflow: 'hidden' }}>
+      <div style={{ display: 'flex', alignItems: 'center', padding: '6px 14px', background: WECHAT_THEME.codeHeaderBg, borderBottom: `1px solid ${WECHAT_THEME.codeBorder}` }}>
+        <span style={{ fontSize: '11px', fontWeight: 750, color: WECHAT_THEME.accent, textTransform: 'uppercase', letterSpacing: '0.05em' }}>mermaid</span>
       </div>
-      <div style={{ padding: '16px', background: '#faf5f0', display: 'flex', justifyContent: 'center' }} dangerouslySetInnerHTML={{ __html: svg }} />
+      <div style={{ padding: '16px', background: WECHAT_THEME.codeBg, display: 'flex', justifyContent: 'center' }} dangerouslySetInnerHTML={{ __html: svg }} />
     </div>
   )
 }
@@ -61,13 +63,12 @@ interface WechatPreviewProps {
   onClose: () => void
 }
 
-const FONT_FAMILY = "-apple-system, BlinkMacSystemFont, 'PingFang SC', 'Noto Sans SC', 'Source Han Sans SC', 'Microsoft YaHei', sans-serif"
-
 export function WechatPreview({ content, fileName, onClose }: WechatPreviewProps) {
   const articleRef = useRef<HTMLDivElement>(null)
   const [copied, setCopied] = useState(false)
   const [copiedMeta, setCopiedMeta] = useState<'title' | 'summary' | null>(null)
   const meta = useMemo(() => extractWechatMeta(content, fileName), [content, fileName])
+  const previewContent = useMemo(() => normalizeMarkdownTypography(stripFirstH1(content)).replace(/::: *nicmd-html\s+([\s\S]*?):::/g, (_, body) => renderNicmdHtmlPlaceholder(body)), [content])
 
   const copyMetaText = async (type: 'title' | 'summary', text: string) => {
     if (!text) return
@@ -129,7 +130,7 @@ export function WechatPreview({ content, fileName, onClose }: WechatPreviewProps
 
         <div className="wechat-preview-scroll custom-scrollbar">
           <div className="wechat-phone-frame">
-            <div ref={articleRef} className="wechat-body" style={{ fontFamily: FONT_FAMILY }}>
+            <div ref={articleRef} className="wechat-body" style={{ fontFamily: WECHAT_FONT_FAMILY }}>
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{
@@ -156,10 +157,10 @@ export function WechatPreview({ content, fileName, onClose }: WechatPreviewProps
                       return <MermaidSvg chart={codeString} />
                     }
                     return (
-                      <div style={{ margin: '18px 0', borderRadius: '10px', border: '1px solid #f1e6df', overflow: 'hidden' }}>
+                      <div style={{ margin: '18px 0', borderRadius: '14px', border: `1px solid ${WECHAT_THEME.codeBorder}`, overflow: 'hidden' }}>
                         {lang && (
-                          <div style={{ display: 'flex', alignItems: 'center', padding: '6px 14px', background: '#fff7ed', borderBottom: '1px solid #f1e6df' }}>
-                            <span style={{ fontSize: '11px', fontWeight: 600, color: '#ea580c', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{lang}</span>
+                          <div style={{ display: 'flex', alignItems: 'center', padding: '6px 14px', background: WECHAT_THEME.codeHeaderBg, borderBottom: `1px solid ${WECHAT_THEME.codeBorder}` }}>
+                            <span style={{ fontSize: '11px', fontWeight: 750, color: WECHAT_THEME.accent, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{lang}</span>
                           </div>
                         )}
                         <pre style={{ ...wechatStyles.pre, margin: 0, border: 'none', borderRadius: 0 }}><code style={wechatStyles.code}>{children}</code></pre>
@@ -172,8 +173,18 @@ export function WechatPreview({ content, fileName, onClose }: WechatPreviewProps
                   img: ({ src, alt }) => <img src={src || ''} alt={alt || ''} style={wechatStyles.img} />
                 }}
               >
-                {stripFirstH1(content)}
+                {previewContent}
               </ReactMarkdown>
+              <footer style={{ marginTop: '42px', padding: '22px 0 2px', borderTop: `1px solid ${WECHAT_THEME.borderSoft}`, textAlign: 'center', color: WECHAT_THEME.muted2 }}>
+                <a href={NICMD_BRAND.url} style={{ display: 'inline-block', color: WECHAT_THEME.muted, textDecoration: 'none' }}>
+                  <span style={{ display: 'inline-block', padding: '10px 18px 9px', border: `1px solid ${WECHAT_THEME.accentBorder}`, borderRadius: '999px', background: `linear-gradient(135deg, rgba(255,255,255,.72), ${WECHAT_THEME.accentSofter})`, boxShadow: WECHAT_THEME.softShadow }}>
+                    <span style={{ display: 'block', fontFamily: NICMD_BRAND_FONT_FAMILY, fontSize: '19px', lineHeight: 1, fontWeight: 600, letterSpacing: '.20em', textTransform: 'uppercase', color: WECHAT_THEME.accentText, textShadow: '0 1px 0 rgba(255,255,255,.75)' }}>𝕸 NicMD</span>
+                    <span style={{ display: 'block', marginTop: '7px', fontSize: '10px', lineHeight: 1.5, letterSpacing: '.20em', color: WECHAT_THEME.muted2, textTransform: 'uppercase' }}>Edited & Published</span>
+                  </span>
+                </a>
+                <div style={{ marginTop: '10px', fontSize: '12px', lineHeight: 1.7, color: WECHAT_THEME.muted, letterSpacing: '.02em' }}>本文由 NicMD 编辑发布</div>
+                <div style={{ marginTop: '3px', fontFamily: NICMD_BRAND_FONT_FAMILY, fontSize: '11px', lineHeight: 1.6, color: WECHAT_THEME.muted2, letterSpacing: '.03em', wordBreak: 'break-all' }}>{NICMD_BRAND.url}</div>
+              </footer>
             </div>
           </div>
         </div>
@@ -182,26 +193,14 @@ export function WechatPreview({ content, fileName, onClose }: WechatPreviewProps
   )
 }
 
-function extractWechatMeta(content: string, fileName?: string) {
-  const title = content.match(/^#\s+(.+)$/m)?.[1]?.trim() || fileName?.replace(/\.[^.]+$/, '') || '未命名文章'
-  const summary = content.match(/<!--\s*summary:\s*(.+?)\s*-->/s)?.[1]?.trim() || createSummary(content)
-  return { title, summary }
-}
-
-function createSummary(content: string) {
-  const text = content
-    .replace(/<!--.*?-->/gs, '')
-    .replace(/```[\s\S]*?```/g, '')
-    .replace(/^#+\s+/gm, '')
-    .replace(/[*_`\[\]()>|~#-]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim()
-  if (!text) return ''
-  return text.length > 32 ? `${text.slice(0, 32)}...` : text
-}
-
-function stripFirstH1(content: string) {
-  return content.replace(/^#\s+.+\n?/, '')
+function renderNicmdHtmlPlaceholder(body: string): string {
+  const attrs: Record<string, string> = {}
+  for (const line of body.split(/\r?\n/)) {
+    const match = line.match(/^\s*([\w-]+)\s*:\s*(.*?)\s*$/)
+    if (match) attrs[match[1]] = match[2]
+  }
+  const title = attrs.title || 'HTML 配图'
+  return `\n\n> ${title}\n>\n> 该图会在 nicmd weixin 命令预览中自动截图为 PNG。\n\n`
 }
 
 function copySelection(element: HTMLElement) {
@@ -216,109 +215,109 @@ function copySelection(element: HTMLElement) {
 
 const wechatStyles = {
   h1: {
-    margin: '0 0 22px',
-    padding: '0 0 14px',
-    borderBottom: '1px solid #f1e6df',
-    color: '#1f2937',
-    fontSize: '24px',
-    fontWeight: 800,
-    lineHeight: 1.35,
-    letterSpacing: '-0.02em'
+    margin: '0 0 26px',
+    padding: '0 0 16px',
+    borderBottom: `1px solid ${WECHAT_THEME.border}`,
+    color: WECHAT_THEME.text,
+    fontSize: '28px',
+    fontWeight: 850,
+    lineHeight: 1.28,
+    letterSpacing: '-0.035em'
   },
   h2: {
     display: 'flex',
     alignItems: 'center',
     gap: '10px',
     margin: '34px 0 16px',
-    color: '#9a3412',
-    fontSize: '20px',
-    fontWeight: 800,
-    lineHeight: 1.45
+    color: WECHAT_THEME.text,
+    fontSize: '21px',
+    fontWeight: 850,
+    lineHeight: 1.42
   },
   h2Mark: {
     display: 'inline-block',
     width: '5px',
     height: '20px',
     borderRadius: '99px',
-    background: 'linear-gradient(180deg, #fbbf24, #ea580c)',
+    background: `linear-gradient(180deg, ${WECHAT_THEME.accent2}, ${WECHAT_THEME.accent})`,
     flexShrink: 0
   },
   h3: {
-    margin: '26px 0 12px',
-    color: '#1f2937',
-    fontSize: '17px',
-    fontWeight: 750,
-    lineHeight: 1.45
+    margin: '28px 0 12px',
+    color: WECHAT_THEME.textSoft,
+    fontSize: '16px',
+    fontWeight: 800,
+    lineHeight: 1.5
   },
   h4: {
     margin: '22px 0 10px',
-    color: '#374151',
+    color: WECHAT_THEME.textSoft,
     fontSize: '15px',
-    fontWeight: 700,
-    lineHeight: 1.45
+    fontWeight: 760,
+    lineHeight: 1.5
   },
   p: {
-    margin: '13px 0',
-    color: '#374151',
+    margin: '14px 0',
+    color: WECHAT_THEME.textSoft,
     fontSize: '15px',
     lineHeight: 1.95,
-    letterSpacing: '0.02em'
+    letterSpacing: '0.01em'
   },
   strong: {
-    color: '#111827',
-    fontWeight: 800
+    color: WECHAT_THEME.text,
+    fontWeight: 850
   },
   em: {
-    color: '#9a3412',
+    color: WECHAT_THEME.muted,
     fontStyle: 'normal'
   },
   blockquote: {
-    margin: '20px 0',
-    padding: '12px 16px',
-    borderLeft: '4px solid #fb923c',
-    borderRadius: '0 10px 10px 0',
-    background: '#fff7ed',
-    color: '#6b7280'
+    margin: '22px 0',
+    padding: '14px 17px',
+    borderLeft: `4px solid ${WECHAT_THEME.accent}`,
+    borderRadius: '0 16px 16px 0',
+    background: WECHAT_THEME.surfaceSoft,
+    color: WECHAT_THEME.muted
   },
   ul: {
-    margin: '14px 0',
+    margin: '15px 0',
     paddingLeft: '22px',
-    color: '#374151',
+    color: WECHAT_THEME.textSoft,
     fontSize: '15px',
     lineHeight: 1.9
   },
   ol: {
-    margin: '14px 0',
+    margin: '15px 0',
     paddingLeft: '22px',
-    color: '#374151',
+    color: WECHAT_THEME.textSoft,
     fontSize: '15px',
     lineHeight: 1.9
   },
   li: {
-    margin: '6px 0',
-    color: '#374151'
+    margin: '7px 0',
+    color: WECHAT_THEME.textSoft
   },
   a: {
-    color: '#ea580c',
+    color: WECHAT_THEME.accent,
     textDecoration: 'none',
-    borderBottom: '1px solid rgba(234, 88, 12, 0.35)'
+    borderBottom: `1px solid ${WECHAT_THEME.accentBorder}`
   },
   inlineCode: {
     margin: '0 2px',
     padding: '2px 5px',
     borderRadius: '5px',
-    background: '#fff7ed',
-    color: '#c2410c',
+    background: WECHAT_THEME.codeBg,
+    color: WECHAT_THEME.codeText,
     fontSize: '13px',
     fontFamily: "'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace"
   },
   pre: {
     padding: '14px 16px',
-    background: '#faf5f0',
+    background: WECHAT_THEME.codeBg,
     overflowX: 'auto'
   },
   code: {
-    color: '#9a3412',
+    color: WECHAT_THEME.codeText,
     fontSize: '13px',
     lineHeight: 1.75,
     fontFamily: "'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace"
@@ -328,21 +327,21 @@ const wechatStyles = {
     margin: '20px 0',
     borderCollapse: 'collapse' as const,
     fontSize: '14px',
-    color: '#374151'
+    color: WECHAT_THEME.textSoft
   },
   th: {
-    padding: '10px 12px',
-    border: '1px solid #fed7aa',
-    background: '#fff7ed',
-    color: '#9a3412',
-    fontWeight: 800,
+    padding: '11px 12px',
+    border: `1px solid ${WECHAT_THEME.borderSoft}`,
+    background: WECHAT_THEME.surfaceSoft,
+    color: WECHAT_THEME.text,
+    fontWeight: 850,
     textAlign: 'left' as const
   },
   td: {
-    padding: '10px 12px',
-    border: '1px solid #f1e6df',
-    background: '#ffffff',
-    color: '#374151'
+    padding: '11px 12px',
+    border: `1px solid ${WECHAT_THEME.borderSoft}`,
+    background: WECHAT_THEME.surface,
+    color: WECHAT_THEME.textSoft
   },
   img: {
     display: 'block',

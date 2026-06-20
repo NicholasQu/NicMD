@@ -1,0 +1,646 @@
+import { BrowserWindow, shell } from 'electron'
+import { createServer, type IncomingMessage, type ServerResponse } from 'http'
+import { mkdir, readFile, stat, writeFile } from 'fs/promises'
+import { existsSync } from 'fs'
+import { createHash } from 'crypto'
+import { dirname, extname, resolve, relative, basename, join } from 'path'
+import { Marked } from 'marked'
+import {
+  WECHAT_FONT_FAMILY,
+  escapeHtml,
+  extractWechatMeta,
+  normalizeMarkdownTypography,
+  renderNicmdBrandFooter,
+  renderWechatImagePlaceholder,
+  stripFirstH1,
+  wrapWechatHtml
+} from '../shared/wechat-render'
+import { WECHAT_THEME } from '../shared/wechat-theme'
+
+interface WxArticleOptions {
+  inputPath: string
+  port?: number
+  open?: boolean
+  watch?: boolean
+}
+
+const HOST = '127.0.0.1'
+const IMAGE_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg'])
+
+export async function startWxArticleServer(options: WxArticleOptions): Promise<void> {
+  const inputPath = resolve(options.inputPath)
+  if (!existsSync(inputPath)) {
+    console.error(`Markdown file not found: ${inputPath}`)
+    return
+  }
+
+  const rootDir = dirname(inputPath)
+  const server = createServer(async (req, res) => {
+    try {
+      await handleRequest(req, res, inputPath, rootDir)
+    } catch (e: any) {
+      sendHtml(res, 500, renderErrorPage('NicMD weixin failed', e?.message || String(e)))
+    }
+  })
+
+  const closeServer = () => new Promise<void>((resolveClose) => {
+    server.close(() => resolveClose())
+  })
+
+  const shutdown = async (reason: string) => {
+    console.log(`\nStopping NicMD wxarticle server (${reason})...`)
+    await closeServer()
+    process.exit(0)
+  }
+
+  process.once('SIGINT', () => { void shutdown('SIGINT') })
+  process.once('SIGTERM', () => { void shutdown('SIGTERM') })
+  process.once('SIGHUP', () => { void shutdown('SIGHUP') })
+  process.once('exit', () => {
+    if (server.listening) server.close()
+  })
+
+  try {
+    await new Promise<void>((resolveListen, rejectListen) => {
+      server.once('error', rejectListen)
+      server.listen(options.port || 0, HOST, () => resolveListen())
+    })
+  } catch (e: any) {
+    const portText = options.port ? `:${options.port}` : ''
+    console.error(`Failed to start NicMD weixin server on ${HOST}${portText}.`)
+    if (e?.code === 'EADDRINUSE') console.error('The port is already in use. Choose another port or close the existing process.')
+    else console.error(e?.message || String(e))
+    return
+  }
+
+  const address = server.address()
+  const port = typeof address === 'object' && address ? address.port : options.port
+  const url = `http://${HOST}:${port}/`
+
+  console.log('NicMD Weixin Article Preview')
+  console.log(`File : ${inputPath}`)
+  console.log(`URL  : ${url}`)
+  console.log('Close: press Ctrl+C to stop and release the port')
+
+  if (options.open !== false) {
+    await shell.openExternal(url)
+  }
+
+  await new Promise<void>(() => {})
+}
+
+async function handleRequest(req: IncomingMessage, res: ServerResponse, inputPath: string, rootDir: string) {
+  const requestUrl = new URL(req.url || '/', `http://${HOST}`)
+
+  if (requestUrl.pathname === '/asset') {
+    await handleAsset(requestUrl, res, rootDir)
+    return
+  }
+
+  if (requestUrl.pathname === '/article-html') {
+    const html = await renderArticleHtml(inputPath, rootDir)
+    sendHtml(res, 200, html)
+    return
+  }
+
+  if (requestUrl.pathname === '/' || requestUrl.pathname === '/wxarticle') {
+    const content = await readFile(inputPath, 'utf-8')
+    const meta = extractWechatMeta(content, basename(inputPath))
+    const articleHtml = await renderArticleHtml(inputPath, rootDir)
+    sendHtml(res, 200, renderPreviewPage({ title: meta.title, summary: meta.summary, articleHtml, inputPath }))
+    return
+  }
+
+  sendHtml(res, 404, renderErrorPage('404 Not Found', requestUrl.pathname))
+}
+
+async function handleAsset(requestUrl: URL, res: ServerResponse, rootDir: string) {
+  const src = requestUrl.searchParams.get('src') || ''
+  const filePath = safeResolveAsset(rootDir, src)
+  if (!filePath) {
+    sendHtml(res, 403, renderErrorPage('Asset blocked', 'Only files inside the article folder can be served.'))
+    return
+  }
+
+  try {
+    const fileStat = await stat(filePath)
+    if (!fileStat.isFile()) throw new Error('Not a file')
+    const buffer = await readFile(filePath)
+    const type = getMimeType(filePath)
+    res.writeHead(200, {
+      'Content-Type': type,
+      'Cache-Control': 'no-cache'
+    })
+    res.end(buffer)
+  } catch (e: any) {
+    sendHtml(res, 404, renderErrorPage('Asset not found', e?.message || src))
+  }
+}
+
+async function renderArticleHtml(inputPath: string, rootDir: string): Promise<string> {
+  const content = await readFile(inputPath, 'utf-8')
+
+  const renderer = {
+    image: ({ href, title, text }) => {
+      const src = String(href || '')
+      const alt = escapeHtml(String(text || ''))
+      const resolved = resolveImage(rootDir, src)
+
+      if (!resolved.ok) {
+        return renderWechatImagePlaceholder({ title: alt || '图片无法显示', reason: resolved.reason, src })
+      }
+
+      const t = WECHAT_THEME
+      const titleHtml = title ? `<figcaption style="margin-top:8px;text-align:center;color:${t.muted};font-size:12px;line-height:1.6;">${escapeHtml(String(title))}</figcaption>` : ''
+      return `<figure style="margin:22px 0;text-align:center;"><img src="/asset?src=${encodeURIComponent(resolved.relativePath)}" alt="${alt}" style="display:block;max-width:100%;margin:0 auto;border-radius:12px;box-shadow:${t.softShadow};" />${titleHtml}</figure>`
+    },
+    code: ({ text, lang }) => {
+      const language = String(lang || '').trim()
+      const code = escapeHtml(String(text || ''))
+      if (language.toLowerCase() === 'mermaid') {
+        return renderWechatImagePlaceholder({ title: 'Mermaid 图暂未渲染', reason: 'weixin CLI V1 暂不渲染 Mermaid，请先导出为图片后引用。', src: 'mermaid code block' })
+      }
+      const t = WECHAT_THEME
+      const langLabel = language ? `<div style="padding:6px 14px;background:${t.codeHeaderBg};border-bottom:1px solid ${t.codeBorder};color:${t.accent};font-size:11px;font-weight:750;text-transform:uppercase;letter-spacing:.05em;">${escapeHtml(language)}</div>` : ''
+      return `<div style="margin:18px 0;border-radius:14px;border:1px solid ${t.codeBorder};overflow:hidden;background:${t.codeBg};">${langLabel}<pre style="margin:0;padding:14px 16px;background:${t.codeBg};overflow-x:auto;"><code style="color:${t.codeText};font-size:13px;line-height:1.75;font-family:SFMono-Regular,Consolas,Liberation Mono,Menlo,monospace;">${code}</code></pre></div>`
+    }
+  }
+
+  const markedInstance = new Marked({ gfm: true, breaks: false, renderer })
+  const withoutFirstH1 = stripFirstH1(content)
+  const normalized = normalizeMarkdownTypography(withoutFirstH1)
+  const prepared = await preprocessNicmdHtmlBlocks(normalized, rootDir)
+  const html = await markedInstance.parse(prepared)
+  return `<section style="font-family:${WECHAT_FONT_FAMILY};">${wrapWechatHtml(String(html))}${renderNicmdBrandFooter()}</section>`
+}
+
+function resolveImage(rootDir: string, src: string): { ok: true; relativePath: string } | { ok: false; reason: string } {
+  if (!src.trim()) return { ok: false, reason: '图片地址为空。' }
+  if (/^https?:\/\//i.test(src) || src.startsWith('data:')) {
+    return { ok: false, reason: '公众号复制场景不建议直接使用远程或 data 图片，建议下载到本地后引用。' }
+  }
+  if (/\.html?($|[?#])/i.test(src)) {
+    return { ok: false, reason: '这是 HTML 文件，不是图片。请先截图导出为 PNG/JPG 后再插入。' }
+  }
+
+  const cleanSrc = src.split('#')[0].split('?')[0]
+  const ext = extname(cleanSrc).toLowerCase()
+  if (!IMAGE_EXTENSIONS.has(ext)) {
+    return { ok: false, reason: `不支持的图片类型：${ext || '无扩展名'}。支持 png/jpg/jpeg/gif/webp/svg。` }
+  }
+
+  const filePath = safeResolveAsset(rootDir, cleanSrc)
+  if (!filePath) return { ok: false, reason: '图片路径越界，出于安全考虑已拦截。' }
+  if (!existsSync(filePath)) return { ok: false, reason: '图片文件不存在。' }
+
+  return { ok: true, relativePath: relative(rootDir, filePath).replace(/\\/g, '/') }
+}
+
+async function preprocessNicmdHtmlBlocks(content: string, rootDir: string): Promise<string> {
+  const pattern = /::: *nicmd-html\s+([\s\S]*?):::/g
+  const parts: string[] = []
+  let lastIndex = 0
+  let match: RegExpExecArray | null
+
+  while ((match = pattern.exec(content))) {
+    parts.push(content.slice(lastIndex, match.index))
+    parts.push(await renderNicmdHtmlBlock(match[1], rootDir))
+    lastIndex = pattern.lastIndex
+  }
+
+  parts.push(content.slice(lastIndex))
+  return parts.join('')
+}
+
+async function renderNicmdHtmlBlock(body: string, rootDir: string): Promise<string> {
+  const attrs = parseDirectiveAttrs(body)
+  const src = attrs.src || ''
+  const title = attrs.title || 'HTML 配图'
+  const width = Number(attrs.width || 960)
+  const shot = attrs.shot ? Number(attrs.shot) : 0
+  const resolved = resolveHtmlAsset(rootDir, src)
+  if (!resolved.ok) return renderWechatImagePlaceholder({ title, reason: resolved.reason, src })
+
+  try {
+    const description = await extractHtmlShotDescription(rootDir, resolved.relativePath, shot)
+    const t = WECHAT_THEME
+    const descriptionHtml = description
+      ? `<div style="margin-top:6px;color:${t.muted};font-size:13px;font-weight:500;line-height:1.7;">${escapeHtml(description)}</div>`
+      : ''
+    const imageRelativePath = await captureHtmlToPng(rootDir, resolved.relativePath, shot, width)
+    return `<figure style="margin:30px 0;text-align:center;">
+      <figcaption style="margin:0 0 12px;text-align:left;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+          <span style="display:inline-flex;align-items:center;height:22px;padding:0 9px;border-radius:999px;background:${t.accentSoft};color:${t.accentText};font-size:11px;font-weight:800;letter-spacing:.02em;">Visual</span>
+          <span style="color:${t.text};font-size:15px;font-weight:850;line-height:1.45;">${escapeHtml(title)}</span>
+          <span style="height:1px;flex:1;background:${t.accentLine};"></span>
+        </div>
+        ${descriptionHtml}
+      </figcaption>
+      <img src="/asset?src=${encodeURIComponent(imageRelativePath)}" alt="${escapeHtml(title)}" style="display:block;width:100%;max-width:${Math.min(width, 960)}px;height:auto;margin:0 auto;border-radius:18px;box-shadow:${t.shadow};border:1px solid ${t.border};" />
+    </figure>`
+  } catch (e: any) {
+    return renderWechatImagePlaceholder({ title, reason: e?.message || 'HTML 截图失败。', src })
+  }
+}
+
+async function extractHtmlShotDescription(rootDir: string, relativeHtmlPath: string, shot: number): Promise<string> {
+  if (!shot) return ''
+  const sourcePath = safeResolveAsset(rootDir, relativeHtmlPath)
+  if (!sourcePath) return ''
+
+  const win = new BrowserWindow({
+    width: 900,
+    height: 700,
+    show: false,
+    webPreferences: {
+      offscreen: true,
+      sandbox: false,
+      contextIsolation: true,
+      nodeIntegration: false
+    }
+  })
+
+  try {
+    const fileUrl = `file:///${sourcePath.replace(/\\/g, '/')}`
+    await win.loadURL(fileUrl)
+    await win.webContents.executeJavaScript(`new Promise(resolve => {
+      if (document.readyState === 'complete') resolve(true)
+      else window.addEventListener('load', () => resolve(true), { once: true })
+    })`)
+    return await win.webContents.executeJavaScript(`(() => {
+      const target = document.querySelectorAll('.shot')[${shot - 1}]
+      const desc = target?.querySelector('.desc')
+      return desc ? desc.textContent.trim() : ''
+    })()`)
+  } finally {
+    win.destroy()
+  }
+}
+
+async function captureHtmlToPng(rootDir: string, relativeHtmlPath: string, shot: number, width: number): Promise<string> {
+  const sourcePath = safeResolveAsset(rootDir, relativeHtmlPath)
+  if (!sourcePath) throw new Error('HTML 路径越界，无法截图。')
+
+  const sourceStat = await stat(sourcePath)
+  const cacheDir = join(rootDir, '.nicmd', 'weixin-assets')
+  await mkdir(cacheDir, { recursive: true })
+
+  const hash = createHash('sha1')
+    .update(`png-v3|${relativeHtmlPath}|${shot}|${width}|${sourceStat.mtimeMs}`)
+    .digest('hex')
+    .slice(0, 16)
+  const outputPath = join(cacheDir, `${hash}.png`)
+  const outputRelative = relative(rootDir, outputPath).replace(/\\/g, '/')
+  if (existsSync(outputPath)) return outputRelative
+
+  const win = new BrowserWindow({
+    width: Math.max(720, Math.min(width, 1400)),
+    height: 1200,
+    show: false,
+    webPreferences: {
+      offscreen: true,
+      sandbox: false,
+      contextIsolation: true,
+      nodeIntegration: false
+    }
+  })
+
+  try {
+    const fileUrl = `file:///${sourcePath.replace(/\\/g, '/')}`
+    await win.loadURL(fileUrl)
+
+    await win.webContents.executeJavaScript(`new Promise(resolve => {
+      if (document.readyState === 'complete') resolve(true)
+      else window.addEventListener('load', () => resolve(true), { once: true })
+    })`)
+
+    const clip = await win.webContents.executeJavaScript(`(() => {
+      const shotIndex = ${shot || 0}
+      let target = shotIndex ? document.querySelectorAll('.shot')[shotIndex - 1] : (document.querySelector('.page') || document.querySelector('main') || document.body)
+      if (!target) return null
+      if (shotIndex) {
+        const h2 = target.querySelector('h2')
+        const desc = target.querySelector('.desc')
+        if (h2) h2.remove()
+        if (desc) desc.remove()
+        target.style.padding = '0'
+        document.body.innerHTML = ''
+        document.body.style.margin = '0'
+        document.body.style.padding = '24px'
+        document.body.style.background = '#07111f'
+        target.style.margin = '0 auto'
+        target.style.maxWidth = '1120px'
+        document.body.appendChild(target)
+        target = document.querySelector('.shot') || document.querySelector('.page') || document.body
+      }
+      const rect = target.getBoundingClientRect()
+      return { x: Math.max(0, Math.floor(rect.left)), y: Math.max(0, Math.floor(rect.top)), width: Math.ceil(rect.width), height: Math.ceil(rect.height) }
+    })()`)
+
+    if (!clip || !clip.width || !clip.height) throw new Error('无法定位 HTML 配图区域。')
+    const captureWidth = Math.min(Math.max(Math.ceil(clip.width), 320), 1800)
+    const captureHeight = Math.min(Math.max(Math.ceil(clip.height), 160), 3000)
+    win.setSize(captureWidth + 80, captureHeight + 80)
+    await new Promise(resolve => setTimeout(resolve, 120))
+
+    const image = await win.webContents.capturePage({
+      x: clip.x,
+      y: clip.y,
+      width: captureWidth,
+      height: captureHeight
+    })
+    await writeFile(outputPath, image.toPNG())
+    return outputRelative
+  } finally {
+    win.destroy()
+  }
+}
+
+function parseDirectiveAttrs(body: string): Record<string, string> {
+  const attrs: Record<string, string> = {}
+  for (const line of body.split(/\r?\n/)) {
+    const match = line.match(/^\s*([\w-]+)\s*:\s*(.*?)\s*$/)
+    if (match) attrs[match[1]] = match[2]
+  }
+  return attrs
+}
+
+function resolveHtmlAsset(rootDir: string, src: string): { ok: true; relativePath: string } | { ok: false; reason: string } {
+  if (!src.trim()) return { ok: false, reason: 'HTML 配图地址为空。' }
+  if (/^https?:\/\//i.test(src) || src.startsWith('data:')) return { ok: false, reason: '只支持本地 HTML 配图。' }
+
+  const cleanSrc = src.split('#')[0].split('?')[0]
+  const ext = extname(cleanSrc).toLowerCase()
+  if (ext !== '.html' && ext !== '.htm') return { ok: false, reason: `这不是 HTML 文件：${ext || '无扩展名'}。` }
+
+  const filePath = safeResolveAsset(rootDir, cleanSrc)
+  if (!filePath) return { ok: false, reason: 'HTML 路径越界，出于安全考虑已拦截。' }
+  if (!existsSync(filePath)) return { ok: false, reason: 'HTML 文件不存在。' }
+
+  return { ok: true, relativePath: relative(rootDir, filePath).replace(/\\/g, '/') }
+}
+
+function safeResolveAsset(rootDir: string, src: string): string | null {
+  const decoded = decodeURIComponent(src)
+  const filePath = resolve(rootDir, decoded)
+  const rel = relative(rootDir, filePath)
+  if (rel.startsWith('..') || rel === '..') return null
+  return filePath
+}
+
+function renderPreviewPage(data: { title: string; summary: string; articleHtml: string; inputPath: string }) {
+  const safeTitle = escapeHtml(data.title)
+  const safeSummary = escapeHtml(data.summary)
+  const safePath = escapeHtml(data.inputPath)
+  const t = WECHAT_THEME
+  return `<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>${safeTitle} - NicMD weixin</title>
+  <style>
+    :root { color-scheme: light; --text:${t.text}; --text-soft:${t.textSoft}; --muted:${t.muted}; --muted-2:${t.muted2}; --surface:${t.surface}; --surface-soft:${t.surfaceSoft}; --border:${t.border}; --border-soft:${t.borderSoft}; --accent:${t.accent}; --accent-2:${t.accent2}; --accent-text:${t.accentText}; --accent-soft:${t.accentSoft}; --accent-softer:${t.accentSofter}; --accent-border:${t.accentBorder}; --accent-line:${t.accentLine}; --shadow:${t.shadow}; --soft-shadow:${t.softShadow}; }
+    * { box-sizing: border-box; }
+    body { margin:0; min-height:100vh; background:radial-gradient(circle at 20% 0%,var(--accent-softer),transparent 30%),linear-gradient(180deg,var(--surface-soft) 0%,var(--surface) 46%,var(--surface-soft) 100%); color:var(--text); font-family:${WECHAT_FONT_FAMILY}; }
+    .toolbar { position:sticky; top:0; z-index:10; display:flex; align-items:center; justify-content:space-between; gap:16px; min-height:64px; padding:10px 20px; background:rgba(255,255,255,.78); backdrop-filter:saturate(180%) blur(22px); border-bottom:1px solid var(--border); box-shadow:0 8px 26px rgba(0,0,0,.045); }
+    .brand { display:flex; align-items:center; gap:12px; min-width:0; }
+    .logo { width:36px; height:36px; border-radius:13px; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:900; font-family:Georgia,serif; background:linear-gradient(135deg,var(--accent),var(--accent-2)); box-shadow:0 10px 22px var(--accent-softer); }
+    .meta { min-width:0; }
+    .meta-title { font-size:15px; font-weight:850; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:620px; }
+    .actions { display:flex; align-items:center; gap:8px; flex-shrink:0; }
+    button { border:none; border-radius:10px; padding:9px 12px; font-size:12px; font-weight:750; cursor:pointer; transition:.18s ease; }
+    .primary { color:#fff; background:linear-gradient(135deg,var(--accent),var(--accent-2)); box-shadow:0 10px 22px var(--accent-softer); }
+    .secondary { color:var(--text); background:rgba(255,255,255,.72); border:1px solid var(--border); }
+    button:hover { transform:translateY(-1px); box-shadow:0 8px 18px rgba(0,0,0,.08); }
+    .layout { width:min(1180px, calc(100vw - 36px)); margin:22px auto 54px; display:grid; grid-template-columns:minmax(0,720px) 260px; gap:22px; align-items:start; justify-content:center; }
+    .main-col { min-width:0; }
+    .summary-card { width:min(720px,100%); margin:0 auto 14px; padding:15px 17px; border-radius:20px; background:rgba(255,255,255,.74); backdrop-filter:saturate(180%) blur(18px); border:1px solid var(--border); box-shadow:0 18px 44px rgba(0,0,0,.06); }
+    .summary-label { color:var(--muted-2); font-size:12px; font-weight:800; margin-bottom:6px; letter-spacing:.02em; }
+    .summary-text { color:var(--text-soft); font-size:13px; line-height:1.75; }
+    .toc { position:sticky; top:86px; max-height:calc(100vh - 110px); overflow:auto; padding:14px; border-radius:20px; background:rgba(255,255,255,.74); backdrop-filter:saturate(180%) blur(18px); border:1px solid var(--border); box-shadow:0 18px 44px rgba(0,0,0,.07); }
+    .toc-title { color:var(--text); font-size:13px; font-weight:900; margin-bottom:10px; }
+    .toc a { display:block; color:var(--muted); text-decoration:none; font-size:12px; line-height:1.45; padding:7px 8px; border-radius:10px; border-left:2px solid transparent; }
+    .toc a:hover { color:var(--text); background:var(--surface-soft); }
+    .toc a.active { color:var(--accent); background:var(--accent-softer); border-left-color:var(--accent); font-weight:800; }
+    .toc a.h3 { padding-left:18px; font-size:11px; color:var(--muted-2); }
+    .phone { width:min(720px,100%); margin:0 auto; background:var(--surface); border-radius:24px; box-shadow:0 24px 70px rgba(0,0,0,.12); overflow:hidden; border:1px solid var(--border); }
+    .article { padding:36px 32px 46px; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
+    .article h1, .article h2, .article h3, .article h4, .article p, .article li, .article td, .article th { hyphens:auto; }
+    .article h2::after { content:''; display:block; width:88px; height:3px; margin-top:10px; border-radius:999px; background:var(--accent-line); }
+    .article h3::before { content:''; display:inline-block; width:6px; height:6px; margin-right:8px; border-radius:50%; background:var(--accent); vertical-align:2px; box-shadow:0 0 0 4px var(--accent-softer); }
+    .article h3.reference-heading { margin-top:34px !important; padding-top:18px !important; border-top:1px solid var(--border-soft) !important; color:var(--muted-2) !important; font-size:14px !important; font-weight:760 !important; }
+    .article h3.reference-heading::before { background:var(--muted-2) !important; box-shadow:none !important; }
+    .article img { cursor:zoom-in; transition:transform .2s ease, box-shadow .2s ease; }
+    .article img:hover { transform:translateY(-2px); box-shadow:0 18px 46px rgba(0,0,0,.18) !important; }
+    .lightbox { position:fixed; inset:0; z-index:100; display:none; align-items:center; justify-content:center; padding:32px; background:rgba(0,0,0,.78); backdrop-filter:blur(18px); }
+    .lightbox.show { display:flex; }
+    .lightbox img { max-width:min(1180px,96vw); max-height:92vh; border-radius:20px; box-shadow:0 28px 90px rgba(0,0,0,.45); }
+    .lightbox-close { position:fixed; top:18px; right:22px; color:#fff; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.22); border-radius:999px; padding:8px 12px; font-size:13px; }
+    .path { width:min(680px,100%); margin:12px auto 0; color:#9ca3af; font-size:11px; text-align:center; word-break:break-all; }
+    .toast { position:fixed; right:20px; bottom:20px; padding:12px 16px; border-radius:12px; color:#fff; background:#16a34a; box-shadow:0 18px 36px rgba(22,163,74,.28); opacity:0; transform:translateY(10px); transition:.2s ease; font-size:13px; font-weight:750; }
+    .toast.show { opacity:1; transform:translateY(0); }
+    @media (max-width: 980px) { .layout { display:block; width:min(760px, calc(100vw - 24px)); } .toc { display:none; } .toolbar { align-items:flex-start; flex-direction:column; } .actions { flex-wrap:wrap; } }
+  </style>
+</head>
+<body>
+  <header class="toolbar">
+    <div class="brand">
+      <div class="logo">𝕸</div>
+      <div class="meta">
+        <div class="meta-title">${safeTitle}</div>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="secondary" onclick="copyText(${JSON.stringify(data.title)})">复制标题</button>
+      <button class="secondary" onclick="copyText(${JSON.stringify(data.summary)})">复制摘要</button>
+      <button class="primary" onclick="copyArticle()">一键复制公众号富文本</button>
+    </div>
+  </header>
+  <main class="layout">
+    <div class="main-col">
+      <section class="summary-card">
+        <div class="summary-label">摘要</div>
+        <div class="summary-text" id="summaryText">${safeSummary}</div>
+      </section>
+      <div class="phone"><article id="article" class="article">${data.articleHtml}</article></div>
+      <div class="path">${safePath}</div>
+    </div>
+    <aside class="toc" id="toc"><div class="toc-title">目录</div></aside>
+  </main>
+  <div id="lightbox" class="lightbox" onclick="closeLightbox()"><button class="lightbox-close">关闭</button><img id="lightboxImg" alt="preview" /></div>
+  <div id="toast" class="toast">已复制，去公众号粘贴</div>
+  <script>
+    buildToc()
+    styleReferenceSection()
+    setupImageLightbox()
+    setupActiveToc()
+
+    function copyText(text) {
+      const value = text || ''
+      fallbackCopyText(value)
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(value).catch(() => {})
+      }
+      showToast('已复制')
+    }
+    async function copyArticle() {
+      const article = document.getElementById('article')
+      const html = article.innerHTML
+      const plain = article.innerText
+      try {
+        if (navigator.clipboard && window.ClipboardItem) {
+          await navigator.clipboard.write([new ClipboardItem({
+            'text/html': new Blob([html], { type: 'text/html' }),
+            'text/plain': new Blob([plain], { type: 'text/plain' })
+          })])
+        } else {
+          fallbackCopy(article)
+        }
+        showToast('已复制，去公众号粘贴')
+      } catch (e) {
+        fallbackCopy(article)
+        showToast('已复制，去公众号粘贴')
+      }
+    }
+    function fallbackCopy(element) {
+      const range = document.createRange()
+      range.selectNodeContents(element)
+      const selection = window.getSelection()
+      selection.removeAllRanges()
+      selection.addRange(range)
+      document.execCommand('copy')
+      selection.removeAllRanges()
+    }
+    function fallbackCopyText(text) {
+      const textarea = document.createElement('textarea')
+      textarea.value = text
+      textarea.style.position = 'fixed'
+      textarea.style.left = '-9999px'
+      document.body.appendChild(textarea)
+      textarea.focus()
+      textarea.select()
+      document.execCommand('copy')
+      textarea.remove()
+    }
+    function buildToc() {
+      const toc = document.getElementById('toc')
+      const article = document.getElementById('article')
+      if (!toc || !article) return
+      const headings = Array.from(article.querySelectorAll('h2,h3')).filter(heading => !heading.innerText.includes('参考资料'))
+      headings.forEach((heading, index) => {
+        const id = 'toc-' + index
+        heading.id = id
+        heading.style.scrollMarginTop = '92px'
+        const link = document.createElement('a')
+        link.href = '#' + id
+        link.dataset.target = id
+        link.textContent = heading.innerText.replace(/^#+\\s*/, '')
+        link.className = heading.tagName.toLowerCase()
+        link.addEventListener('click', event => {
+          event.preventDefault()
+          const y = heading.getBoundingClientRect().top + window.scrollY - 86
+          window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' })
+        })
+        toc.appendChild(link)
+      })
+      if (headings.length === 0) toc.style.display = 'none'
+    }
+    function setupImageLightbox() {
+      const box = document.getElementById('lightbox')
+      const boxImg = document.getElementById('lightboxImg')
+      document.querySelectorAll('#article img').forEach(img => {
+        img.addEventListener('click', () => {
+          boxImg.src = img.src
+          box.classList.add('show')
+        })
+      })
+      document.addEventListener('keydown', event => {
+        if (event.key === 'Escape') closeLightbox()
+      })
+    }
+    function closeLightbox() {
+      const box = document.getElementById('lightbox')
+      const boxImg = document.getElementById('lightboxImg')
+      box.classList.remove('show')
+      boxImg.src = ''
+    }
+    function setupActiveToc() {
+      const headings = Array.from(document.querySelectorAll('#article h2,#article h3')).filter(heading => !heading.innerText.includes('参考资料'))
+      const links = Array.from(document.querySelectorAll('#toc a'))
+      if (!headings.length || !links.length) return
+      const activate = () => {
+        let current = headings[0]
+        for (const heading of headings) {
+          if (heading.getBoundingClientRect().top <= 120) current = heading
+          else break
+        }
+        links.forEach(link => {
+          const active = link.dataset.target === current.id
+          link.classList.toggle('active', active)
+          if (active) link.scrollIntoView({ block: 'nearest' })
+        })
+      }
+      activate()
+      window.addEventListener('scroll', activate, { passive: true })
+    }
+    window.closeLightbox = closeLightbox
+    function styleReferenceSection() {
+      const article = document.getElementById('article')
+      if (!article) return
+      const headings = Array.from(article.querySelectorAll('h2,h3,h4'))
+      const ref = headings.find(h => h.innerText.includes('参考资料'))
+      if (!ref) return
+      ref.classList.add('reference-heading')
+      ref.style.boxShadow = 'none'
+      ref.style.background = 'transparent'
+      ref.style.borderLeft = 'none'
+      ref.style.borderRadius = '0'
+      let node = ref.nextElementSibling
+      while (node) {
+        node.style.color = '#86868b'
+        node.style.fontSize = '12px'
+        node.style.lineHeight = '1.75'
+        node.querySelectorAll?.('a').forEach(a => {
+          a.style.color = '#6e6e73'
+          a.style.borderBottomColor = 'rgba(110,110,115,.24)'
+        })
+        node = node.nextElementSibling
+      }
+    }
+    function showToast(text) {
+      const toast = document.getElementById('toast')
+      toast.textContent = text
+      toast.classList.add('show')
+      setTimeout(() => toast.classList.remove('show'), 1800)
+    }
+  </script>
+</body>
+</html>`
+}
+
+function sendHtml(res: ServerResponse, status: number, html: string) {
+  res.writeHead(status, {
+    'Content-Type': 'text/html; charset=utf-8',
+    'Cache-Control': 'no-cache'
+  })
+  res.end(html)
+}
+
+function renderErrorPage(title: string, message: string) {
+  const t = WECHAT_THEME
+  return `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><title>${escapeHtml(title)}</title></head><body style="font-family:${WECHAT_FONT_FAMILY};padding:32px;background:${t.surfaceSoft};color:${t.text};"><h1>${escapeHtml(title)}</h1><pre style="white-space:pre-wrap;line-height:1.8;color:${t.textSoft};">${escapeHtml(message)}</pre></body></html>`
+}
+
+function getMimeType(filePath: string) {
+  const ext = extname(filePath).toLowerCase()
+  if (ext === '.png') return 'image/png'
+  if (ext === '.jpg' || ext === '.jpeg') return 'image/jpeg'
+  if (ext === '.gif') return 'image/gif'
+  if (ext === '.webp') return 'image/webp'
+  if (ext === '.svg') return 'image/svg+xml'
+  if (ext === '.html' || ext === '.htm') return 'text/html; charset=utf-8'
+  return 'application/octet-stream'
+}
+

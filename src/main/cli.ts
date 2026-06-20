@@ -1,13 +1,51 @@
-import { BrowserWindow } from 'electron'
+import { BrowserWindow, app } from 'electron'
 import { readFile, writeFile, unlink } from 'fs/promises'
 import { join } from 'path'
-import { existsSync } from 'fs'
 import * as mammoth from 'mammoth'
 import { buildPdfHtml } from './pdf-builder'
+import { startWxArticleServer } from './wxarticle-server'
+
+export function getCliArgs(argv: string[]): string[] {
+  return argv.slice(1).filter(a =>
+    a !== '.' &&
+    !a.startsWith('--allow-file') &&
+    !a.startsWith('--no-sandbox') &&
+    !a.startsWith('--enable-')
+  )
+}
+
+export function isCliOnlyCommand(argv: string[]): boolean {
+  const args = getCliArgs(argv)
+  return args.some(a => ['weixin', 'wxarticle', 'help', '--help', '-h', '--version', '-v'].includes(a))
+}
 
 export async function handleCli(argv: string[]): Promise<void> {
-  const args = argv.slice(1).filter(a => !a.startsWith('--allow-file') && !a.startsWith('--no-sandbox') && !a.startsWith('--enable-'))
+  const args = getCliArgs(argv)
   if (args.length === 0) return
+
+  if (args.includes('help') || args.includes('--help') || args.includes('-h')) {
+    printHelp()
+    return
+  }
+
+  if (args.includes('--version') || args.includes('-v')) {
+    console.log(app.getVersion())
+    return
+  }
+
+  const weixinIdx = args.findIndex(a => a === 'weixin' || a === 'wxarticle')
+  if (weixinIdx >= 0) {
+    const inputPath = args[weixinIdx + 1]
+    if (!inputPath || inputPath.startsWith('-')) { console.log('Usage: NicMD.exe weixin input.md [--port 37621] [--no-open]'); return }
+    const portIdx = args.indexOf('--port')
+    const port = portIdx >= 0 ? Number(args[portIdx + 1]) : undefined
+    await startWxArticleServer({
+      inputPath,
+      port: Number.isFinite(port) ? port : undefined,
+      open: !args.includes('--no-open')
+    })
+    return
+  }
 
   const exportIdx = args.indexOf('--export-pdf')
   const convertIdx = args.indexOf('--convert-docx')
@@ -70,4 +108,38 @@ export async function handleCli(argv: string[]): Promise<void> {
     console.log('  API Key and prompts are configured in the AI panel settings.')
     return
   }
+}
+
+function printHelp(): void {
+  console.log(`NicMD - Markdown writing and publishing toolkit
+
+Usage:
+  nicmd <file.md>
+  nicmd weixin <file.md> [options]
+  nicmd --export-pdf <input.md> [output.pdf]
+  nicmd --convert-docx <input.docx> [output.md]
+  nicmd --help
+  nicmd --version
+
+Commands:
+  weixin <file.md>          Start a local WeChat article preview server.
+
+Options:
+  -h, --help                Show this help message.
+  -v, --version             Show NicMD version.
+  --export-pdf              Export Markdown to PDF.
+  --convert-docx            Convert DOCX to Markdown.
+  --port <port>             Use a fixed port for weixin preview.
+  --no-open                 Do not open browser automatically.
+
+Examples:
+  nicmd article.md
+  nicmd weixin article.md
+  nicmd weixin article.md --port 37621 --no-open
+  nicmd --export-pdf article.md article.pdf
+  nicmd --convert-docx draft.docx draft.md
+
+Notes:
+  weixin binds to 127.0.0.1 only. Press Ctrl+C to stop the server and release the port.
+`)
 }
