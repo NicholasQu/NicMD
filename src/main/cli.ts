@@ -4,6 +4,7 @@ import { join } from 'path'
 import * as mammoth from 'mammoth'
 import { buildPdfHtml } from './pdf-builder'
 import { startWxArticleServer } from './wxarticle-server'
+import { WECHAT_THEMES } from '../shared/wechat-theme'
 
 export function getCliArgs(argv: string[]): string[] {
   return argv.slice(1).filter(a =>
@@ -36,13 +37,21 @@ export async function handleCli(argv: string[]): Promise<void> {
   const weixinIdx = args.findIndex(a => a === 'weixin' || a === 'wxarticle')
   if (weixinIdx >= 0) {
     const inputPath = args[weixinIdx + 1]
-    if (!inputPath || inputPath.startsWith('-')) { console.log('Usage: NicMD.exe weixin input.md [--port 37621] [--no-open]'); return }
+    if (!inputPath || inputPath.startsWith('-')) { console.log('Usage: NicMD.exe weixin input.md [--theme appleGold] [--port 37621] [--no-open]'); return }
     const portIdx = args.indexOf('--port')
     const port = portIdx >= 0 ? Number(args[portIdx + 1]) : undefined
+    const themeIdx = args.indexOf('--theme')
+    const theme = themeIdx >= 0 ? args[themeIdx + 1] : undefined
+    if (theme && !(theme in WECHAT_THEMES)) {
+      console.log(`Unknown theme: ${theme}`)
+      console.log(`Available themes: ${Object.keys(WECHAT_THEMES).join(', ')}`)
+      return
+    }
     await startWxArticleServer({
       inputPath,
       port: Number.isFinite(port) ? port : undefined,
-      open: !args.includes('--no-open')
+      open: !args.includes('--no-open'),
+      theme
     })
     return
   }
@@ -129,13 +138,15 @@ Options:
   -v, --version             Show NicMD version.
   --export-pdf              Export Markdown to PDF.
   --convert-docx            Convert DOCX to Markdown.
+  --theme <name>            Use a weixin theme: appleGold, appleOrange, appleBlue.
   --port <port>             Use a fixed port for weixin preview.
   --no-open                 Do not open browser automatically.
 
 Examples:
   nicmd article.md
   nicmd weixin article.md
-  nicmd weixin article.md --port 37621 --no-open
+  nicmd weixin article.md --theme appleOrange
+  nicmd weixin article.md --theme appleGold --port 37621 --no-open
   nicmd --export-pdf article.md article.pdf
   nicmd --convert-docx draft.docx draft.md
 

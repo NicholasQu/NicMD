@@ -14,13 +14,14 @@ import {
   renderWechatImagePlaceholder,
   wrapWechatHtml
 } from '../shared/wechat-render'
-import { WECHAT_THEME } from '../shared/wechat-theme'
+import { ACTIVE_WECHAT_THEME, setActiveWechatTheme } from '../shared/wechat-theme'
 
 interface WxArticleOptions {
   inputPath: string
   port?: number
   open?: boolean
   watch?: boolean
+  theme?: string
 }
 
 const HOST = '127.0.0.1'
@@ -34,6 +35,7 @@ export async function startWxArticleServer(options: WxArticleOptions): Promise<v
   }
 
   const rootDir = dirname(inputPath)
+  const theme = setActiveWechatTheme(options.theme)
   const server = createServer(async (req, res) => {
     try {
       await handleRequest(req, res, inputPath, rootDir)
@@ -78,6 +80,7 @@ export async function startWxArticleServer(options: WxArticleOptions): Promise<v
 
   console.log('NicMD Weixin Article Preview')
   console.log(`File : ${inputPath}`)
+  console.log(`Theme: ${theme.name}`)
   console.log(`URL  : ${url}`)
   console.log('Close: press Ctrl+C to stop and release the port')
 
@@ -106,7 +109,7 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse, inputPat
     const content = await readFile(inputPath, 'utf-8')
     const meta = extractWechatMeta(content, basename(inputPath))
     const articleHtml = await renderArticleHtml(inputPath, rootDir)
-    sendHtml(res, 200, renderPreviewPage({ title: meta.title, summary: meta.summary, articleHtml, inputPath }))
+    sendHtml(res, 200, renderPreviewPage({ title: meta.title, subtitle: meta.subtitle, summary: meta.summary, articleHtml, inputPath }))
     return
   }
 
@@ -149,7 +152,7 @@ async function renderArticleHtml(inputPath: string, rootDir: string): Promise<st
         return renderWechatImagePlaceholder({ title: alt || '图片无法显示', reason: resolved.reason, src })
       }
 
-      const t = WECHAT_THEME
+      const t = ACTIVE_WECHAT_THEME
       const titleHtml = title ? `<figcaption style="margin-top:8px;text-align:center;color:${t.muted};font-size:12px;line-height:1.6;">${escapeHtml(String(title))}</figcaption>` : ''
       return `<figure style="margin:22px 0;text-align:center;"><img src="/asset?src=${encodeURIComponent(resolved.relativePath)}" alt="${alt}" style="display:block;max-width:100%;margin:0 auto;border-radius:12px;box-shadow:${t.softShadow};" />${titleHtml}</figure>`
     },
@@ -159,7 +162,7 @@ async function renderArticleHtml(inputPath: string, rootDir: string): Promise<st
       if (language.toLowerCase() === 'mermaid') {
         return renderWechatImagePlaceholder({ title: 'Mermaid 图暂未渲染', reason: 'weixin CLI V1 暂不渲染 Mermaid，请先导出为图片后引用。', src: 'mermaid code block' })
       }
-      const t = WECHAT_THEME
+      const t = ACTIVE_WECHAT_THEME
       const langLabel = language ? `<div style="padding:6px 14px;background:${t.codeHeaderBg};border-bottom:1px solid ${t.codeBorder};color:${t.accent};font-size:11px;font-weight:750;text-transform:uppercase;letter-spacing:.05em;">${escapeHtml(language)}</div>` : ''
       return `<div style="margin:18px 0;border-radius:14px;border:1px solid ${t.codeBorder};overflow:hidden;background:${t.codeBg};">${langLabel}<pre style="margin:0;padding:14px 16px;background:${t.codeBg};overflow-x:auto;"><code style="color:${t.codeText};font-size:13px;line-height:1.75;font-family:SFMono-Regular,Consolas,Liberation Mono,Menlo,monospace;">${code}</code></pre></div>`
     }
@@ -221,22 +224,12 @@ async function renderNicmdHtmlBlock(body: string, rootDir: string): Promise<stri
 
   try {
     const description = await extractHtmlShotDescription(rootDir, resolved.relativePath, shot)
-    const t = WECHAT_THEME
+    const t = ACTIVE_WECHAT_THEME
     const descriptionHtml = description
       ? `<div style="margin-top:6px;color:${t.muted};font-size:13px;font-weight:500;line-height:1.7;">${escapeHtml(description)}</div>`
       : ''
     const imageRelativePath = await captureHtmlToPng(rootDir, resolved.relativePath, shot, width)
-    return `<figure style="margin:30px 0;text-align:center;">
-      <figcaption style="margin:0 0 12px;text-align:left;">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
-          <span style="display:inline-flex;align-items:center;height:22px;padding:0 9px;border-radius:999px;background:${t.accentSoft};color:${t.accentText};font-size:11px;font-weight:800;letter-spacing:.02em;">Visual</span>
-          <span style="color:${t.text};font-size:15px;font-weight:850;line-height:1.45;">${escapeHtml(title)}</span>
-          <span style="height:1px;flex:1;background:${t.accentLine};"></span>
-        </div>
-        ${descriptionHtml}
-      </figcaption>
-      <img src="/asset?src=${encodeURIComponent(imageRelativePath)}" alt="${escapeHtml(title)}" style="display:block;width:100%;max-width:${Math.min(width, 960)}px;height:auto;margin:0 auto;border-radius:18px;box-shadow:${t.shadow};border:1px solid ${t.border};" />
-    </figure>`
+    return `<figure style="margin:30px 0;text-align:center;"><figcaption style="margin:0 0 12px;text-align:left;"><div style="margin-bottom:4px;line-height:22px;"><span style="display:inline-block;vertical-align:middle;padding:0 9px;height:22px;line-height:22px;border-radius:999px;background:${t.accentSoft};color:${t.accentText};font-size:11px;font-weight:800;letter-spacing:.02em;">Visual</span><span style="display:inline-block;vertical-align:middle;margin-left:8px;color:${t.text};font-size:15px;font-weight:850;line-height:1.45;">${escapeHtml(title)}</span></div>${descriptionHtml}</figcaption><img src="/asset?src=${encodeURIComponent(imageRelativePath)}" alt="${escapeHtml(title)}" style="display:block;width:100%;max-width:${Math.min(width, 960)}px;height:auto;margin:0 auto;border-radius:18px;box-shadow:${t.shadow};border:1px solid ${t.border};" /></figure>`
   } catch (e: any) {
     return renderWechatImagePlaceholder({ title, reason: e?.message || 'HTML 截图失败。', src })
   }
@@ -285,7 +278,7 @@ async function captureHtmlToPng(rootDir: string, relativeHtmlPath: string, shot:
   await mkdir(cacheDir, { recursive: true })
 
   const hash = createHash('sha1')
-    .update(`png-v3|${relativeHtmlPath}|${shot}|${width}|${sourceStat.mtimeMs}`)
+    .update(`png-v5|${relativeHtmlPath}|${shot}|${width}|${sourceStat.mtimeMs}`)
     .digest('hex')
     .slice(0, 16)
   const outputPath = join(cacheDir, `${hash}.png`)
@@ -387,11 +380,12 @@ function safeResolveAsset(rootDir: string, src: string): string | null {
   return filePath
 }
 
-function renderPreviewPage(data: { title: string; summary: string; articleHtml: string; inputPath: string }) {
+function renderPreviewPage(data: { title: string; subtitle: string; summary: string; articleHtml: string; inputPath: string }) {
   const safeTitle = escapeHtml(data.title)
+  const safeSubtitle = escapeHtml(data.subtitle)
   const safeSummary = escapeHtml(data.summary)
   const safePath = escapeHtml(data.inputPath)
-  const t = WECHAT_THEME
+  const t = ACTIVE_WECHAT_THEME
   return `<!doctype html>
 <html lang="zh-CN">
 <head>
@@ -399,7 +393,7 @@ function renderPreviewPage(data: { title: string; summary: string; articleHtml: 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>${safeTitle} - NicMD weixin</title>
   <style>
-    :root { color-scheme: light; --text:${t.text}; --text-soft:${t.textSoft}; --muted:${t.muted}; --muted-2:${t.muted2}; --surface:${t.surface}; --surface-soft:${t.surfaceSoft}; --border:${t.border}; --border-soft:${t.borderSoft}; --accent:${t.accent}; --accent-2:${t.accent2}; --accent-text:${t.accentText}; --accent-soft:${t.accentSoft}; --accent-softer:${t.accentSofter}; --accent-border:${t.accentBorder}; --accent-line:${t.accentLine}; --shadow:${t.shadow}; --soft-shadow:${t.softShadow}; }
+    :root { color-scheme: light; --text:${t.text}; --text-soft:${t.textSoft}; --muted:${t.muted}; --muted-2:${t.muted2}; --heading:${t.heading}; --surface:${t.surface}; --surface-soft:${t.surfaceSoft}; --border:${t.border}; --border-soft:${t.borderSoft}; --accent:${t.accent}; --accent-2:${t.accent2}; --accent-text:${t.accentText}; --accent-soft:${t.accentSoft}; --accent-softer:${t.accentSofter}; --accent-border:${t.accentBorder}; --accent-line:${t.accentLine}; --shadow:${t.shadow}; --soft-shadow:${t.softShadow}; }
     * { box-sizing: border-box; }
     body { margin:0; min-height:100vh; background:radial-gradient(circle at 20% 0%,var(--accent-softer),transparent 30%),linear-gradient(180deg,var(--surface-soft) 0%,var(--surface) 46%,var(--surface-soft) 100%); color:var(--text); font-family:${WECHAT_FONT_FAMILY}; }
     .toolbar { position:sticky; top:0; z-index:10; display:flex; align-items:center; justify-content:space-between; gap:16px; min-height:64px; padding:10px 20px; background:rgba(255,255,255,.78); backdrop-filter:saturate(180%) blur(22px); border-bottom:1px solid var(--border); box-shadow:0 8px 26px rgba(0,0,0,.045); }
@@ -414,6 +408,12 @@ function renderPreviewPage(data: { title: string; summary: string; articleHtml: 
     button:hover { transform:translateY(-1px); box-shadow:0 8px 18px rgba(0,0,0,.08); }
     .layout { width:min(1180px, calc(100vw - 36px)); margin:22px auto 54px; display:grid; grid-template-columns:minmax(0,720px) 260px; gap:22px; align-items:start; justify-content:center; }
     .main-col { min-width:0; }
+    .title-card { width:min(720px,100%); margin:0 auto 14px; padding:18px 22px 17px; border-radius:22px; background:linear-gradient(135deg,rgba(255,255,255,.84),var(--surface)); border:1px solid var(--border); box-shadow:var(--soft-shadow); }
+    .title-eyebrow { color:var(--accent-text); font-size:10px; font-weight:850; letter-spacing:.16em; text-transform:uppercase; margin-bottom:8px; }
+    .article-title { margin:0; color:var(--heading); font-size:24px; line-height:1.34; font-weight:860; letter-spacing:-.025em; word-break:normal; overflow-wrap:break-word; }
+    .article-subtitle { margin:8px 0 0; color:var(--muted); font-size:15px; line-height:1.65; font-weight:520; word-break:normal; overflow-wrap:break-word; }
+    .body-divider { display:flex; align-items:center; gap:12px; width:min(720px,100%); margin:16px auto 14px; color:var(--muted-2); font-size:11px; font-weight:850; letter-spacing:.18em; text-transform:uppercase; }
+    .body-divider::before, .body-divider::after { content:''; height:1px; flex:1; background:var(--accent-line); opacity:.72; }
     .summary-card { width:min(720px,100%); margin:0 auto 14px; padding:15px 17px; border-radius:20px; background:rgba(255,255,255,.74); backdrop-filter:saturate(180%) blur(18px); border:1px solid var(--border); box-shadow:0 18px 44px rgba(0,0,0,.06); }
     .summary-label { color:var(--muted-2); font-size:12px; font-weight:800; margin-bottom:6px; letter-spacing:.02em; }
     .summary-text { color:var(--text-soft); font-size:13px; line-height:1.75; }
@@ -425,13 +425,11 @@ function renderPreviewPage(data: { title: string; summary: string; articleHtml: 
     .toc a.h3 { padding-left:18px; font-size:11px; color:var(--muted-2); }
     .phone { width:min(720px,100%); margin:0 auto; background:var(--surface); border-radius:24px; box-shadow:0 24px 70px rgba(0,0,0,.12); overflow:hidden; border:1px solid var(--border); }
     .article { padding:36px 32px 46px; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
-    .article h1, .article h2, .article h3, .article h4, .article p, .article li, .article td, .article th { hyphens:auto; }
-    .article h2::after { content:''; display:block; width:88px; height:3px; margin-top:10px; border-radius:999px; background:var(--accent-line); }
-    .article h3::before { content:''; display:inline-block; width:6px; height:6px; margin-right:8px; border-radius:50%; background:var(--accent); vertical-align:2px; box-shadow:0 0 0 4px var(--accent-softer); }
+    .article h1, .article h2, .article h3, .article h4, .article p, .article li, .article td, .article th { hyphens:none; }
     .article h3.reference-heading { margin-top:34px !important; padding-top:18px !important; border-top:1px solid var(--border-soft) !important; color:var(--muted-2) !important; font-size:14px !important; font-weight:760 !important; }
-    .article h3.reference-heading::before { background:var(--muted-2) !important; box-shadow:none !important; }
     .article img { cursor:zoom-in; transition:transform .2s ease, box-shadow .2s ease; }
     .article img:hover { transform:translateY(-2px); box-shadow:0 18px 46px rgba(0,0,0,.18) !important; }
+    .image-copy-btn { display:inline-flex; align-items:center; justify-content:center; margin:10px auto 0; padding:5px 10px; border-radius:999px; border:1px solid var(--accent-border); background:#fff; color:var(--accent-text); font-size:11px; font-weight:800; cursor:pointer; }
     .lightbox { position:fixed; inset:0; z-index:100; display:none; align-items:center; justify-content:center; padding:32px; background:rgba(0,0,0,.78); backdrop-filter:blur(18px); }
     .lightbox.show { display:flex; }
     .lightbox img { max-width:min(1180px,96vw); max-height:92vh; border-radius:20px; box-shadow:0 28px 90px rgba(0,0,0,.45); }
@@ -458,10 +456,16 @@ function renderPreviewPage(data: { title: string; summary: string; articleHtml: 
   </header>
   <main class="layout">
     <div class="main-col">
+      <section class="title-card">
+        <div class="title-eyebrow">NicMD Weixin Article</div>
+        <h1 class="article-title">${safeTitle}</h1>
+        ${safeSubtitle ? `<p class="article-subtitle">${safeSubtitle}</p>` : ''}
+      </section>
       <section class="summary-card">
         <div class="summary-label">摘要</div>
         <div class="summary-text" id="summaryText">${safeSummary}</div>
       </section>
+      <div class="body-divider">Body</div>
       <div class="phone"><article id="article" class="article">${data.articleHtml}</article></div>
       <div class="path">${safePath}</div>
     </div>
@@ -473,6 +477,7 @@ function renderPreviewPage(data: { title: string; summary: string; articleHtml: 
     buildToc()
     styleReferenceSection()
     setupImageLightbox()
+    setupImageCopyButtons()
     setupActiveToc()
 
     function copyText(text) {
@@ -485,22 +490,47 @@ function renderPreviewPage(data: { title: string; summary: string; articleHtml: 
     }
     async function copyArticle() {
       const article = document.getElementById('article')
-      const html = article.innerHTML
-      const plain = article.innerText
+      const copyRoot = createCopyRoot(article)
       try {
-        if (navigator.clipboard && window.ClipboardItem) {
-          await navigator.clipboard.write([new ClipboardItem({
-            'text/html': new Blob([html], { type: 'text/html' }),
-            'text/plain': new Blob([plain], { type: 'text/plain' })
-          })])
-        } else {
-          fallbackCopy(article)
-        }
-        showToast('已复制，去公众号粘贴')
+        await hydrateCopyImages(copyRoot)
+        fallbackCopy(copyRoot)
+        showToast('已复制白底正文，若图片仍失败请用“复制此图”逐张补入')
       } catch (e) {
-        fallbackCopy(article)
-        showToast('已复制，去公众号粘贴')
+        try {
+          fallbackCopy(copyRoot)
+          showToast('已复制白底正文，图片请逐张检查')
+        } catch (_) {
+          showToast('复制失败，请手动选择正文区域复制')
+        }
+      } finally {
+        copyRoot.remove()
       }
+    }
+    function createCopyRoot(article) {
+      const copyRoot = article.cloneNode(true)
+      copyRoot.id = 'nicmd-copy-root'
+      copyRoot.style.position = 'fixed'
+      copyRoot.style.left = '-99999px'
+      copyRoot.style.top = '0'
+      copyRoot.style.width = '680px'
+      copyRoot.style.padding = '0'
+      copyRoot.style.margin = '0'
+      copyRoot.style.background = '#fff'
+      copyRoot.querySelectorAll('h1,h2,h3,h4,section,div,blockquote').forEach(node => {
+        node.style.background = 'transparent'
+        node.style.boxShadow = 'none'
+      })
+      copyRoot.querySelectorAll('.image-copy-btn').forEach(button => button.remove())
+      document.body.appendChild(copyRoot)
+      return copyRoot
+    }
+    async function hydrateCopyImages(root) {
+      const images = Array.from(root.querySelectorAll('img'))
+      await Promise.all(images.map(async img => {
+        img.src = new URL(img.getAttribute('src') || img.src, window.location.href).href
+        img.crossOrigin = 'anonymous'
+        if (img.decode) await img.decode().catch(() => {})
+      }))
     }
     function fallbackCopy(element) {
       const range = document.createRange()
@@ -563,6 +593,82 @@ function renderPreviewPage(data: { title: string; summary: string; articleHtml: 
       const boxImg = document.getElementById('lightboxImg')
       box.classList.remove('show')
       boxImg.src = ''
+    }
+    function setupImageCopyButtons() {
+      document.querySelectorAll('#article figure').forEach(figure => {
+        const img = figure.querySelector('img')
+        if (!img) return
+        const button = document.createElement('button')
+        button.type = 'button'
+        button.className = 'image-copy-btn'
+        button.textContent = '复制圆角图'
+        button.addEventListener('click', async event => {
+          event.preventDefault()
+          event.stopPropagation()
+          await copySingleImage(img)
+        })
+        figure.appendChild(button)
+      })
+    }
+    async function copySingleImage(img) {
+      try {
+        const url = new URL(img.getAttribute('src') || img.src, window.location.href).href
+        const response = await fetch(url)
+        const blob = await response.blob()
+        const output = await imageBlobToRoundedPng(blob, img)
+        await navigator.clipboard.write([new ClipboardItem({ 'image/png': output })])
+        showToast('圆角图片已复制，可到公众号正文里粘贴')
+      } catch (e) {
+        showToast('单图复制失败，请右键图片复制')
+      }
+    }
+    function imageBlobToRoundedPng(blob, sourceImg) {
+      return new Promise((resolve, reject) => {
+        const img = new Image()
+        img.onload = () => {
+          const radius = Number.parseFloat(sourceImg.style.borderRadius || '18') || 18
+          const border = 1
+          const shadow = 28
+          const canvas = document.createElement('canvas')
+          canvas.width = img.naturalWidth + shadow * 2
+          canvas.height = img.naturalHeight + shadow * 2
+          const ctx = canvas.getContext('2d')
+          if (!ctx) return reject(new Error('Canvas 不可用'))
+          ctx.clearRect(0, 0, canvas.width, canvas.height)
+          ctx.save()
+          ctx.shadowColor = 'rgba(100,70,22,.18)'
+          ctx.shadowBlur = 22
+          ctx.shadowOffsetY = 10
+          roundedRect(ctx, shadow, shadow, img.naturalWidth, img.naturalHeight, radius)
+          ctx.fillStyle = '#ffffff'
+          ctx.fill()
+          ctx.restore()
+          ctx.save()
+          roundedRect(ctx, shadow, shadow, img.naturalWidth, img.naturalHeight, radius)
+          ctx.clip()
+          ctx.drawImage(img, shadow, shadow)
+          ctx.restore()
+          ctx.save()
+          roundedRect(ctx, shadow + border / 2, shadow + border / 2, img.naturalWidth - border, img.naturalHeight - border, radius)
+          ctx.strokeStyle = 'rgba(121,85,35,.14)'
+          ctx.lineWidth = border
+          ctx.stroke()
+          ctx.restore()
+          canvas.toBlob(result => result ? resolve(result) : reject(new Error('图片转换失败')), 'image/png')
+        }
+        img.onerror = reject
+        img.src = URL.createObjectURL(blob)
+      })
+    }
+    function roundedRect(ctx, x, y, width, height, radius) {
+      const r = Math.min(radius, width / 2, height / 2)
+      ctx.beginPath()
+      ctx.moveTo(x + r, y)
+      ctx.arcTo(x + width, y, x + width, y + height, r)
+      ctx.arcTo(x + width, y + height, x, y + height, r)
+      ctx.arcTo(x, y + height, x, y, r)
+      ctx.arcTo(x, y, x + width, y, r)
+      ctx.closePath()
     }
     function setupActiveToc() {
       const headings = Array.from(document.querySelectorAll('#article h2,#article h3')).filter(heading => !heading.innerText.includes('参考资料'))
@@ -627,7 +733,7 @@ function sendHtml(res: ServerResponse, status: number, html: string) {
 }
 
 function renderErrorPage(title: string, message: string) {
-  const t = WECHAT_THEME
+  const t = ACTIVE_WECHAT_THEME
   return `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><title>${escapeHtml(title)}</title></head><body style="font-family:${WECHAT_FONT_FAMILY};padding:32px;background:${t.surfaceSoft};color:${t.text};"><h1>${escapeHtml(title)}</h1><pre style="white-space:pre-wrap;line-height:1.8;color:${t.textSoft};">${escapeHtml(message)}</pre></body></html>`
 }
 

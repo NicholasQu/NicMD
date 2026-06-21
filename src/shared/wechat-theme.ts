@@ -4,6 +4,7 @@ export interface WechatTheme {
   textSoft: string
   muted: string
   muted2: string
+  heading: string
   surface: string
   surfaceSoft: string
   border: string
@@ -30,6 +31,7 @@ export const WECHAT_THEMES = {
     textSoft: '#3a3a3c',
     muted: '#6e6e73',
     muted2: '#86868b',
+    heading: '#c2410c',
     surface: '#ffffff',
     surfaceSoft: '#f5f5f7',
     border: 'rgba(0,0,0,.08)',
@@ -54,6 +56,7 @@ export const WECHAT_THEMES = {
     textSoft: '#3a3a3c',
     muted: '#6e6e73',
     muted2: '#86868b',
+    heading: '#12372a',
     surface: '#ffffff',
     surfaceSoft: '#f5f5f7',
     border: 'rgba(0,0,0,.08)',
@@ -78,6 +81,7 @@ export const WECHAT_THEMES = {
     textSoft: '#3f3a34',
     muted: '#74685d',
     muted2: '#9a8f82',
+    heading: '#c2410c',
     surface: '#fffdf8',
     surfaceSoft: '#f7f3ea',
     border: 'rgba(121,85,35,.14)',
@@ -102,7 +106,13 @@ export type WechatThemeName = keyof typeof WECHAT_THEMES
 
 export const DEFAULT_WECHAT_THEME_NAME: WechatThemeName = 'appleGold'
 export const WECHAT_THEME = WECHAT_THEMES[DEFAULT_WECHAT_THEME_NAME]
+export let ACTIVE_WECHAT_THEME: WechatTheme = WECHAT_THEME
 
 export function getWechatTheme(name: string | undefined): WechatTheme {
   return WECHAT_THEMES[(name as WechatThemeName) || DEFAULT_WECHAT_THEME_NAME] || WECHAT_THEME
+}
+
+export function setActiveWechatTheme(name: string | undefined): WechatTheme {
+  ACTIVE_WECHAT_THEME = getWechatTheme(name)
+  return ACTIVE_WECHAT_THEME
 }
