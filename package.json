@@ -1,6 +1,6 @@
 {
   "name": "nicmd",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Beautiful Markdown Editor for Windows",
   "main": "./out/main/index.js",
   "author": "NicMD",

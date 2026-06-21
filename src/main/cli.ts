@@ -24,7 +24,15 @@ export async function handleCli(argv: string[]): Promise<void> {
   const args = getCliArgs(argv)
   if (args.length === 0) return
 
-  if (args.includes('help') || args.includes('--help') || args.includes('-h')) {
+  const helpRequested = args.includes('help') || args.includes('--help') || args.includes('-h')
+  const weixinIdx = args.findIndex(a => a === 'weixin' || a === 'wxarticle')
+
+  if (weixinIdx >= 0 && helpRequested) {
+    printWeixinHelp()
+    return
+  }
+
+  if (helpRequested) {
     printHelp()
     return
   }
@@ -34,7 +42,6 @@ export async function handleCli(argv: string[]): Promise<void> {
     return
   }
 
-  const weixinIdx = args.findIndex(a => a === 'weixin' || a === 'wxarticle')
   if (weixinIdx >= 0) {
     const inputPath = args[weixinIdx + 1]
     if (!inputPath || inputPath.startsWith('-')) { console.log('Usage: NicMD.exe weixin input.md [--theme appleGold] [--port 37621] [--no-open]'); return }
@@ -124,33 +131,89 @@ function printHelp(): void {
 
 Usage:
   nicmd <file.md>
+      Open a Markdown file in the NicMD desktop editor.
+
   nicmd weixin <file.md> [options]
+      Start a local WeChat article preview server for the Markdown file.
+      Use this when preparing an article for WeChat Official Accounts.
+
   nicmd --export-pdf <input.md> [output.pdf]
+      Render Markdown to PDF. If output.pdf is omitted, NicMD writes next to input.md.
+
   nicmd --convert-docx <input.docx> [output.md]
-  nicmd --help
+      Convert a DOCX draft to Markdown. If output.md is omitted, NicMD writes next to input.docx.
+
   nicmd --version
+      Print the installed NicMD version.
 
 Commands:
-  weixin <file.md>          Start a local WeChat article preview server.
+  weixin, wxarticle        WeChat Official Account publishing preview.
+  help, -h, --help         Show this global help.
 
-Options:
-  -h, --help                Show this help message.
-  -v, --version             Show NicMD version.
-  --export-pdf              Export Markdown to PDF.
-  --convert-docx            Convert DOCX to Markdown.
-  --theme <name>            Use a weixin theme: appleGold, appleOrange, appleBlue.
-  --port <port>             Use a fixed port for weixin preview.
-  --no-open                 Do not open browser automatically.
+Common options:
+  -v, --version            Show NicMD version.
+
+WeChat options:
+  --theme <name>           Article theme. Available: ${Object.keys(WECHAT_THEMES).join(', ')}.
+                           Default: appleGold.
+  --port <port>            Bind the preview server to a fixed local port.
+  --no-open                Start the server without opening a browser.
+
+More help:
+  nicmd weixin --help      Show detailed WeChat publishing help.
 
 Examples:
   nicmd article.md
   nicmd weixin article.md
-  nicmd weixin article.md --theme appleOrange
-  nicmd weixin article.md --theme appleGold --port 37621 --no-open
+  nicmd weixin article.md --theme appleGold
+  nicmd weixin article.md --theme appleOrange --port 37621 --no-open
   nicmd --export-pdf article.md article.pdf
   nicmd --convert-docx draft.docx draft.md
+`)
+}
+
+function printWeixinHelp(): void {
+  console.log(`NicMD Weixin - WeChat Official Account article preview
+
+Usage:
+  nicmd weixin <file.md> [options]
+  nicmd wxarticle <file.md> [options]
+
+What it does:
+  1. Reads the Markdown file.
+  2. Normalizes heading levels for article body structure.
+  3. Converts Markdown to WeChat-friendly HTML with inline styles.
+  4. Starts a local preview server at 127.0.0.1.
+  5. Provides one-click rich-text copy for WeChat Official Account editor.
+
+Options:
+  --theme <name>
+      Select a WeChat article theme.
+
+      appleGold     Default. Gilded cinnabar style: warm gold background,
+                    cinnabar-orange headings, rounded chapter cards.
+      appleOrange   Brighter orange style for more energetic articles.
+      appleBlue     Blue technical style for cooler engineering notes.
+
+  --port <port>
+      Use a fixed local port, for example --port 37621.
+      Useful when scripts or browser bookmarks depend on a stable URL.
+
+  --no-open
+      Do not open the browser automatically. The server URL is printed in terminal.
+
+  -h, --help
+      Show this help.
+
+Examples:
+  nicmd weixin article.md
+  nicmd weixin article.md --theme appleGold
+  nicmd weixin article.md --theme appleOrange
+  nicmd weixin article.md --theme appleGold --port 37621 --no-open
 
 Notes:
-  weixin binds to 127.0.0.1 only. Press Ctrl+C to stop the server and release the port.
+  - The preview server only binds to 127.0.0.1.
+  - Press Ctrl+C to stop the server and release the port.
+  - The default appleGold theme is optimized for WeChat article publishing.
 `)
 }

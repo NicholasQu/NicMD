@@ -28,8 +28,10 @@ npx copyfiles -f src/main/splash.html out/main/
 Write-Host 'Packaging Windows x64...' -ForegroundColor Cyan
 npx electron-builder --win --x64 --config.directories.output=$output
 
+$packageJson = Get-Content (Join-Path $root 'package.json') -Raw | ConvertFrom-Json
+$version = $packageJson.version
 $unpackedExe = Join-Path $root "$output\win-unpacked\NicMD.exe"
-$installer = Join-Path $root "$output\NicMD-1.0.0-x64.exe"
+$installer = Join-Path $root "$output\NicMD-$version-x64.exe"
 
 Write-Host ''
 Write-Host 'Done.' -ForegroundColor Green
