@@ -3,7 +3,7 @@ import { readFile, writeFile, unlink } from 'fs/promises'
 import { join } from 'path'
 import * as mammoth from 'mammoth'
 import { buildPdfHtml } from './pdf-builder'
-import { startWxArticleServer } from './wxarticle-server'
+import { startWxArticleServer, killWeixinServers, listWeixinServers } from './wxarticle-server'
 import { WECHAT_THEMES } from '../shared/wechat-theme'
 
 export function getCliArgs(argv: string[]): string[] {
@@ -17,7 +17,7 @@ export function getCliArgs(argv: string[]): string[] {
 
 export function isCliOnlyCommand(argv: string[]): boolean {
   const args = getCliArgs(argv)
-  return args.some(a => ['weixin', 'wxarticle', 'help', '--help', '-h', '--version', '-v'].includes(a))
+  return args.some(a => ['weixin', 'wxarticle', 'help', '--help', '-h', '--version', '-v', 'kill', '--kill', 'ps', '--ps', 'list'].includes(a))
 }
 
 export async function handleCli(argv: string[]): Promise<void> {
@@ -39,6 +39,16 @@ export async function handleCli(argv: string[]): Promise<void> {
 
   if (args.includes('--version') || args.includes('-v')) {
     console.log(app.getVersion())
+    return
+  }
+
+  if (args.includes('kill') || args.includes('--kill')) {
+    await killWeixinServers()
+    return
+  }
+
+  if (args.includes('ps') || args.includes('--ps') || args.includes('list')) {
+    await listWeixinServers()
     return
   }
 
@@ -146,8 +156,16 @@ Usage:
   nicmd --version
       Print the installed NicMD version.
 
+  nicmd kill
+      Stop all running weixin preview servers and release their ports.
+
+  nicmd ps
+      List all running weixin preview servers (PID, port, file).
+
 Commands:
   weixin, wxarticle        WeChat Official Account publishing preview.
+  kill                     Stop all weixin preview servers.
+  ps, list                 List running weixin preview servers.
   help, -h, --help         Show this global help.
 
 Common options:

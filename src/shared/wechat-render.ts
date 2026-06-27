@@ -48,7 +48,9 @@ const HIGHLIGHT_RULES: ReplaceRule[] = [
 
 export function extractWechatMeta(content: string, fileName?: string): WechatMeta {
   const title = content.match(/^#\s+(.+)$/m)?.[1]?.trim() || fileName?.replace(/\.[^.]+$/, '') || '未命名文章'
-  const subtitle = content.replace(/^#\s+.+\n?/, '').match(/^##\s+(.+)$/m)?.[1]?.trim() || ''
+  // 优先识别 H1 后紧跟的 blockquote 作为副标题
+  const afterH1 = content.replace(/^#\s+.+\n?/, '')
+  const subtitle = afterH1.match(/^>\s+(.+)$/m)?.[1]?.trim() || ''
   const summary = content.match(/<!--\s*summary:\s*(.+?)\s*-->/s)?.[1]?.trim() || createWechatSummary(content)
   return { title, subtitle, summary }
 }
@@ -74,7 +76,12 @@ export function prepareWechatMarkdown(content: string): string {
 }
 
 function stripOpeningTitles(content: string): string {
-  return stripFirstH1(content).replace(/^##\s+.+\n+/, '')
+  return stripFirstH1(content)
+    .replace(/^\n+/, '')
+    // strip H1 后紧跟的 blockquote（已被提取为副标题）
+    .replace(/^(?:>\s+.+\n?)+\n*/, '')
+    // strip H1 后紧跟的 H2（防止与标题卡片重复）
+    .replace(/^##\s+.+\n+/, '')
 }
 
 function normalizeBodyHeadingLevels(content: string): string {
@@ -109,54 +116,100 @@ export function wrapWechatHtml(html: string): string {
   return applyReplaceRules(html, createWechatHtmlStyleRules())
 }
 
+/**
+ * 微信公众号编辑器样式兼容性备忘
+ *
+ * 【✅ 微信保留的 inline 样式】
+ *   - color, font-size, font-weight, font-family, line-height, letter-spacing
+ *   - text-align: center / left / right
+ *   - margin, padding（简单数值，不要用 calc）
+ *   - border / border-bottom / border-left / border-top / border-right
+ *   - border-radius（≤8px 稳定，>12px 可能丢失）
+ *   - background（纯色稳定，rgba/gradient 可能丢失）
+ *
+ * 【✅ 微信保留的 HTML 元素】
+ *   - <section>（微信编辑器最稳定的容器，优于 <div>）
+ *   - <span>（inline 样式载体）
+ *   - <p>, <strong>, <em>, <code>, <pre>, <blockquote>
+ *   - <ul>, <ol>, <li>, <table>, <img>
+ *   - Unicode 字符（▪ ● ◆ ❖ 等，纯文本，100% 保留）
+ *
+ * 【❌ 微信会丢弃的样式】
+ *   - display: flex / grid（布局塌陷）
+ *   - display: inline-block 的背景色块（颜色丢失，仅保留文字）
+ *   - background: linear-gradient / radial-gradient（渐变丢失）
+ *   - backdrop-filter: blur（毛玻璃丢失）
+ *   - box-shadow（阴影丢失，macOS 编辑器可显示但手机端丢失）
+ *   - transform, animation, transition（全部丢失）
+ *   - position: sticky / fixed / absolute（定位丢失）
+ *   - CSS 变量 var(--xxx)（不支持）
+ *   - :hover, ::before, ::after 伪元素（不支持）
+ *
+ * 【⚠️ 注意事项】
+ *   - 所有样式必须 inline（微信编辑器会清除 <style> 标签）
+ *   - <section> 优于 <div>，微信对 section 的样式保留率更高
+ *   - 代码块标题栏：用 border 分隔，不要依赖 background 色
+ *   - 标题装饰：用 Unicode 字符（▪❖●◆），不要用 CSS 色块
+ *   - 圆角：≤8px 安全，微信手机端大圆角可能被裁切
+ *   - 图片：必须用 <img> 标签，微信会自动转存到自己的 CDN
+ */
 function createWechatHtmlStyleRules(): ReplaceRule[] {
   const t = ACTIVE_WECHAT_THEME
   return [
     [/<h1\b/g, `<h1 style="margin:0 0 22px;padding:0 0 14px;border-bottom:1px solid ${t.border};color:${t.heading};font-size:24px;font-weight:850;line-height:1.34;letter-spacing:-.025em;word-break:normal;overflow-wrap:break-word;"`],
-    [/<h2\b/g, `<h2 style="margin:32px 0 14px;padding:0;color:${t.heading};font-size:19px;font-weight:860;line-height:1.45;letter-spacing:-.012em;word-break:normal;overflow-wrap:break-word;"`],
-    [/(<h2\b[^>]*>)([\s\S]*?)<\/h2>/g, `$1<span style="display:inline-block;max-width:100%;padding:10px 14px 10px 16px;border-left:4px solid ${t.accent};border-radius:14px;background:${t.codeHeaderBg};color:${t.heading};box-sizing:border-box;">$2</span></h2>`],
-    [/<h3\b/g, `<h3 style="margin:26px 0 11px;padding:4px 0 4px 12px;border-left:3px solid ${t.accent};color:${t.heading};font-size:16px;font-weight:800;line-height:1.5;letter-spacing:-.006em;word-break:normal;overflow-wrap:break-word;"`],
-    [/<h4\b/g, `<h4 style="margin:22px 0 10px;padding:0 0 6px;border-bottom:1px solid ${t.borderSoft};color:${t.textSoft};font-size:15px;font-weight:760;line-height:1.5;word-break:normal;overflow-wrap:break-word;"`],
+    [/<h2\b/g, `<h2 style="margin:36px 0 20px;padding:0;color:${t.heading};font-size:20px;font-weight:850;line-height:1.45;text-align:center;letter-spacing:-.01em;word-break:normal;overflow-wrap:break-word;"`],
+    [/(<h2\b[^>]*>)([\s\S]*?)<\/h2>/g, `$1<span style="color:${t.accent};margin-right:6px;">▪</span><span style="display:inline-block;padding:0 18px 8px;border-bottom:2px solid ${t.accent};">$2</span></h2>`],
+    [/<h3\b/g, `<h3 style="margin:28px 0 12px;padding:0;color:${t.heading};font-size:17px;font-weight:800;line-height:1.5;letter-spacing:-.006em;word-break:normal;overflow-wrap:break-word;"`],
+    [/(<h3\b[^>]*>)([\s\S]*?)<\/h3>/g, `$1<span style="color:${t.accent};margin-right:7px;">▪</span><span style="display:inline-block;padding:0 14px 5px 0;border-bottom:1.5px solid ${t.accent};">$2</span></h3>`],
+    [/<h4\b/g, `<h4 style="margin:24px 0 10px;padding:0;color:${t.heading};font-size:15px;font-weight:760;line-height:1.5;word-break:normal;overflow-wrap:break-word;"`],
+    [/(<h4\b[^>]*>)([\s\S]*?)<\/h4>/g, `$1<span style="color:${t.accentBorder};margin-right:6px;">▪</span>$2</h4>`],
     [/<p\b/g, `<p style="margin:14px 0;color:${t.textSoft};font-size:15px;line-height:1.95;letter-spacing:.01em;word-break:normal;overflow-wrap:anywhere;"`],
     [/<strong\b/g, `<strong style="display:inline;color:${t.text};font-weight:850;white-space:normal;"`],
     [/<em\b/g, `<em style="color:${t.muted};font-style:normal;"`],
     [/<mark\b/g, `<mark style="padding:1px 5px;border-radius:7px;background:${t.accentSoft};color:${t.accentText};font-weight:850;box-decoration-break:clone;-webkit-box-decoration-break:clone;"`],
-    [/<blockquote\b/g, `<blockquote style="margin:22px 0;padding:14px 17px;border-left:4px solid ${t.accent};border-radius:0 16px 16px 0;background:${t.surfaceSoft};color:${t.muted};"`],
+    [/<blockquote\b/g, `<blockquote style="margin:6px 0;padding:0 0 0 12px;border-left:2px solid ${t.accentBorder};color:${t.muted};"`],
+    [/blockquote style="([^"]*)">\s*<p style="([^"]*?)margin:14px 0([^"]*)"/g, 'blockquote style="$1"><p style="$2margin:0$3"'],
     [/<ul\b/g, `<ul style="margin:15px 0;padding-left:22px;color:${t.textSoft};font-size:15px;line-height:1.9;list-style-position:outside;"`],
     [/<ol\b/g, `<ol style="margin:15px 0;padding-left:22px;color:${t.textSoft};font-size:15px;line-height:1.9;list-style-position:outside;"`],
     [/<li\b/g, `<li style="margin:7px 0;color:${t.textSoft};word-break:normal;overflow-wrap:break-word;"`],
-    [/<table\b/g, `<table style="width:100%;margin:22px 0;border-collapse:separate;border-spacing:0;font-size:14px;color:${t.textSoft};border:1px solid ${t.borderSoft};border-radius:14px;overflow:hidden;"`],
-    [/<th\b/g, `<th style="padding:11px 12px;border-bottom:1px solid ${t.borderSoft};background:${t.surfaceSoft};color:${t.text};font-weight:850;text-align:left;"`],
-    [/<td\b/g, `<td style="padding:11px 12px;border-bottom:1px solid ${t.borderSoft};background:${t.surface};color:${t.textSoft};vertical-align:top;word-break:normal;overflow-wrap:anywhere;"`],
+    [/<table\b/g, `<table style="width:100%;margin:22px 0;border-collapse:separate;border-spacing:0;font-size:14px;color:${t.textSoft};border:1px solid ${t.borderSoft};border-radius:8px;overflow:hidden;"`],
+    [/<th\b/g, `<th style="padding:11px 12px;border-bottom:1px solid ${t.borderSoft};background:${t.surfaceSoft};color:${t.text};font-weight:850;text-align:left;word-break:break-word;overflow-wrap:anywhere;"`],
+    [/<td\b/g, `<td style="padding:11px 12px;border-bottom:1px solid ${t.borderSoft};background:${t.surface};color:${t.textSoft};vertical-align:top;word-break:break-word;overflow-wrap:anywhere;"`],
+    [/<img\b/g, `<img style="max-width:100%;height:auto;border-radius:4px;" `],
     [/<a /g, `<a style="color:${t.accent};text-decoration:none;border-bottom:1px solid ${t.accentBorder};overflow-wrap:anywhere;" `]
   ]
 }
 
+/**
+ * 品牌底部 — 圆形印章 + 金色铭牌
+ * 用 table 布局（微信最稳定的横向排列）
+ * 左侧圆形 div 印章（border-radius:50%），右侧金色一行字
+ */
 export function renderNicmdBrandFooter(): string {
   const t = ACTIVE_WECHAT_THEME
-  return `<footer style="margin:42px 0 0;padding:22px 0 2px;border-top:1px solid ${t.borderSoft};text-align:center;color:${t.muted2};font-family:${WECHAT_FONT_FAMILY};">
-    <a href="${NICMD_BRAND.url}" style="display:inline-block;text-decoration:none;border-bottom:none;color:${t.muted};">
-      <span style="display:inline-block;padding:10px 18px 9px;border:1px solid ${t.accentBorder};border-radius:999px;background:linear-gradient(135deg,rgba(255,255,255,.72),${t.accentSofter});box-shadow:${t.softShadow};">
-        <span style="display:block;font-family:${NICMD_BRAND_FONT_FAMILY};font-size:19px;line-height:1;font-weight:600;letter-spacing:.20em;text-transform:uppercase;color:${t.accentText};text-shadow:0 1px 0 rgba(255,255,255,.75);">𝕸 NicMD</span>
-        <span style="display:block;margin-top:7px;font-family:${WECHAT_FONT_FAMILY};font-size:10px;line-height:1.5;letter-spacing:.20em;color:${t.muted2};text-transform:uppercase;">Edited & Published</span>
-      </span>
-    </a>
-    <div style="margin-top:10px;font-size:12px;line-height:1.7;color:${t.muted};letter-spacing:.02em;">${escapeHtml(NICMD_BRAND.tagline)}</div>
-    <div style="margin-top:3px;font-family:${NICMD_BRAND_FONT_FAMILY};font-size:11px;line-height:1.6;color:${t.muted2};letter-spacing:.03em;word-break:break-all;">${escapeHtml(NICMD_BRAND.url)}</div>
+  return `<footer style="margin:42px 0 0;padding:24px 0 0;border-top:1px solid ${t.borderSoft};text-align:center;">
+    <section style="display:inline-block;text-align:left;">
+      <section style="display:inline-block;vertical-align:middle;width:100px;height:100px;border:4px solid #d4a72c;border-radius:50%;background:#fdf6e3;background:linear-gradient(135deg,#fff8e7,#f5e6c8);text-align:center;font-family:Georgia,serif;color:#d4a72c;margin-right:14px;">
+        <span style="display:block;padding-top:22px;font-size:26px;font-weight:900;line-height:1;">𝕸</span>
+        <span style="display:block;font-size:13px;font-weight:800;letter-spacing:.04em;line-height:1.4;">NicMD</span>
+      </section>
+      <section style="display:inline-block;vertical-align:middle;">
+        <p style="margin:0 0 4px;font-size:12px;font-weight:800;color:${t.accent};">${escapeHtml(NICMD_BRAND.tagline)}</p>
+        <p style="margin:0;font-size:11px;color:${t.muted2};word-break:break-all;">${escapeHtml(NICMD_BRAND.url)}</p>
+      </section>
+    </section>
   </footer>`
 }
 
 export function renderWechatImagePlaceholder(data: ImagePlaceholderData): string {
   const t = ACTIVE_WECHAT_THEME
-  return `<figure style="margin:22px 0;padding:18px;border:1px dashed ${t.accentBorder};border-radius:16px;background:linear-gradient(135deg,${t.surfaceSoft},${t.surface});text-align:left;">
-    <div style="display:flex;align-items:center;gap:12px;">
-      <div style="width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,${t.accent},${t.accent2});color:#fff;display:flex;align-items:center;justify-content:center;font-family:Georgia,serif;font-weight:900;font-size:22px;flex-shrink:0;">𝕸</div>
-      <div style="min-width:0;">
-        <div style="color:${t.text};font-size:15px;font-weight:850;line-height:1.5;">${escapeHtml(data.title || '图片无法显示')}</div>
-        <div style="margin-top:3px;color:${t.muted};font-size:13px;line-height:1.6;">${escapeHtml(data.reason)}</div>
-      </div>
-    </div>
-    <div style="margin-top:12px;padding:8px 10px;border-radius:10px;background:${t.surfaceSoft};color:${t.muted};font-size:12px;line-height:1.6;word-break:break-all;">src: ${escapeHtml(data.src)}</div>
+  return `<figure style="margin:22px 0;padding:18px;border:1px dashed ${t.accentBorder};border-radius:8px;background:${t.surfaceSoft};text-align:left;">
+    <section style="display:inline-block;vertical-align:middle;width:42px;height:42px;border-radius:8px;background:${t.accent};color:#fff;text-align:center;line-height:42px;font-family:Georgia,serif;font-weight:900;font-size:22px;margin-right:12px;">𝕸</section>
+    <section style="display:inline-block;vertical-align:middle;">
+      <div style="color:${t.text};font-size:15px;font-weight:850;line-height:1.5;">${escapeHtml(data.title || '图片无法显示')}</div>
+      <div style="margin-top:3px;color:${t.muted};font-size:13px;line-height:1.6;">${escapeHtml(data.reason)}</div>
+    </section>
+    <div style="margin-top:12px;padding:8px 10px;border-radius:4px;background:${t.surface};color:${t.muted};font-size:12px;line-height:1.6;word-break:break-all;">src: ${escapeHtml(data.src)}</div>
   </figure>`
 }
 

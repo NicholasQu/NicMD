@@ -4,6 +4,8 @@ import { mkdir, readFile, stat, writeFile } from 'fs/promises'
 import { existsSync } from 'fs'
 import { createHash } from 'crypto'
 import { dirname, extname, resolve, relative, basename, join } from 'path'
+import { homedir } from 'os'
+import { execSync } from 'child_process'
 import { Marked } from 'marked'
 import {
   WECHAT_FONT_FAMILY,
@@ -27,12 +29,46 @@ interface WxArticleOptions {
 const HOST = '127.0.0.1'
 const IMAGE_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg'])
 
+// weixin server PID 注册表，用于 kill 命令一键清理
+const PID_REGISTRY = process.env.APPDATA
+  ? join(process.env.APPDATA, 'nicmd', 'weixin-servers.json')
+  : join(homedir(), '.nicmd', 'weixin-servers.json')
+
+interface PidEntry { pid: number; port: number; file: string; startedAt: string }
+
+async function readPidRegistry(): Promise<PidEntry[]> {
+  try {
+    const data = await readFile(PID_REGISTRY, 'utf-8')
+    return JSON.parse(data)
+  } catch { return [] }
+}
+
+async function writePidRegistry(entries: PidEntry[]): Promise<void> {
+  await mkdir(dirname(PID_REGISTRY), { recursive: true })
+  await writeFile(PID_REGISTRY, JSON.stringify(entries, null, 2), 'utf-8')
+}
+
+async function registerServer(pid: number, port: number, file: string): Promise<void> {
+  const entries = await readPidRegistry()
+  entries.push({ pid, port, file, startedAt: new Date().toISOString() })
+  await writePidRegistry(entries)
+}
+
+async function unregisterServer(pid: number): Promise<void> {
+  const entries = await readPidRegistry()
+  await writePidRegistry(entries.filter(e => e.pid !== pid))
+}
+
 export async function startWxArticleServer(options: WxArticleOptions): Promise<void> {
   const inputPath = resolve(options.inputPath)
   if (!existsSync(inputPath)) {
     console.error(`Markdown file not found: ${inputPath}`)
     return
   }
+
+  // 设置可识别的进程标题，任务管理器/进程列表中可见
+  process.title = `nicmd-weixin: ${basename(inputPath)}`
+  process.env.NICMD_ROLE = 'weixin'
 
   const rootDir = dirname(inputPath)
   const theme = setActiveWechatTheme(options.theme)
@@ -51,6 +87,7 @@ export async function startWxArticleServer(options: WxArticleOptions): Promise<v
   const shutdown = async (reason: string) => {
     console.log(`\nStopping NicMD wxarticle server (${reason})...`)
     await closeServer()
+    await unregisterServer(process.pid)
     process.exit(0)
   }
 
@@ -78,11 +115,14 @@ export async function startWxArticleServer(options: WxArticleOptions): Promise<v
   const port = typeof address === 'object' && address ? address.port : options.port
   const url = `http://${HOST}:${port}/`
 
+  // 注册到 PID 表，供 kill 命令清理
+  await registerServer(process.pid, port, inputPath)
+
   console.log('NicMD Weixin Article Preview')
   console.log(`File : ${inputPath}`)
   console.log(`Theme: ${theme.name}`)
   console.log(`URL  : ${url}`)
-  console.log('Close: press Ctrl+C to stop and release the port')
+  console.log('Close: press Ctrl+C, or run "nicmd kill" to stop all weixin servers')
 
   if (options.open !== false) {
     await shell.openExternal(url)
@@ -156,6 +196,10 @@ async function renderArticleHtml(inputPath: string, rootDir: string): Promise<st
       const titleHtml = title ? `<figcaption style="margin-top:8px;text-align:center;color:${t.muted};font-size:12px;line-height:1.6;">${escapeHtml(String(title))}</figcaption>` : ''
       return `<figure style="margin:22px 0;text-align:center;"><img src="/asset?src=${encodeURIComponent(resolved.relativePath)}" alt="${alt}" style="display:block;max-width:100%;margin:0 auto;border-radius:12px;box-shadow:${t.softShadow};" />${titleHtml}</figure>`
     },
+    // 代码块：微信兼容方案
+    // - 用 <section> 容器（微信保留率优于 <div>）
+    // - 标题栏用 border 分隔，不依赖 background 色（微信复制会丢背景色）
+    // - font-family 加中文字体 fallback（否则中文用宋体，很丑）
     code: ({ text, lang }) => {
       const language = String(lang || '').trim()
       const code = escapeHtml(String(text || ''))
@@ -163,8 +207,12 @@ async function renderArticleHtml(inputPath: string, rootDir: string): Promise<st
         return renderWechatImagePlaceholder({ title: 'Mermaid 图暂未渲染', reason: 'weixin CLI V1 暂不渲染 Mermaid，请先导出为图片后引用。', src: 'mermaid code block' })
       }
       const t = ACTIVE_WECHAT_THEME
-      const langLabel = language ? `<div style="padding:6px 14px;background:${t.codeHeaderBg};border-bottom:1px solid ${t.codeBorder};color:${t.accent};font-size:11px;font-weight:750;text-transform:uppercase;letter-spacing:.05em;">${escapeHtml(language)}</div>` : ''
-      return `<div style="margin:18px 0;border-radius:14px;border:1px solid ${t.codeBorder};overflow:hidden;background:${t.codeBg};">${langLabel}<pre style="margin:0;padding:14px 16px;background:${t.codeBg};overflow-x:auto;"><code style="color:${t.codeText};font-size:13px;line-height:1.75;font-family:SFMono-Regular,Consolas,Liberation Mono,Menlo,monospace;">${code}</code></pre></div>`
+      const header = language
+        ? `<section style="margin:18px 0 0;padding:6px 14px;border:1px solid ${t.accentBorder};border-bottom:1px solid ${t.accentBorder};border-radius:8px 8px 0 0;color:${t.accentText};font-size:11px;font-weight:700;letter-spacing:.04em;">${escapeHtml(language)}</section>`
+        : ''
+      const bodyMargin = language ? '0' : '18px 0'
+      const bodyRadius = language ? 'border-radius:0 0 8px 8px;border-top:none;' : 'border-radius:8px;'
+      return `${header}<section style="margin:${bodyMargin};padding:14px 16px;border:1px solid ${t.accentBorder};${bodyRadius}overflow-x:auto;"><pre style="margin:0;padding:0;white-space:pre-wrap;word-wrap:break-word;"><code style="color:${t.textSoft};font-size:13px;line-height:1.75;font-family:SFMono-Regular,Consolas,'Liberation Mono',Menlo,'PingFang SC','Microsoft YaHei',monospace;">${code}</code></pre></section>`
     }
   }
 
@@ -333,13 +381,32 @@ async function captureHtmlToPng(rootDir: string, relativeHtmlPath: string, shot:
     const captureWidth = Math.min(Math.max(Math.ceil(clip.width), 320), 1800)
     const captureHeight = Math.min(Math.max(Math.ceil(clip.height), 160), 3000)
     win.setSize(captureWidth + 80, captureHeight + 80)
-    await new Promise(resolve => setTimeout(resolve, 120))
+    await new Promise(resolve => setTimeout(resolve, 300))
+
+    // 重新测量：窗口 resize 后布局可能重排，旧坐标失效
+    const finalClip = await win.webContents.executeJavaScript(`(() => {
+      const target = document.querySelector('.shot') || document.querySelector('.page') || document.body
+      if (!target) return null
+      // 展开所有溢出内容：确保 .page 不会被 overflow:hidden 截断
+      target.style.overflow = 'visible'
+      const scrollH = Math.max(target.scrollHeight, target.offsetHeight)
+      const rect = target.getBoundingClientRect()
+      return { x: Math.max(0, Math.floor(rect.left)), y: Math.max(0, Math.floor(rect.top)), width: Math.ceil(rect.width), height: Math.ceil(Math.max(rect.height, scrollH)) }
+    })()`)
+
+    const finalWidth = finalClip ? Math.min(Math.max(finalClip.width, 320), 1800) : captureWidth
+    const finalHeight = finalClip ? Math.min(Math.max(finalClip.height, 160), 3000) : captureHeight
+    // 如果重新测量的高度更大，需要再次调整窗口
+    if (finalHeight > captureHeight) {
+      win.setSize(finalWidth + 80, finalHeight + 80)
+      await new Promise(resolve => setTimeout(resolve, 300))
+    }
 
     const image = await win.webContents.capturePage({
-      x: clip.x,
-      y: clip.y,
-      width: captureWidth,
-      height: captureHeight
+      x: finalClip ? finalClip.x : clip.x,
+      y: finalClip ? finalClip.y : clip.y,
+      width: finalWidth,
+      height: finalHeight
     })
     await writeFile(outputPath, image.toPNG())
     return outputRelative
@@ -351,8 +418,14 @@ async function captureHtmlToPng(rootDir: string, relativeHtmlPath: string, shot:
 function parseDirectiveAttrs(body: string): Record<string, string> {
   const attrs: Record<string, string> = {}
   for (const line of body.split(/\r?\n/)) {
-    const match = line.match(/^\s*([\w-]+)\s*:\s*(.*?)\s*$/)
-    if (match) attrs[match[1]] = match[2]
+    // 格式1：每行一个 key: value（冒号格式）
+    const colonMatch = line.match(/^\s*([\w-]+)\s*:\s*(.*?)\s*$/)
+    if (colonMatch) { attrs[colonMatch[1]] = colonMatch[2]; continue }
+    // 格式2：行内 key="value" 或 key=value（等号格式，支持一行多个属性）
+    const inlineMatches = line.matchAll(/([\w-]+)\s*=\s*(?:"([^"]*)"|'([^']*)'|(\S+))/g)
+    for (const m of inlineMatches) {
+      attrs[m[1]] = m[2] ?? m[3] ?? m[4] ?? ''
+    }
   }
   return attrs
 }
@@ -746,5 +819,120 @@ function getMimeType(filePath: string) {
   if (ext === '.svg') return 'image/svg+xml'
   if (ext === '.html' || ext === '.htm') return 'text/html; charset=utf-8'
   return 'application/octet-stream'
+}
+
+export async function killWeixinServers(): Promise<void> {
+  // 双重机制：PID 注册表 + 系统进程扫描兜底
+  const registryPids = (await readPidRegistry()).map(e => e.pid)
+  const systemPids = findWeixinProcessPids()
+  const allPids = [...new Set([...registryPids, ...systemPids])]
+
+  if (allPids.length === 0) {
+    console.log('No NicMD weixin servers running.')
+    return
+  }
+
+  let killed = 0
+  for (const pid of allPids) {
+    try {
+      process.kill(pid)
+      killed++
+    } catch {
+      // 进程已不存在或无权限，忽略
+    }
+  }
+
+  // Windows 下 taskkill 兜底（process.kill 有时不够）
+  if (process.platform === 'win32') {
+    for (const pid of allPids) {
+      try {
+        execSync(`taskkill /PID ${pid} /F`, { stdio: 'ignore' })
+      } catch {
+        // 已杀掉或不存在
+      }
+    }
+  }
+
+  await writePidRegistry([])
+  console.log(`Stopped ${killed} NicMD weixin server(s).`)
+  console.log(`Scanned PIDs: ${allPids.join(', ')}`)
+}
+
+export async function listWeixinServers(): Promise<void> {
+  const entries = await readPidRegistry()
+  const systemPids = findWeixinProcessPids()
+
+  // 合并：注册表中的 + 系统扫描发现的
+  const registryPids = new Set(entries.map(e => e.pid))
+  const orphanPids = systemPids.filter(pid => !registryPids.has(pid))
+
+  if (entries.length === 0 && orphanPids.length === 0) {
+    console.log('No NicMD weixin servers running.')
+    return
+  }
+
+  console.log('NicMD weixin servers:')
+  console.log('')
+  for (const entry of entries) {
+    const alive = isProcessAlive(entry.pid)
+    const status = alive ? 'running' : 'dead'
+    console.log(`  PID ${entry.pid}  port ${entry.port}  [${status}]`)
+    console.log(`    file: ${entry.file}`)
+    console.log(`    started: ${entry.startedAt}`)
+    console.log('')
+  }
+
+  if (orphanPids.length > 0) {
+    console.log('Orphaned weixin processes (found in system, not in registry):')
+    for (const pid of orphanPids) {
+      console.log(`  PID ${pid}  [running]`)
+    }
+    console.log('')
+  }
+
+  console.log(`Total: ${entries.length + orphanPids.length} process(es)`)
+  console.log('Run "nicmd kill" to stop all of them.')
+}
+
+function findWeixinProcessPids(): number[] {
+  if (process.platform !== 'win32') return []
+  try {
+    // wmic 查找所有 NicMD.exe 进程，命令行以 weixin/wxarticle 作为独立参数的
+    // 只匹配命令行参数（紧跟在 exe 路径后的第一个 token），避免误杀打开 weixin-xxx.md 文件的桌面端
+    const output = execSync(
+      'wmic process where "name=\'NicMD.exe\'" get processid,commandline /format:csv',
+      { encoding: 'utf-8', timeout: 5000 }
+    )
+    const pids: number[] = []
+    for (const line of output.split('\n')) {
+      const trimmed = line.trim()
+      if (!trimmed) continue
+      // CSV 格式: Node,CommandLine,ProcessId
+      const parts = trimmed.split(',')
+      const pidStr = parts[parts.length - 1]
+      const cmdline = parts.slice(1, -1).join(',')
+      const pid = parseInt(pidStr, 10)
+      if (isNaN(pid)) continue
+
+      // 解析命令行参数：exe 路径后的第一个参数是否是 weixin 或 wxarticle
+      // 命令行格式: "C:\...\NicMD.exe" weixin "D:\article.md"
+      const argMatch = cmdline.match(/NicMD\.exe"?\s+(weixin|wxarticle)\b/i)
+      if (argMatch) {
+        pids.push(pid)
+      }
+    }
+    return pids
+  } catch {
+    return []
+  }
+}
+
+function isProcessAlive(pid: number): boolean {
+  try {
+    process.kill(pid, 0)
+    return true
+  } catch {
+    return false
+  }
 }
 
