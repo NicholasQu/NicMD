@@ -277,7 +277,7 @@ async function renderNicmdHtmlBlock(body: string, rootDir: string): Promise<stri
       ? `<div style="margin-top:6px;color:${t.muted};font-size:13px;font-weight:500;line-height:1.7;">${escapeHtml(description)}</div>`
       : ''
     const imageRelativePath = await captureHtmlToPng(rootDir, resolved.relativePath, shot, width)
-    return `<figure style="margin:30px 0;text-align:center;"><figcaption style="margin:0 0 12px;text-align:left;"><div style="margin-bottom:4px;line-height:22px;"><span style="display:inline-block;vertical-align:middle;padding:0 9px;height:22px;line-height:22px;border-radius:999px;background:${t.accentSoft};color:${t.accentText};font-size:11px;font-weight:800;letter-spacing:.02em;">Visual</span><span style="display:inline-block;vertical-align:middle;margin-left:8px;color:${t.text};font-size:15px;font-weight:850;line-height:1.45;">${escapeHtml(title)}</span></div>${descriptionHtml}</figcaption><img src="/asset?src=${encodeURIComponent(imageRelativePath)}" alt="${escapeHtml(title)}" style="display:block;width:100%;max-width:${Math.min(width, 960)}px;height:auto;margin:0 auto;border-radius:18px;box-shadow:${t.shadow};border:1px solid ${t.border};" /></figure>`
+    return `<figure style="margin:30px 0;text-align:center;"><figcaption style="margin:0 0 12px;text-align:left;"><div style="margin-bottom:4px;line-height:22px;"><span style="display:inline-block;vertical-align:middle;padding:0 9px;height:22px;line-height:22px;border-radius:999px;background:${t.accentSoft};color:${t.accentText};font-size:11px;font-weight:800;letter-spacing:.02em;">Visual</span><span style="display:inline-block;vertical-align:middle;margin-left:8px;color:${t.text};font-size:15px;font-weight:850;line-height:1.45;">${escapeHtml(title)}</span></div>${descriptionHtml}</figcaption><img src="/asset?src=${encodeURIComponent(imageRelativePath)}" alt="${escapeHtml(title)}" style="display:block;width:100%;max-width:${Math.min(width, 960)}px;height:auto;margin:0 auto;" /></figure>`
   } catch (e: any) {
     return renderWechatImagePlaceholder({ title, reason: e?.message || 'HTML 截图失败。', src })
   }
@@ -326,7 +326,7 @@ async function captureHtmlToPng(rootDir: string, relativeHtmlPath: string, shot:
   await mkdir(cacheDir, { recursive: true })
 
   const hash = createHash('sha1')
-    .update(`png-v5|${relativeHtmlPath}|${shot}|${width}|${sourceStat.mtimeMs}`)
+    .update(`png-v7|${relativeHtmlPath}|${shot}|${width}|${sourceStat.mtimeMs}`)
     .digest('hex')
     .slice(0, 16)
   const outputPath = join(cacheDir, `${hash}.png`)
@@ -408,7 +408,34 @@ async function captureHtmlToPng(rootDir: string, relativeHtmlPath: string, shot:
       width: finalWidth,
       height: finalHeight
     })
-    await writeFile(outputPath, image.toPNG())
+    // 截图后在 renderer 页面内用 canvas 做圆角遮罩，四角变透明
+    const dataUrl = image.toDataURL()
+    const roundedDataUrl = await win.webContents.executeJavaScript(`(async () => {
+      const img = new Image()
+      img.src = ${JSON.stringify(dataUrl)}
+      await new Promise((res, rej) => { img.onload = res; img.onerror = rej })
+      const w = img.naturalWidth, h = img.naturalHeight
+      const canvas = document.createElement('canvas')
+      canvas.width = w; canvas.height = h
+      const ctx = canvas.getContext('2d')
+      const r = 18
+      ctx.beginPath()
+      ctx.moveTo(r, 0)
+      ctx.lineTo(w - r, 0)
+      ctx.quadraticCurveTo(w, 0, w, r)
+      ctx.lineTo(w, h - r)
+      ctx.quadraticCurveTo(w, h, w - r, h)
+      ctx.lineTo(r, h)
+      ctx.quadraticCurveTo(0, h, 0, h - r)
+      ctx.lineTo(0, r)
+      ctx.quadraticCurveTo(0, 0, r, 0)
+      ctx.closePath()
+      ctx.clip()
+      ctx.drawImage(img, 0, 0)
+      return canvas.toDataURL('image/png')
+    })()`)
+    const base64 = roundedDataUrl.replace(/^data:image\/png;base64,/, '')
+    await writeFile(outputPath, Buffer.from(base64, 'base64'))
     return outputRelative
   } finally {
     win.destroy()
@@ -464,6 +491,7 @@ function renderPreviewPage(data: { title: string; subtitle: string; summary: str
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231c1917'/%3E%3Ctext x='32' y='55' font-family='Georgia,serif' font-size='60' fill='%23fbbf24' text-anchor='middle'%3E𝕸%3C/text%3E%3C/svg%3E" />
   <title>${safeTitle} - NicMD weixin</title>
   <style>
     :root { color-scheme: light; --text:${t.text}; --text-soft:${t.textSoft}; --muted:${t.muted}; --muted-2:${t.muted2}; --heading:${t.heading}; --surface:${t.surface}; --surface-soft:${t.surfaceSoft}; --border:${t.border}; --border-soft:${t.borderSoft}; --accent:${t.accent}; --accent-2:${t.accent2}; --accent-text:${t.accentText}; --accent-soft:${t.accentSoft}; --accent-softer:${t.accentSofter}; --accent-border:${t.accentBorder}; --accent-line:${t.accentLine}; --shadow:${t.shadow}; --soft-shadow:${t.softShadow}; }

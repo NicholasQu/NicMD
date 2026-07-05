@@ -175,29 +175,36 @@ function createWechatHtmlStyleRules(): ReplaceRule[] {
     [/<table\b/g, `<table style="width:100%;margin:22px 0;border-collapse:separate;border-spacing:0;font-size:14px;color:${t.textSoft};border:1px solid ${t.borderSoft};border-radius:8px;overflow:hidden;"`],
     [/<th\b/g, `<th style="padding:11px 12px;border-bottom:1px solid ${t.borderSoft};background:${t.surfaceSoft};color:${t.text};font-weight:850;text-align:left;word-break:break-word;overflow-wrap:anywhere;"`],
     [/<td\b/g, `<td style="padding:11px 12px;border-bottom:1px solid ${t.borderSoft};background:${t.surface};color:${t.textSoft};vertical-align:top;word-break:break-word;overflow-wrap:anywhere;"`],
-    [/<img\b/g, `<img style="max-width:100%;height:auto;border-radius:4px;" `],
+    [/<img\b/g, `<img style="max-width:100%;height:auto;" `],
     [/<a /g, `<a style="color:${t.accent};text-decoration:none;border-bottom:1px solid ${t.accentBorder};overflow-wrap:anywhere;" `]
   ]
 }
 
 /**
- * 品牌底部 — 圆形印章 + 金色铭牌
- * 用 table 布局（微信最稳定的横向排列）
- * 左侧圆形 div 印章（border-radius:50%），右侧金色一行字
+ * 品牌底部 — 烫金渐变条名片（G5 最终版）
+ * 微信兼容关键点：
+ * 1. 背景色写在 table + td 上（双保险）
+ * 2. 圆章和文字用 table 两列 td 并排（最可靠，不依赖 inline-block）
+ * 3. 每个 td 显式 border:0 none
+ * 4. 渐变丢失时降级为纯色 #3a2f1a
  */
 export function renderNicmdBrandFooter(): string {
   const t = ACTIVE_WECHAT_THEME
+  const url = escapeHtml(NICMD_BRAND.url)
+  const tag = escapeHtml(NICMD_BRAND.tagline)
+
   return `<footer style="margin:42px 0 0;padding:24px 0 0;border-top:1px solid ${t.borderSoft};text-align:center;">
-    <section style="display:inline-block;text-align:left;">
-      <section style="display:inline-block;vertical-align:middle;width:100px;height:100px;border:4px solid #d4a72c;border-radius:50%;background:#fdf6e3;background:linear-gradient(135deg,#fff8e7,#f5e6c8);text-align:center;font-family:Georgia,serif;color:#d4a72c;margin-right:14px;">
-        <span style="display:block;padding-top:22px;font-size:26px;font-weight:900;line-height:1;">𝕸</span>
-        <span style="display:block;font-size:13px;font-weight:800;letter-spacing:.04em;line-height:1.4;">NicMD</span>
-      </section>
-      <section style="display:inline-block;vertical-align:middle;">
-        <p style="margin:0 0 4px;font-size:12px;font-weight:800;color:${t.accent};">${escapeHtml(NICMD_BRAND.tagline)}</p>
-        <p style="margin:0;font-size:11px;color:${t.muted2};word-break:break-all;">${escapeHtml(NICMD_BRAND.url)}</p>
-      </section>
-    </section>
+    <table cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;width:100%;border-collapse:separate;border-spacing:0;border:1px solid #d4a72c;border-radius:10px;background:#3a2f1a;overflow:hidden;">
+      <tr>
+        <td style="background:#3a2f1a;border:0 none;padding:14px 4px 14px 18px;vertical-align:middle;width:56px;">
+          <span style="display:inline-block;width:48px;height:48px;line-height:48px;text-align:center;border:2px solid #fbbf24;border-radius:50%;background:#1c1917;color:#fbbf24;font-family:Georgia,serif;font-weight:900;font-size:24px;">𝕸</span>
+        </td>
+        <td style="background:#3a2f1a;border:0 none;padding:14px 18px 14px 8px;vertical-align:middle;text-align:left;">
+          <p style="margin:0 0 4px;font-size:12px;font-weight:800;color:#fbbf24;">${tag}</p>
+          <p style="margin:0;font-size:10px;font-style:italic;color:#d4a72c;border-bottom:1px solid #d4a72c;padding-bottom:1px;">${url}</p>
+        </td>
+      </tr>
+    </table>
   </footer>`
 }
 
