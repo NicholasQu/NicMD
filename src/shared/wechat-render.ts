@@ -26,11 +26,15 @@ type ReplaceRule = readonly [RegExp, string]
 const CODE_FENCE_SPLIT = /(```[\s\S]*?```)/g
 
 const TYPOGRAPHY_RULES: ReplaceRule[] = [
-  // 列表项：**标题词**：说明  →  只加粗标题词，说明文字保持正文
-  [/^(\s*(?:[-*+]|\d+[.)])\s*)\*\*([^*\n]+)\*\*([：:])/gm, '$1<strong style="display:inline;color:inherit;font-weight:700;">$2</strong>$3'],
-  [/^(\s*(?:[-*+]|\d+[.)])\s*)__([^_\n]+)__([：:])/gm, '$1<strong style="display:inline;color:inherit;font-weight:700;">$2</strong>$3'],
-  [/\*\*([^*\n]+)\*\*([：:])\s*/g, '<span style="font-weight:700;display:inline;white-space:nowrap;">$1$2&nbsp;</span>'],
-  [/__([^_\n]+)__([：:])\s*/g, '<span style="font-weight:700;display:inline;white-space:nowrap;">$1$2&nbsp;</span>'],
+  // **标题**：说明  →  **标题：**说明
+  // 把冒号包进加粗范围，让 marked.js 自然生成 <strong>标题：</strong>
+  // 冒号在 strong 内部不会断行，说明文字在 strong 外部不会加粗
+  // **标题**：说明  →  <strong>标题：</strong>说明
+  // 预处理生成裸 <strong>（冒号包进 strong 内部防微信断行）
+  // 不加 inline style，让 wrapWechatHtml 全局 <strong> 规则统一处理
+  // 不能用 **标题：** markdown 方案：GFM 闭合 ** 后紧跟字母不算闭合
+  [/\*\*([^*\n]+)\*\*([：:])/g, '<strong>$1$2</strong>'],
+  [/__([^_\n]+)__([：:])/g, '<strong>$1$2</strong>'],
   [/\*\*([“‘\"'《（\(][^*\n]+[”’\"'》）\)])\*\*/g, '<strong>$1</strong>'],
   [/__([“‘\"'《（\(][^_\n]+[”’\"'》）\)])__/g, '<strong>$1</strong>'],
   [/\*\*\s+([“‘\"'《（\(])/g, '**$1'],

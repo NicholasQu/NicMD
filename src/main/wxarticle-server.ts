@@ -193,8 +193,8 @@ async function renderArticleHtml(inputPath: string, rootDir: string): Promise<st
       }
 
       const t = ACTIVE_WECHAT_THEME
-      const titleHtml = title ? `<figcaption style="margin-top:8px;text-align:center;color:${t.muted};font-size:12px;line-height:1.6;">${escapeHtml(String(title))}</figcaption>` : ''
-      return `<figure style="margin:22px 0;text-align:center;"><img src="/asset?src=${encodeURIComponent(resolved.relativePath)}" alt="${alt}" style="display:block;max-width:100%;margin:0 auto;border-radius:12px;box-shadow:${t.softShadow};" />${titleHtml}</figure>`
+      const captionHtml = title ? `<section style="margin-top:8px;text-align:center;color:${t.muted};font-size:12px;line-height:1.6;">${escapeHtml(String(title))}</section>` : ''
+      return `<section style="margin:20px 0;text-align:center;"><img src="/asset?src=${encodeURIComponent(resolved.relativePath)}" alt="${alt}" style="display:block;max-width:100%;margin:0 auto;border-radius:12px;" />${captionHtml}</section>`
     },
     // 代码块：微信兼容方案
     // - 用 <section> 容器（微信保留率优于 <div>）
@@ -283,7 +283,7 @@ async function renderNicmdHtmlBlock(body: string, rootDir: string): Promise<stri
       ? `<div style="margin-top:6px;color:${t.muted};font-size:13px;font-weight:500;line-height:1.7;">${escapeHtml(description)}</div>`
       : ''
     const imageRelativePath = await captureHtmlToPng(rootDir, resolved.relativePath, shot, width)
-    return `<figure style="margin:30px 0;text-align:center;"><figcaption style="margin:0 0 12px;text-align:left;"><div style="margin-bottom:4px;line-height:22px;"><span style="display:inline-block;vertical-align:middle;padding:0 9px;height:22px;line-height:22px;border-radius:999px;background:${t.accentSoft};color:${t.accentText};font-size:11px;font-weight:800;letter-spacing:.02em;">Visual</span><span style="display:inline-block;vertical-align:middle;margin-left:8px;color:${t.text};font-size:15px;font-weight:850;line-height:1.45;">${escapeHtml(title)}</span></div>${descriptionHtml}</figcaption><img src="/asset?src=${encodeURIComponent(imageRelativePath)}" alt="${escapeHtml(title)}" style="display:block;width:100%;max-width:${Math.min(width, 960)}px;height:auto;margin:0 auto;" /></figure>`
+    return `<section style="margin:24px 0;text-align:center;"><section style="margin:0 0 12px;text-align:left;"><div style="margin-bottom:4px;line-height:22px;"><span style="display:inline-block;vertical-align:middle;padding:0 9px;height:22px;line-height:22px;border-radius:999px;background:${t.accentSoft};color:${t.accentText};font-size:11px;font-weight:800;letter-spacing:.02em;">Visual</span><span style="display:inline-block;vertical-align:middle;margin-left:8px;color:${t.text};font-size:15px;font-weight:700;line-height:1.45;">${escapeHtml(title)}</span></div>${descriptionHtml}</section><img src="/asset?src=${encodeURIComponent(imageRelativePath)}" alt="${escapeHtml(title)}" style="display:block;width:100%;max-width:${Math.min(width, 960)}px;height:auto;margin:0 auto;" /></section>`
   } catch (e: any) {
     return renderWechatImagePlaceholder({ title, reason: e?.message || 'HTML 截图失败。', src })
   }
@@ -702,9 +702,12 @@ function renderPreviewPage(data: { title: string; subtitle: string; summary: str
       boxImg.src = ''
     }
     function setupImageCopyButtons() {
-      document.querySelectorAll('#article figure').forEach(figure => {
-        const img = figure.querySelector('img')
+      // 匹配所有包含 img 的容器（figure 或 section）
+      document.querySelectorAll('#article figure, #article section').forEach(container => {
+        const img = container.querySelector('img')
         if (!img) return
+        // 避免重复添加按钮
+        if (container.querySelector('.image-copy-btn')) return
         const button = document.createElement('button')
         button.type = 'button'
         button.className = 'image-copy-btn'
@@ -714,7 +717,7 @@ function renderPreviewPage(data: { title: string; subtitle: string; summary: str
           event.stopPropagation()
           await copySingleImage(img)
         })
-        figure.appendChild(button)
+        container.appendChild(button)
       })
     }
     async function copySingleImage(img) {

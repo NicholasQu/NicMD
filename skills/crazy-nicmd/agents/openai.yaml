@@ -1,0 +1,7 @@
+interface:
+  display_name: "Crazy NicMD"
+  short_description: "NicMD微信预览、命令行、导出转换和HTML配图统一助手"
+  default_prompt: "Use $crazy-nicmd to prepare this Markdown article for WeChat preview and publishing with NicMD."
+
+policy:
+  allow_implicit_invocation: true
