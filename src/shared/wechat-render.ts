@@ -26,8 +26,9 @@ type ReplaceRule = readonly [RegExp, string]
 const CODE_FENCE_SPLIT = /(```[\s\S]*?```)/g
 
 const TYPOGRAPHY_RULES: ReplaceRule[] = [
-  [/^(\s*(?:[-*+]|\d+[.)])\s*)\*\*([^*\n]+)\*\*([：:])\s*(.+)$/gm, '$1<span style="display:inline;font-weight:700;">$2$3$4</span>'],
-  [/^(\s*(?:[-*+]|\d+[.)])\s*)__([^_\n]+)__([：:])\s*(.+)$/gm, '$1<span style="display:inline;font-weight:700;">$2$3$4</span>'],
+  // 列表项：**标题词**：说明  →  只加粗标题词，说明文字保持正文
+  [/^(\s*(?:[-*+]|\d+[.)])\s*)\*\*([^*\n]+)\*\*([：:])/gm, '$1<strong style="display:inline;color:inherit;font-weight:700;">$2</strong>$3'],
+  [/^(\s*(?:[-*+]|\d+[.)])\s*)__([^_\n]+)__([：:])/gm, '$1<strong style="display:inline;color:inherit;font-weight:700;">$2</strong>$3'],
   [/\*\*([^*\n]+)\*\*([：:])\s*/g, '<span style="font-weight:700;display:inline;white-space:nowrap;">$1$2&nbsp;</span>'],
   [/__([^_\n]+)__([：:])\s*/g, '<span style="font-weight:700;display:inline;white-space:nowrap;">$1$2&nbsp;</span>'],
   [/\*\*([“‘\"'《（\(][^*\n]+[”’\"'》）\)])\*\*/g, '<strong>$1</strong>'],
@@ -163,17 +164,17 @@ function createWechatHtmlStyleRules(): ReplaceRule[] {
     [/(<h3\b[^>]*>)([\s\S]*?)<\/h3>/g, `$1<span style="color:${t.accent};margin-right:7px;">▪</span><span style="display:inline-block;padding:0 14px 5px 0;border-bottom:1.5px solid ${t.accent};">$2</span></h3>`],
     [/<h4\b/g, `<h4 style="margin:24px 0 10px;padding:0;color:${t.heading};font-size:15px;font-weight:760;line-height:1.5;word-break:normal;overflow-wrap:break-word;"`],
     [/(<h4\b[^>]*>)([\s\S]*?)<\/h4>/g, `$1<span style="color:${t.accentBorder};margin-right:6px;">▪</span>$2</h4>`],
-    [/<p\b/g, `<p style="margin:14px 0;color:${t.textSoft};font-size:15px;line-height:1.95;letter-spacing:.01em;word-break:normal;overflow-wrap:anywhere;"`],
-    [/<strong\b/g, `<strong style="display:inline;color:${t.text};font-weight:850;white-space:normal;"`],
+    [/<p\b/g, `<p style="margin:14px 0;color:${t.textSoft};font-size:15px;line-height:1.95;letter-spacing:.01em;word-break:normal;overflow-wrap:anywhere;font-family:${WECHAT_FONT_FAMILY};"`],
+    [/<strong\b/g, `<strong style="display:inline;color:${t.text};font-weight:700;white-space:normal;"`],
     [/<em\b/g, `<em style="color:${t.muted};font-style:normal;"`],
-    [/<mark\b/g, `<mark style="padding:1px 5px;border-radius:7px;background:${t.accentSoft};color:${t.accentText};font-weight:850;box-decoration-break:clone;-webkit-box-decoration-break:clone;"`],
+    [/<mark\b/g, `<mark style="padding:1px 5px;border-radius:7px;background:${t.accentSoft};color:${t.accentText};font-weight:700;box-decoration-break:clone;-webkit-box-decoration-break:clone;"`],
     [/<blockquote\b/g, `<blockquote style="margin:6px 0;padding:0 0 0 12px;border-left:2px solid ${t.accentBorder};color:${t.muted};"`],
     [/blockquote style="([^"]*)">\s*<p style="([^"]*?)margin:14px 0([^"]*)"/g, 'blockquote style="$1"><p style="$2margin:0$3"'],
-    [/<ul\b/g, `<ul style="margin:15px 0;padding-left:22px;color:${t.textSoft};font-size:15px;line-height:1.9;list-style-position:outside;"`],
-    [/<ol\b/g, `<ol style="margin:15px 0;padding-left:22px;color:${t.textSoft};font-size:15px;line-height:1.9;list-style-position:outside;"`],
-    [/<li\b/g, `<li style="margin:7px 0;color:${t.textSoft};word-break:normal;overflow-wrap:break-word;"`],
+    [/<ul\b/g, `<ul style="margin:15px 0;padding-left:22px;color:${t.textSoft};font-size:15px;line-height:1.9;list-style-position:outside;font-family:${WECHAT_FONT_FAMILY};"`],
+    [/<ol\b/g, `<ol style="margin:15px 0;padding-left:22px;color:${t.textSoft};font-size:15px;line-height:1.9;list-style-position:outside;font-family:${WECHAT_FONT_FAMILY};"`],
+    [/<li\b/g, `<li style="margin:7px 0;color:${t.textSoft};word-break:normal;overflow-wrap:break-word;font-family:${WECHAT_FONT_FAMILY};"`],
     [/<table\b/g, `<table style="width:100%;margin:22px 0;border-collapse:separate;border-spacing:0;font-size:14px;color:${t.textSoft};border:1px solid ${t.borderSoft};border-radius:8px;overflow:hidden;"`],
-    [/<th\b/g, `<th style="padding:11px 12px;border-bottom:1px solid ${t.borderSoft};background:${t.surfaceSoft};color:${t.text};font-weight:850;text-align:left;word-break:break-word;overflow-wrap:anywhere;"`],
+    [/<th\b/g, `<th style="padding:11px 12px;border-bottom:1px solid ${t.borderSoft};background:${t.surfaceSoft};color:${t.text};font-weight:700;text-align:left;word-break:break-word;overflow-wrap:anywhere;"`],
     [/<td\b/g, `<td style="padding:11px 12px;border-bottom:1px solid ${t.borderSoft};background:${t.surface};color:${t.textSoft};vertical-align:top;word-break:break-word;overflow-wrap:anywhere;"`],
     [/<img\b/g, `<img style="max-width:100%;height:auto;" `],
     [/<a /g, `<a style="color:${t.accent};text-decoration:none;border-bottom:1px solid ${t.accentBorder};overflow-wrap:anywhere;" `]
@@ -213,7 +214,7 @@ export function renderWechatImagePlaceholder(data: ImagePlaceholderData): string
   return `<figure style="margin:22px 0;padding:18px;border:1px dashed ${t.accentBorder};border-radius:8px;background:${t.surfaceSoft};text-align:left;">
     <section style="display:inline-block;vertical-align:middle;width:42px;height:42px;border-radius:8px;background:${t.accent};color:#fff;text-align:center;line-height:42px;font-family:Georgia,serif;font-weight:900;font-size:22px;margin-right:12px;">𝕸</section>
     <section style="display:inline-block;vertical-align:middle;">
-      <div style="color:${t.text};font-size:15px;font-weight:850;line-height:1.5;">${escapeHtml(data.title || '图片无法显示')}</div>
+      <div style="color:${t.text};font-size:15px;font-weight:700;line-height:1.5;">${escapeHtml(data.title || '图片无法显示')}</div>
       <div style="margin-top:3px;color:${t.muted};font-size:13px;line-height:1.6;">${escapeHtml(data.reason)}</div>
     </section>
     <div style="margin-top:12px;padding:8px 10px;border-radius:4px;background:${t.surface};color:${t.muted};font-size:12px;line-height:1.6;word-break:break-all;">src: ${escapeHtml(data.src)}</div>

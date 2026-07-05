@@ -212,7 +212,13 @@ async function renderArticleHtml(inputPath: string, rootDir: string): Promise<st
         : ''
       const bodyMargin = language ? '0' : '18px 0'
       const bodyRadius = language ? 'border-radius:0 0 8px 8px;border-top:none;' : 'border-radius:8px;'
-      return `${header}<section style="margin:${bodyMargin};padding:14px 16px;border:1px solid ${t.accentBorder};${bodyRadius}overflow-x:auto;"><pre style="margin:0;padding:0;white-space:pre-wrap;word-wrap:break-word;"><code style="color:${t.textSoft};font-size:13px;line-height:1.75;font-family:SFMono-Regular,Consolas,'Liberation Mono',Menlo,'PingFang SC','Microsoft YaHei',monospace;">${code}</code></pre></section>`
+      return `${header}<section style="margin:${bodyMargin};padding:14px 16px;border:1px solid ${t.accentBorder};${bodyRadius}overflow-x:auto;"><pre style="margin:0;padding:0;white-space:pre-wrap;word-wrap:break-word;"><code style="color:${t.textSoft};font-size:13px;line-height:1.75;font-family:'SF Mono',SFMono-Regular,Consolas,'Liberation Mono',Menlo,'PingFang SC','Microsoft YaHei',monospace;">${code}</code></pre></section>`
+    },
+    // 行内代码：统一样式，避免不同上下文字体不一致
+    codespan: ({ text }) => {
+      const t = ACTIVE_WECHAT_THEME
+      const code = escapeHtml(String(text || ''))
+      return `<code style="display:inline;padding:1px 6px;border-radius:4px;background:${t.accentSofter};color:${t.accentText};font-size:13px;font-family:'SF Mono',SFMono-Regular,Consolas,'Liberation Mono',Menlo,'PingFang SC','Microsoft YaHei',monospace;font-weight:600;">${code}</code>`
     }
   }
 
