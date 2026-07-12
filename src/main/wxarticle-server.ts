@@ -24,10 +24,24 @@ interface WxArticleOptions {
   open?: boolean
   watch?: boolean
   theme?: string
+  watermark?: string
+  watermarkColor?: string
+  watermarkOpacity?: number
+}
+
+interface ImageWatermarkOptions {
+  text: string
+  color: string
+  opacity: number
 }
 
 const HOST = '127.0.0.1'
 const IMAGE_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg'])
+const DEFAULT_IMAGE_WATERMARK: ImageWatermarkOptions = {
+  text: '曲水流觞TechRill',
+  color: '#fb923c',
+  opacity: 0.72
+}
 
 // weixin server PID 注册表，用于 kill 命令一键清理
 const PID_REGISTRY = process.env.APPDATA
@@ -72,9 +86,10 @@ export async function startWxArticleServer(options: WxArticleOptions): Promise<v
 
   const rootDir = dirname(inputPath)
   const theme = setActiveWechatTheme(options.theme)
+  const watermark = normalizeImageWatermarkOptions(options)
   const server = createServer(async (req, res) => {
     try {
-      await handleRequest(req, res, inputPath, rootDir)
+      await handleRequest(req, res, inputPath, rootDir, watermark)
     } catch (e: any) {
       sendHtml(res, 500, renderErrorPage('NicMD weixin failed', e?.message || String(e)))
     }
@@ -121,6 +136,11 @@ export async function startWxArticleServer(options: WxArticleOptions): Promise<v
   console.log('NicMD Weixin Article Preview')
   console.log(`File : ${inputPath}`)
   console.log(`Theme: ${theme.name}`)
+  if (watermark.text) {
+    console.log(`Watermark: ${watermark.text} ${watermark.color} @ ${watermark.opacity}`)
+  } else {
+    console.log('Watermark: disabled')
+  }
   console.log(`URL  : ${url}`)
   console.log('Close: press Ctrl+C, or run "nicmd kill" to stop all weixin servers')
 
@@ -131,7 +151,30 @@ export async function startWxArticleServer(options: WxArticleOptions): Promise<v
   await new Promise<void>(() => {})
 }
 
-async function handleRequest(req: IncomingMessage, res: ServerResponse, inputPath: string, rootDir: string) {
+function normalizeImageWatermarkOptions(options: WxArticleOptions): ImageWatermarkOptions {
+  return {
+    text: typeof options.watermark === 'string' ? options.watermark.trim() : DEFAULT_IMAGE_WATERMARK.text,
+    color: normalizeWatermarkColor(options.watermarkColor) || DEFAULT_IMAGE_WATERMARK.color,
+    opacity: normalizeWatermarkOpacity(options.watermarkOpacity)
+  }
+}
+
+function normalizeWatermarkColor(value?: string): string | null {
+  if (!value) return null
+  const color = value.trim()
+  if (/^#[0-9a-f]{3}$/i.test(color)) {
+    return '#' + color.slice(1).split('').map(ch => ch + ch).join('').toLowerCase()
+  }
+  if (/^#[0-9a-f]{6}$/i.test(color)) return color.toLowerCase()
+  return null
+}
+
+function normalizeWatermarkOpacity(value?: number): number {
+  if (!Number.isFinite(value)) return DEFAULT_IMAGE_WATERMARK.opacity
+  return Math.min(1, Math.max(0.05, Number(value.toFixed(2))))
+}
+
+async function handleRequest(req: IncomingMessage, res: ServerResponse, inputPath: string, rootDir: string, watermark: ImageWatermarkOptions) {
   const requestUrl = new URL(req.url || '/', `http://${HOST}`)
 
   if (requestUrl.pathname === '/asset') {
@@ -149,7 +192,7 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse, inputPat
     const content = await readFile(inputPath, 'utf-8')
     const meta = extractWechatMeta(content, basename(inputPath))
     const articleHtml = await renderArticleHtml(inputPath, rootDir)
-    sendHtml(res, 200, renderPreviewPage({ title: meta.title, subtitle: meta.subtitle, summary: meta.summary, articleHtml, inputPath }))
+    sendHtml(res, 200, renderPreviewPage({ title: meta.title, subtitle: meta.subtitle, summary: meta.summary, articleHtml, inputPath, watermark }))
     return
   }
 
@@ -283,7 +326,7 @@ async function renderNicmdHtmlBlock(body: string, rootDir: string): Promise<stri
       ? `<div style="margin-top:6px;color:${t.muted};font-size:13px;font-weight:500;line-height:1.7;">${escapeHtml(description)}</div>`
       : ''
     const imageRelativePath = await captureHtmlToPng(rootDir, resolved.relativePath, shot, width)
-    return `<section style="margin:24px 0;text-align:center;"><section style="margin:0 0 12px;text-align:left;"><div style="margin-bottom:4px;line-height:22px;"><span style="display:inline-block;vertical-align:middle;padding:0 9px;height:22px;line-height:22px;border-radius:999px;background:${t.accentSoft};color:${t.accentText};font-size:11px;font-weight:800;letter-spacing:.02em;">Visual</span><span style="display:inline-block;vertical-align:middle;margin-left:8px;color:${t.text};font-size:15px;font-weight:700;line-height:1.45;">${escapeHtml(title)}</span></div>${descriptionHtml}</section><img src="/asset?src=${encodeURIComponent(imageRelativePath)}" alt="${escapeHtml(title)}" style="display:block;width:100%;max-width:${Math.min(width, 960)}px;height:auto;margin:0 auto;" /></section>`
+    return `<section style="margin:24px 0;text-align:center;"><section style="margin:0 0 12px;text-align:left;"><div style="margin-bottom:4px;line-height:22px;"><span style="display:inline-block;vertical-align:middle;padding:0 9px;height:22px;line-height:22px;border-radius:999px;background:${t.accentSoft};color:${t.accentText};font-size:11px;font-weight:800;letter-spacing:.02em;">Visual</span><span style="display:inline-block;vertical-align:middle;margin-left:8px;color:${t.text};font-size:15px;font-weight:700;line-height:1.45;">${escapeHtml(title)}</span></div>${descriptionHtml}</section><img src="/asset?src=${encodeURIComponent(imageRelativePath)}" alt="${escapeHtml(title)}" style="display:block;width:100%;max-width:${Math.min(width, 960)}px;height:auto;margin:0 auto;border-radius:12px;" /></section>`
   } catch (e: any) {
     return renderWechatImagePlaceholder({ title, reason: e?.message || 'HTML 截图失败。', src })
   }
@@ -486,11 +529,21 @@ function safeResolveAsset(rootDir: string, src: string): string | null {
   return filePath
 }
 
-function renderPreviewPage(data: { title: string; subtitle: string; summary: string; articleHtml: string; inputPath: string }) {
+function hexToRgba(hex: string, opacity: number): string {
+  const clean = hex.replace('#', '')
+  const red = parseInt(clean.slice(0, 2), 16)
+  const green = parseInt(clean.slice(2, 4), 16)
+  const blue = parseInt(clean.slice(4, 6), 16)
+  return `rgba(${red},${green},${blue},${opacity})`
+}
+
+function renderPreviewPage(data: { title: string; subtitle: string; summary: string; articleHtml: string; inputPath: string; watermark: ImageWatermarkOptions }) {
   const safeTitle = escapeHtml(data.title)
   const safeSubtitle = escapeHtml(data.subtitle)
   const safeSummary = escapeHtml(data.summary)
   const safePath = escapeHtml(data.inputPath)
+  const imageWatermarkText = data.watermark.text
+  const imageWatermarkColor = hexToRgba(data.watermark.color, data.watermark.opacity)
   const t = ACTIVE_WECHAT_THEME
   return `<!doctype html>
 <html lang="zh-CN">
@@ -536,7 +589,15 @@ function renderPreviewPage(data: { title: string; subtitle: string; summary: str
     .article h3.reference-heading { margin-top:34px !important; padding-top:18px !important; border-top:1px solid var(--border-soft) !important; color:var(--muted-2) !important; font-size:14px !important; font-weight:760 !important; }
     .article img { cursor:zoom-in; transition:transform .2s ease, box-shadow .2s ease; }
     .article img:hover { transform:translateY(-2px); box-shadow:0 18px 46px rgba(0,0,0,.18) !important; }
-    .image-copy-btn { display:inline-flex; align-items:center; justify-content:center; margin:10px auto 0; padding:5px 10px; border-radius:999px; border:1px solid var(--accent-border); background:#fff; color:var(--accent-text); font-size:11px; font-weight:800; cursor:pointer; }
+    .nicmd-image-frame { position:relative; display:inline-block; max-width:100%; line-height:0; vertical-align:top; overflow:hidden; border-radius:12px; }
+    .nicmd-image-frame > img { display:block; max-width:100%; height:auto; margin:0 auto; }
+    .img-watermark-overlay { position:absolute; z-index:1; pointer-events:none; display:block; max-width:calc(100% - 24px); color:${imageWatermarkColor}; font-size:11px; font-weight:800; line-height:1.2; letter-spacing:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; transform:rotate(-9deg); transform-origin:center; }
+    .img-watermark-overlay.wm-top-left { top:14px; left:14px; }
+    .img-watermark-overlay.wm-top-right { top:14px; right:14px; }
+    .img-watermark-overlay.wm-bottom-left { bottom:14px; left:14px; }
+    .img-watermark-overlay.wm-bottom-right { right:14px; bottom:14px; }
+    .image-copy-row { text-align:center; }
+    .image-copy-btn { display:inline-flex; align-items:center; justify-content:center; margin:10px 4px 0; padding:5px 10px; border-radius:999px; border:1px solid var(--accent-border); background:#fff; color:var(--accent-text); font-size:11px; font-weight:800; cursor:pointer; }
     .lightbox { position:fixed; inset:0; z-index:100; display:none; align-items:center; justify-content:center; padding:32px; background:rgba(0,0,0,.78); backdrop-filter:blur(18px); }
     .lightbox.show { display:flex; }
     .lightbox img { max-width:min(1180px,96vw); max-height:92vh; border-radius:20px; box-shadow:0 28px 90px rgba(0,0,0,.45); }
@@ -581,10 +642,13 @@ function renderPreviewPage(data: { title: string; subtitle: string; summary: str
   <div id="lightbox" class="lightbox" onclick="closeLightbox()"><button class="lightbox-close">关闭</button><img id="lightboxImg" alt="preview" /></div>
   <div id="toast" class="toast">已复制，去公众号粘贴</div>
   <script>
+    const IMAGE_WATERMARK_TEXT = ${JSON.stringify(imageWatermarkText)}
+    const IMAGE_WATERMARK_COLOR = ${JSON.stringify(imageWatermarkColor)}
     buildToc()
     styleReferenceSection()
     setupImageLightbox()
     setupImageCopyButtons()
+    setupImageWatermarkObserver()
     setupActiveToc()
 
     function copyText(text) {
@@ -599,9 +663,9 @@ function renderPreviewPage(data: { title: string; subtitle: string; summary: str
       const article = document.getElementById('article')
       const copyRoot = createCopyRoot(article)
       try {
-        await hydrateCopyImages(copyRoot)
+        await hydrateCopyImages(copyRoot, true)
         fallbackCopy(copyRoot)
-        showToast('已复制白底正文，若图片仍失败请用“复制此图”逐张补入')
+        showToast('已复制白底正文，图片已按预览效果内嵌')
       } catch (e) {
         try {
           fallbackCopy(copyRoot)
@@ -627,16 +691,26 @@ function renderPreviewPage(data: { title: string; subtitle: string; summary: str
         node.style.background = 'transparent'
         node.style.boxShadow = 'none'
       })
-      copyRoot.querySelectorAll('.image-copy-btn').forEach(button => button.remove())
+      copyRoot.querySelectorAll('.img-watermark-overlay,.image-copy-row,.image-copy-btn').forEach(node => node.remove())
+      copyRoot.querySelectorAll('.nicmd-image-frame').forEach(frame => {
+        const img = frame.querySelector('img')
+        if (img) frame.replaceWith(img)
+      })
       document.body.appendChild(copyRoot)
       return copyRoot
     }
-    async function hydrateCopyImages(root) {
+    async function hydrateCopyImages(root, withWatermark) {
       const images = Array.from(root.querySelectorAll('img'))
       await Promise.all(images.map(async img => {
-        img.src = new URL(img.getAttribute('src') || img.src, window.location.href).href
-        img.crossOrigin = 'anonymous'
-        if (img.decode) await img.decode().catch(() => {})
+        const url = new URL(img.getAttribute('src') || img.src, window.location.href).href
+        const response = await fetch(url)
+        const blob = await response.blob()
+        const output = await imageBlobToRoundedPng(blob, img, withWatermark)
+        img.src = await blobToDataUrl(output)
+        img.removeAttribute('crossorigin')
+        img.style.maxWidth = '100%'
+        img.style.height = 'auto'
+        img.style.borderRadius = '12px'
       }))
     }
     function fallbackCopy(element) {
@@ -702,43 +776,85 @@ function renderPreviewPage(data: { title: string; subtitle: string; summary: str
       boxImg.src = ''
     }
     function setupImageCopyButtons() {
-      // 匹配所有包含 img 的容器（figure 或 section）
-      document.querySelectorAll('#article figure, #article section').forEach(container => {
-        const img = container.querySelector('img')
-        if (!img) return
-        // 避免重复添加按钮
-        if (container.querySelector('.image-copy-btn')) return
-        const button = document.createElement('button')
-        button.type = 'button'
-        button.className = 'image-copy-btn'
-        button.textContent = '复制圆角图'
-        button.addEventListener('click', async event => {
+      if (!IMAGE_WATERMARK_TEXT) return
+      document.querySelectorAll('#article img').forEach(img => {
+        if (img.closest('.nicmd-image-frame')) return
+        const frame = document.createElement('span')
+        frame.className = 'nicmd-image-frame'
+        const radius = Number.parseFloat(img.style.borderRadius || '12') || 12
+        frame.style.borderRadius = radius + 'px'
+        img.parentNode.insertBefore(frame, img)
+        frame.appendChild(img)
+        addImageWatermarkOverlay(frame, 'top-left')
+        addImageWatermarkOverlay(frame, 'bottom-right')
+        syncImageWatermarkSize(img, frame)
+        img.addEventListener('load', () => syncImageWatermarkSize(img, frame))
+        const wrapper = document.createElement('div')
+        wrapper.className = 'image-copy-row'
+        const wmBtn = document.createElement('button')
+        wmBtn.type = 'button'
+        wmBtn.className = 'image-copy-btn'
+        wmBtn.textContent = '复制水印图'
+        wmBtn.addEventListener('click', async event => {
           event.preventDefault()
           event.stopPropagation()
-          await copySingleImage(img)
+          await copySingleImage(img, true)
         })
-        container.appendChild(button)
+        wrapper.appendChild(wmBtn)
+        // 原图按钮
+        const origBtn = document.createElement('button')
+        origBtn.type = 'button'
+        origBtn.className = 'image-copy-btn'
+        origBtn.textContent = '复制无水印图'
+        origBtn.addEventListener('click', async event => {
+          event.preventDefault()
+          event.stopPropagation()
+          await copySingleImage(img, false)
+        })
+        wrapper.appendChild(origBtn)
+        frame.insertAdjacentElement('afterend', wrapper)
       })
     }
-    async function copySingleImage(img) {
+    function addImageWatermarkOverlay(frame, corner) {
+      const overlay = document.createElement('div')
+      overlay.className = 'img-watermark-overlay wm-' + corner
+      overlay.textContent = IMAGE_WATERMARK_TEXT
+      frame.appendChild(overlay)
+      return overlay
+    }
+    function syncImageWatermarkSize(img, frame) {
+      const frameWidth = img.clientWidth || img.naturalWidth || 320
+      const size = Math.max(10, Math.min(16, Math.round(frameWidth * 0.028))) + 'px'
+      frame.querySelectorAll('.img-watermark-overlay').forEach(overlay => {
+        overlay.style.fontSize = size
+      })
+    }
+    function setupImageWatermarkObserver() {
+      const article = document.getElementById('article')
+      if (!article || !window.MutationObserver) return
+      const observer = new MutationObserver(() => setupImageCopyButtons())
+      observer.observe(article, { childList: true, subtree: true })
+      window.addEventListener('load', setupImageCopyButtons, { once: true })
+    }
+    async function copySingleImage(img, withWatermark) {
       try {
         const url = new URL(img.getAttribute('src') || img.src, window.location.href).href
         const response = await fetch(url)
         const blob = await response.blob()
-        const output = await imageBlobToRoundedPng(blob, img)
+        const output = await imageBlobToRoundedPng(blob, img, withWatermark)
         await navigator.clipboard.write([new ClipboardItem({ 'image/png': output })])
-        showToast('圆角图片已复制，可到公众号正文里粘贴')
+        showToast(withWatermark ? '水印图片已复制，可到公众号正文里粘贴' : '原图已复制，可到公众号正文里粘贴')
       } catch (e) {
         showToast('单图复制失败，请右键图片复制')
       }
     }
-    function imageBlobToRoundedPng(blob, sourceImg) {
+    function imageBlobToRoundedPng(blob, sourceImg, withWatermark) {
       return new Promise((resolve, reject) => {
         const img = new Image()
         img.onload = () => {
           const radius = Number.parseFloat(sourceImg.style.borderRadius || '18') || 18
-          const border = 1
-          const shadow = 28
+          const border = 0
+          const shadow = 0
           const canvas = document.createElement('canvas')
           canvas.width = img.naturalWidth + shadow * 2
           canvas.height = img.naturalHeight + shadow * 2
@@ -746,9 +862,6 @@ function renderPreviewPage(data: { title: string; subtitle: string; summary: str
           if (!ctx) return reject(new Error('Canvas 不可用'))
           ctx.clearRect(0, 0, canvas.width, canvas.height)
           ctx.save()
-          ctx.shadowColor = 'rgba(100,70,22,.18)'
-          ctx.shadowBlur = 22
-          ctx.shadowOffsetY = 10
           roundedRect(ctx, shadow, shadow, img.naturalWidth, img.naturalHeight, radius)
           ctx.fillStyle = '#ffffff'
           ctx.fill()
@@ -758,16 +871,59 @@ function renderPreviewPage(data: { title: string; subtitle: string; summary: str
           ctx.clip()
           ctx.drawImage(img, shadow, shadow)
           ctx.restore()
+          if (withWatermark) {
+            ctx.save()
+            roundedRect(ctx, shadow, shadow, img.naturalWidth, img.naturalHeight, radius)
+            ctx.clip()
+            drawImageWatermarkText(ctx, shadow, shadow, img.naturalWidth, img.naturalHeight, 'top-left')
+            drawImageWatermarkText(ctx, shadow, shadow, img.naturalWidth, img.naturalHeight, 'bottom-right')
+            ctx.restore()
+          }
           ctx.save()
-          roundedRect(ctx, shadow + border / 2, shadow + border / 2, img.naturalWidth - border, img.naturalHeight - border, radius)
-          ctx.strokeStyle = 'rgba(121,85,35,.14)'
-          ctx.lineWidth = border
-          ctx.stroke()
+          if (border > 0) {
+            roundedRect(ctx, shadow + border / 2, shadow + border / 2, img.naturalWidth - border, img.naturalHeight - border, radius)
+            ctx.strokeStyle = 'rgba(121,85,35,.14)'
+            ctx.lineWidth = border
+            ctx.stroke()
+          }
           ctx.restore()
           canvas.toBlob(result => result ? resolve(result) : reject(new Error('图片转换失败')), 'image/png')
         }
         img.onerror = reject
         img.src = URL.createObjectURL(blob)
+      })
+    }
+    function drawImageWatermarkText(ctx, x, y, width, height, corner) {
+      const label = IMAGE_WATERMARK_TEXT
+      if (!label) return
+      let fontSize = Math.max(18, Math.min(30, Math.round(width * 0.03)))
+      const margin = Math.max(20, Math.round(Math.min(width, height) * 0.045))
+      ctx.textAlign = 'left'
+      ctx.textBaseline = 'middle'
+      ctx.font = '800 ' + fontSize + 'px "Microsoft YaHei", "PingFang SC", sans-serif'
+      let textW = Math.ceil(ctx.measureText(label).width)
+      const maxTextW = Math.max(90, width - margin * 2)
+      while (textW > maxTextW && fontSize > 12) {
+        fontSize -= 1
+        ctx.font = '800 ' + fontSize + 'px "Microsoft YaHei", "PingFang SC", sans-serif'
+        textW = Math.ceil(ctx.measureText(label).width)
+      }
+      const textH = Math.ceil(fontSize * 1.25)
+      const tx = corner.endsWith('right') ? x + width - margin - textW : x + margin
+      const ty = corner.startsWith('bottom') ? y + height - margin - textH / 2 : y + margin + textH / 2
+      ctx.save()
+      ctx.translate(tx + textW / 2, ty)
+      ctx.rotate(-9 * Math.PI / 180)
+      ctx.fillStyle = IMAGE_WATERMARK_COLOR
+      ctx.fillText(label, -textW / 2, 0)
+      ctx.restore()
+    }
+    function blobToDataUrl(blob) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(String(reader.result || ''))
+        reader.onerror = reject
+        reader.readAsDataURL(blob)
       })
     }
     function roundedRect(ctx, x, y, width, height, radius) {
@@ -972,4 +1128,3 @@ function isProcessAlive(pid: number): boolean {
     return false
   }
 }
-

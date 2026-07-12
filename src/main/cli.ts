@@ -59,6 +59,16 @@ export async function handleCli(argv: string[]): Promise<void> {
     const port = portIdx >= 0 ? Number(args[portIdx + 1]) : undefined
     const themeIdx = args.indexOf('--theme')
     const theme = themeIdx >= 0 ? args[themeIdx + 1] : undefined
+    const watermarkIdx = args.indexOf('--watermark')
+    const watermark = args.includes('--no-watermark')
+      ? ''
+      : watermarkIdx >= 0
+        ? args[watermarkIdx + 1] || ''
+        : undefined
+    const watermarkColorIdx = args.indexOf('--watermark-color')
+    const watermarkColor = watermarkColorIdx >= 0 ? args[watermarkColorIdx + 1] : undefined
+    const watermarkOpacityIdx = args.indexOf('--watermark-opacity')
+    const watermarkOpacity = watermarkOpacityIdx >= 0 ? Number(args[watermarkOpacityIdx + 1]) : undefined
     if (theme && !(theme in WECHAT_THEMES)) {
       console.log(`Unknown theme: ${theme}`)
       console.log(`Available themes: ${Object.keys(WECHAT_THEMES).join(', ')}`)
@@ -68,7 +78,10 @@ export async function handleCli(argv: string[]): Promise<void> {
       inputPath,
       port: Number.isFinite(port) ? port : undefined,
       open: !args.includes('--no-open'),
-      theme
+      theme,
+      watermark,
+      watermarkColor,
+      watermarkOpacity: Number.isFinite(watermarkOpacity) ? watermarkOpacity : undefined
     })
     return
   }
@@ -176,6 +189,10 @@ WeChat options:
                            Default: appleGold.
   --port <port>            Bind the preview server to a fixed local port.
   --no-open                Start the server without opening a browser.
+  --watermark <text>       Set image watermark text. Default: 曲水流觞TechRill.
+  --watermark-color <hex>  Set image watermark color, for example #fb923c.
+  --watermark-opacity <n>  Set image watermark opacity from 0 to 1. Default: 0.72.
+  --no-watermark           Disable image watermarks.
 
 More help:
   nicmd weixin --help      Show detailed WeChat publishing help.
@@ -185,6 +202,7 @@ Examples:
   nicmd weixin article.md
   nicmd weixin article.md --theme appleGold
   nicmd weixin article.md --theme appleOrange --port 37621 --no-open
+  nicmd weixin article.md --watermark "曲水流觞TechRill" --watermark-color "#fb923c" --watermark-opacity 0.62
   nicmd --export-pdf article.md article.pdf
   nicmd --convert-docx draft.docx draft.md
 `)
@@ -220,6 +238,22 @@ Options:
   --no-open
       Do not open the browser automatically. The server URL is printed in terminal.
 
+  --watermark <text>
+      Set the image watermark text. Use this for your own public brand or source label.
+      Default: 曲水流觞TechRill.
+
+  --watermark-color <hex>
+      Set the image watermark color as #rgb or #rrggbb.
+      Quote the value in PowerShell, for example --watermark-color "#fb923c".
+      Default: #fb923c.
+
+  --watermark-opacity <n>
+      Set the image watermark opacity from 0 to 1.
+      Default: 0.72.
+
+  --no-watermark
+      Disable image watermarks.
+
   -h, --help
       Show this help.
 
@@ -228,6 +262,7 @@ Examples:
   nicmd weixin article.md --theme appleGold
   nicmd weixin article.md --theme appleOrange
   nicmd weixin article.md --theme appleGold --port 37621 --no-open
+  nicmd weixin article.md --watermark "曲水流觞TechRill" --watermark-color "#fb923c" --watermark-opacity 0.62
 
 Notes:
   - The preview server only binds to 127.0.0.1.

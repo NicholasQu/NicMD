@@ -180,7 +180,8 @@ function createWechatHtmlStyleRules(): ReplaceRule[] {
     [/<table\b/g, `<table style="width:100%;margin:22px 0;border-collapse:separate;border-spacing:0;font-size:14px;color:${t.textSoft};border:1px solid ${t.borderSoft};border-radius:8px;overflow:hidden;"`],
     [/<th\b/g, `<th style="padding:11px 12px;border-bottom:1px solid ${t.borderSoft};background:${t.surfaceSoft};color:${t.text};font-weight:700;text-align:left;word-break:break-word;overflow-wrap:anywhere;"`],
     [/<td\b/g, `<td style="padding:11px 12px;border-bottom:1px solid ${t.borderSoft};background:${t.surface};color:${t.textSoft};vertical-align:top;word-break:break-word;overflow-wrap:anywhere;"`],
-    [/<img\b/g, `<img style="max-width:100%;height:auto;" `],
+    [/<img\b([^>]*?)\sstyle="/g, '<img$1 style="max-width:100%;height:auto;'],
+    [/<img\b(?![^>]*\sstyle=)/g, '<img style="max-width:100%;height:auto;"'],
     [/<a /g, `<a style="color:${t.accent};text-decoration:none;border-bottom:1px solid ${t.accentBorder};overflow-wrap:anywhere;" `]
   ]
 }
